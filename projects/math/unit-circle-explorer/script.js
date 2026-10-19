@@ -344,6 +344,12 @@ function getRefAngle(deg) {
 // ─── Angle Setting ─────────────────────────────────────────────────
 function setAngle(deg) {
   angleDeg = ((deg % 360) + 360) % 360;
+  if (angleSlider) {
+    angleSlider.setAttribute(
+      "aria-valuetext",
+      `${Math.round(angleDeg)} degrees`
+    );
+  }
   updateValues();
   render();
 }

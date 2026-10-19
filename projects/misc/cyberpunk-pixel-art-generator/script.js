@@ -725,6 +725,10 @@ document.getElementById("brushSize")?.addEventListener("input", e => {
   brushSize = parseInt(e.target.value, 10);
   const bsl = document.getElementById("brushSizeLabel");
   if (bsl) bsl.textContent = brushSize + "px";
+  e.target.setAttribute(
+    "aria-valuetext",
+    `${brushSize} ${brushSize === 1 ? "pixel" : "pixels"}`
+  );
 });
 
 // Grid size

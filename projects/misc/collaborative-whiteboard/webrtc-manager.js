@@ -118,6 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
   brushSize.addEventListener("input", e => {
     engine.setBrush(colorPicker.value, e.target.value);
     brushDisplay.textContent = `${e.target.value}px`;
+    e.target.setAttribute(
+      "aria-valuetext",
+      `${e.target.value} ${e.target.value === "1" ? "pixel" : "pixels"}`
+    );
   });
 
   document.getElementById("btn-undo").addEventListener("click", () => {
