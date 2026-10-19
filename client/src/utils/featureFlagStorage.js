@@ -27,14 +27,14 @@ class TransientMemoryStorage {
 export function getFeatureFlagStorage() {
   try {
     // Attempt dummy interaction to verify storage read/write accessibility
-    const testKey = '__storage_test__';
+    const testKey = "__storage_test__";
     window.localStorage.setItem(testKey, testKey);
     window.localStorage.removeItem(testKey);
     return window.localStorage;
   } catch (error) {
     console.warn(
-      '[FEATURE FLAGS] Persistent storage API access is blocked or unavailable. ' +
-      'Engaging safe-mode transient in-memory storage fallback.',
+      "[FEATURE FLAGS] Persistent storage API access is blocked or unavailable. " +
+        "Engaging safe-mode transient in-memory storage fallback.",
       error
     );
     return new TransientMemoryStorage();

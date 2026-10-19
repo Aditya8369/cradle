@@ -130,7 +130,11 @@ const MAX_IMAGE_DIMENSION = 1024;
  * @param {number} [maxDimension=MAX_IMAGE_DIMENSION] - Maximum allowed dimension.
  * @returns {{width: number, height: number, resized: boolean}}
  */
-function calculateClampedDimensions(width, height, maxDimension = MAX_IMAGE_DIMENSION) {
+function calculateClampedDimensions(
+  width,
+  height,
+  maxDimension = MAX_IMAGE_DIMENSION
+) {
   const w = Number(width);
   const h = Number(height);
   const max = Number(maxDimension);
@@ -197,7 +201,11 @@ function validateAndClampImage(imageInput, maxDimension = MAX_IMAGE_DIMENSION) {
     };
   }
 
-  const clamped = calculateClampedDimensions(origWidth, origHeight, maxDimension);
+  const clamped = calculateClampedDimensions(
+    origWidth,
+    origHeight,
+    maxDimension
+  );
 
   if (clamped.resized) {
     return {

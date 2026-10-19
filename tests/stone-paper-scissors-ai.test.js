@@ -2,7 +2,9 @@ const test = require("node:test");
 const assert = require("node:assert");
 const aiModule = require("../projects/games/stone-paper-scissors-game/rpsAiEngine.js");
 const storageModule = require("../projects/games/stone-paper-scissors-game/rpsStorage.js");
-const { RULES } = require("../projects/games/stone-paper-scissors-game/game-engine.js");
+const {
+  RULES,
+} = require("../projects/games/stone-paper-scissors-game/game-engine.js");
 
 test("RPS AI Engine records moves and predicts repeated patterns", () => {
   const ai = aiModule.createAiModel(["rock", "paper", "scissors"]);

@@ -693,7 +693,6 @@ input[type="range"]::-webkit-slider-thumb {
    ANIMATIONS
    ============================================================ */
 @keyframes pulse-glow {
-
   0%,
   100% {
     box-shadow: 0 0 8px rgba(79, 195, 247, 0.2);
@@ -761,7 +760,6 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* Accessibility: Respect user's reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {

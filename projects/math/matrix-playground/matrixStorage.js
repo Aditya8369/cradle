@@ -18,47 +18,47 @@
       matrix: [
         [1, 0, 0],
         [0, 1, 0],
-        [0, 0, 1]
-      ]
+        [0, 0, 1],
+      ],
     },
     rotation45: {
       name: "2D 45° Rotation Matrix",
       matrix: [
         [0.7071, -0.7071],
-        [0.7071, 0.7071]
-      ]
+        [0.7071, 0.7071],
+      ],
     },
     shear2d: {
       name: "2D Shear Matrix",
       matrix: [
         [1, 1.5],
-        [0, 1]
-      ]
+        [0, 1],
+      ],
     },
     magicSquare3: {
       name: "3x3 Magic Square Matrix",
       matrix: [
         [8, 1, 6],
         [3, 5, 7],
-        [4, 9, 2]
-      ]
+        [4, 9, 2],
+      ],
     },
     symmetric3: {
       name: "3x3 Symmetric Matrix",
       matrix: [
         [4, 1, -2],
         [1, 2, 0],
-        [-2, 0, 5]
-      ]
+        [-2, 0, 5],
+      ],
     },
     hilbert3: {
       name: "3x3 Hilbert Matrix",
       matrix: [
         [1.0, 0.5, 0.3333],
         [0.5, 0.3333, 0.25],
-        [0.3333, 0.25, 0.2]
-      ]
-    }
+        [0.3333, 0.25, 0.2],
+      ],
+    },
   };
 
   function getPresets() {
@@ -74,14 +74,16 @@
     current[name] = {
       name,
       matrix,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
     return storage.set(STORAGE_KEY, current);
   }
 
   function getSavedMatrices() {
     const saved = storage.get(STORAGE_KEY, {});
-    return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+    return saved && typeof saved === "object" && !Array.isArray(saved)
+      ? saved
+      : {};
   }
 
   function deleteSavedMatrix(name) {
@@ -95,8 +97,14 @@
    */
   function toLaTeX(matrix, env = "bmatrix") {
     if (!matrix || !matrix.length) return "";
-    const rows = matrix.map(row => row.map(val => Number(val.toFixed(4))).join(" & "));
-    return `\\begin{${env}}\n` + rows.map(r => `  ${r} \\\\`).join("\n") + `\n\\end{${env}}`;
+    const rows = matrix.map(row =>
+      row.map(val => Number(val.toFixed(4))).join(" & ")
+    );
+    return (
+      `\\begin{${env}}\n` +
+      rows.map(r => `  ${r} \\\\`).join("\n") +
+      `\n\\end{${env}}`
+    );
   }
 
   /**
@@ -127,7 +135,9 @@
     }
     // Parse CSV
     const lines = trimmed.split("\n").filter(l => l.trim().length > 0);
-    return lines.map(line => line.split(",").map(val => parseFloat(val.trim())));
+    return lines.map(line =>
+      line.split(",").map(val => parseFloat(val.trim()))
+    );
   }
 
   exports.getPresets = getPresets;

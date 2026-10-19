@@ -59,7 +59,7 @@ const ALL_REQUIRED = [...ALREADY_HAD_SUPPORT, ...ADDED_IN_ISSUE_623];
 test("reduced-motion validation: target file list is non-empty", () => {
   assert.ok(
     ALL_REQUIRED.length > 0,
-    "Expected at least one target CSS file in the list",
+    "Expected at least one target CSS file in the list"
   );
 });
 
@@ -68,12 +68,12 @@ for (const relPath of ALL_REQUIRED) {
   const absPath = path.join(PROJECTS_ROOT, relPath);
   const label = `projects/${relPath}`;
 
-  test(`reduced-motion validation for ${label}`, async (t) => {
+  test(`reduced-motion validation for ${label}`, async t => {
     // File must exist
     await t.test("file exists", () => {
       assert.ok(
         fs.existsSync(absPath),
-        `Expected CSS file to exist at: ${label}`,
+        `Expected CSS file to exist at: ${label}`
       );
     });
 
@@ -85,7 +85,7 @@ for (const relPath of ALL_REQUIRED) {
     await t.test("contains prefers-reduced-motion block", () => {
       assert.ok(
         hasReducedMotionBlock(css),
-        `Missing @media (prefers-reduced-motion: reduce) block in: ${label}`,
+        `Missing @media (prefers-reduced-motion: reduce) block in: ${label}`
       );
     });
   });
@@ -101,7 +101,7 @@ test("reduced-motion validation: correctly detects missing block", () => {
   assert.equal(
     hasReducedMotionBlock(cssWithoutBlock),
     false,
-    "hasReducedMotionBlock should return false when block is absent",
+    "hasReducedMotionBlock should return false when block is absent"
   );
 });
 
@@ -119,7 +119,7 @@ test("reduced-motion validation: correctly detects present block", () => {
   assert.equal(
     hasReducedMotionBlock(cssWithBlock),
     true,
-    "hasReducedMotionBlock should return true when block is present",
+    "hasReducedMotionBlock should return true when block is present"
   );
 });
 
@@ -135,7 +135,7 @@ for (const relPath of ALREADY_HAD_SUPPORT) {
       .length;
     assert.ok(
       matches <= 1,
-      `Found ${matches} prefers-reduced-motion blocks in ${label} (expected at most 1)`,
+      `Found ${matches} prefers-reduced-motion blocks in ${label} (expected at most 1)`
     );
   });
 }

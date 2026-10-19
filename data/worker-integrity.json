@@ -3,16 +3,24 @@
   "remoteAllowed": [],
   "workers": [
     {
+      "url": "projects/aiml/neural-network-playground/nnEngine.js",
+      "sha256": "7689d30e3daf1142dd6cf210ca6a4b0e8345c844cf4fbb1209a718a07a0ce54e"
+    },
+    {
+      "url": "projects/aiml/neural-network-playground/nnWorker.js",
+      "sha256": "ee1ae2f595cdd78d41e8c9b8d9f6d5694b84adf48733b8a2c00c630101041885"
+    },
+    {
       "url": "projects/games/chess/ai-worker.js",
       "sha256": "1d487e11652f81f8ab913357e1eb216d57ec05b7eb2141875c853dede421bf0a"
     },
     {
       "url": "projects/games/chess/chessLogic.js",
-      "sha256": "ea5f2b067b0faabdd40d53d6e3d36272f4feb97f741b59a665883b0ad0212f3b"
+      "sha256": "6dc4a2c03ee9599dabcae7e9cc2ebe8ada75dfc992b00c04d767c9f6211ae63c"
     },
     {
       "url": "scripts/worker.js",
-      "sha256": "cb54400f9d843e9c28aebea4a454bb2ae02af3bd3ed17ae0b6cf92160a915fe2"
+      "sha256": "7217487cef7ebfdae28cc89a2afd65df8a009219ceed06edb5205d32f555b28f"
     }
   ]
 }

@@ -42,12 +42,12 @@ The project follows a decoupled architecture where the UI and audio logic are se
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the piano keyboard DOM and status display |
-| `script.js` | Manages input events, UI state (active keys), and coordinates with the engine |
-| `style.css` | Handles the visual appearance of white/black keys and active states |
-| `pianoEngine.js` | Owns the note frequency data and implements the additive synthesis engine |
+| File             | Responsibility                                                                |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `index.html`     | Defines the piano keyboard DOM and status display                             |
+| `script.js`      | Manages input events, UI state (active keys), and coordinates with the engine |
+| `style.css`      | Handles the visual appearance of white/black keys and active states           |
+| `pianoEngine.js` | Owns the note frequency data and implements the additive synthesis engine     |
 
 ---
 
@@ -87,12 +87,12 @@ Engine triggers an exponential decay ramp to silence the note smoothly
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Keyboard structure and semantic UI |
-| CSS3 | Piano layout, key positioning, and responsive design |
-| JavaScript (ES6+) | Event management and coordination logic |
-| Web Audio API | Real-time sound synthesis and audio routing |
+| Technology        | Purpose                                              |
+| ----------------- | ---------------------------------------------------- |
+| HTML5             | Keyboard structure and semantic UI                   |
+| CSS3              | Piano layout, key positioning, and responsive design |
+| JavaScript (ES6+) | Event management and coordination logic              |
+| Web Audio API     | Real-time sound synthesis and audio routing          |
 
 ---
 

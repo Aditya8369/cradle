@@ -47,12 +47,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page markup, textareas, file input dropzones, diff view containers |
+| File            | Responsibility                                                                     |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `index.html`    | Page markup, textareas, file input dropzones, diff view containers                 |
 | `diffEngine.js` | Pure LCS line diffing algorithm, character diffing, diff statistics, patch builder |
-| `script.js` | DOM event binding, file reader handling, view switching, and rendering |
-| `style.css` | Flexbox/Grid layouts, scroll synchronization styles, syntax line coloring |
+| `script.js`     | DOM event binding, file reader handling, view switching, and rendering             |
+| `style.css`     | Flexbox/Grid layouts, scroll synchronization styles, syntax line coloring          |
 
 ---
 
@@ -86,30 +86,34 @@ DOM updates with side-by-side or unified view
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic structure and text area inputs |
-| CSS3 (Flexbox/Grid/CSS Variables) | Dark mode styling and split pane layouts |
-| Vanilla JavaScript (ES6+) | LCS diffing engine and DOM state management |
+| Technology                        | Purpose                                     |
+| --------------------------------- | ------------------------------------------- |
+| HTML5                             | Semantic structure and text area inputs     |
+| CSS3 (Flexbox/Grid/CSS Variables) | Dark mode styling and split pane layouts    |
+| Vanilla JavaScript (ES6+)         | LCS diffing engine and DOM state management |
 
 ---
 
 ## File Responsibilities
 
 ### `index.html`
+
 - Defines text input areas, file browse buttons, view toggle buttons, option checkboxes, and diff containers.
 
 ### `diffEngine.js`
+
 - `computeLineDiff(textA, textB, options)` — LCS line alignment engine.
 - `computeCharDiff(str1, str2)` — Word/character level diff calculation.
 - `computeDiffStats(alignment)` — Summary counter of additions and deletions.
 - `generateUnifiedPatch(nameA, nameB, alignment)` — Formats standard `.patch` file text.
 
 ### `script.js`
+
 - `renderDiff()` — Obtains inputs, calls `DiffEngine`, and populates line containers.
 - `escapeHtml(str)` — Sanitizes line text for safe HTML rendering.
 
 ### `style.css`
+
 - Custom dark color variables, diff highlight background colors, and monospace code styling.
 
 ---
@@ -158,4 +162,3 @@ None. Built entirely with native browser web standards and vanilla JavaScript.
 
 - [MDN Web Docs — TextDecoder / TextEncoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder)
 - [GNU Diffutils — LCS Diff Algorithm](https://www.gnu.org/software/diffutils/)
-

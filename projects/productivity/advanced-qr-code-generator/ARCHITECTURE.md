@@ -46,12 +46,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page markup, payload textareas, color pickers, download controls |
-| `qrEngine.js` | Payload builder for WiFi/vCard/URL, preset storage manager |
-| `script.js` | DOM input bindings, QR matrix rendering loop, image download handler |
-| `style.css` | Modern visual design, tab layouts, preview box styling |
+| File          | Responsibility                                                       |
+| ------------- | -------------------------------------------------------------------- |
+| `index.html`  | Page markup, payload textareas, color pickers, download controls     |
+| `qrEngine.js` | Payload builder for WiFi/vCard/URL, preset storage manager           |
+| `script.js`   | DOM input bindings, QR matrix rendering loop, image download handler |
+| `style.css`   | Modern visual design, tab layouts, preview box styling               |
 
 ---
 
@@ -80,27 +80,31 @@ User clicks Download PNG/SVG -> Image blob generated for download
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Form inputs, canvas element |
-| CSS3 | Custom properties, dark theme styling |
-| Vanilla JavaScript (ES6+) | QR Engine module, DOM events |
+| Technology                | Purpose                               |
+| ------------------------- | ------------------------------------- |
+| HTML5                     | Form inputs, canvas element           |
+| CSS3                      | Custom properties, dark theme styling |
+| Vanilla JavaScript (ES6+) | QR Engine module, DOM events          |
 
 ---
 
 ## File Responsibilities
 
 ### `index.html`
+
 - Form controls for text input, size slider, color pickers, download buttons.
 
 ### `qrEngine.js`
+
 - `buildPayload(type, data)` — Formats type-specific payload strings (e.g., WiFi `WIFI:S:...`).
 - `validateInput(text)` — Sanitizes payload input.
 
 ### `script.js`
+
 - Handles DOM input events and triggers preview canvas redraws.
 
 ### `style.css`
+
 - Form container rules, visual theme styles.
 
 ---

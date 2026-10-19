@@ -109,7 +109,10 @@ body {
 
 .form-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(70px, 0.75fr) minmax(70px, 0.75fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(70px, 0.75fr) minmax(
+      70px,
+      0.75fr
+    );
   gap: 12px;
   align-items: end;
 }

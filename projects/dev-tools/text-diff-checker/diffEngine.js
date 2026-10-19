@@ -9,10 +9,7 @@ function diffArrays(a, b) {
   const n = a.length;
   const m = b.length;
 
-  const dp = Array.from(
-    { length: n + 1 },
-    () => new Uint32Array(m + 1)
-  );
+  const dp = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
 
   for (let i = n - 1; i >= 0; i--) {
     for (let j = m - 1; j >= 0; j--) {
@@ -64,17 +61,11 @@ function toWordTokens(text) {
 }
 
 function escapeHtml(str) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function inlineWordDiff(oldLine, newLine) {
-  const ops = diffArrays(
-    toWordTokens(oldLine),
-    toWordTokens(newLine)
-  );
+  const ops = diffArrays(toWordTokens(oldLine), toWordTokens(newLine));
 
   let leftHtml = "";
   let rightHtml = "";

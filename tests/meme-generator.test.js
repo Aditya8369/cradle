@@ -98,10 +98,7 @@ test("exportMemeCanvas returns a PNG data URL for an accessible canvas", () => {
     },
   };
 
-  assert.equal(
-    exportMemeCanvas(canvas),
-    "data:image/png;base64,test"
-  );
+  assert.equal(exportMemeCanvas(canvas), "data:image/png;base64,test");
 });
 
 test("exportMemeCanvas rejects tainted canvases with an actionable error", () => {
@@ -159,4 +156,3 @@ test("meme preset storage preserves special characters and HTML payloads safely"
 
   deleteMemePreset(saved[0].id);
 });
-

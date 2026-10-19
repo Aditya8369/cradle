@@ -24,7 +24,11 @@ test("fetchWithTimeout succeeds on successful request", async () => {
   };
 
   try {
-    const res = await APIEngine.fetchWithTimeout("https://example.com", {}, 1000);
+    const res = await APIEngine.fetchWithTimeout(
+      "https://example.com",
+      {},
+      1000
+    );
     assert.equal(res.ok, true);
     const text = await res.text();
     assert.equal(text, "success");
@@ -52,7 +56,10 @@ test("fetchWithTimeout throws timeout error when request exceeds timeout", async
   global.fetch = async (url, options) => {
     return new Promise((resolve, reject) => {
       options.signal.addEventListener("abort", () => {
-        const err = new DOMException("The operation was aborted.", "AbortError");
+        const err = new DOMException(
+          "The operation was aborted.",
+          "AbortError"
+        );
         reject(err);
       });
     });

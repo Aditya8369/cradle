@@ -40,11 +40,11 @@ The application uses a simple state-machine architecture. The core state (curren
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the timer UI, settings inputs, and the SVG ring structure |
-| `script.js` | Implements the timer loop, handles localStorage persistence, and manages audio beeps |
-| `style.css` | Handles the visual identity, including mode-specific accent colors and responsive breakpoints |
+| File         | Responsibility                                                                                |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| `index.html` | Defines the timer UI, settings inputs, and the SVG ring structure                             |
+| `script.js`  | Implements the timer loop, handles localStorage persistence, and manages audio beeps          |
+| `style.css`  | Handles the visual identity, including mode-specific accent colors and responsive breakpoints |
 
 ---
 
@@ -83,13 +83,13 @@ saveState() → Sync settings and stats to localStorage
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic page structure and SVG graphics |
-| CSS3 (Grid/Flexbox) | Layout and mode-specific theming |
-| Vanilla JavaScript | Timer logic, state management, and DOM manipulation |
-| Web Audio API | Programmatic sound notifications |
-| localStorage | Client-side persistence of user data |
+| Technology          | Purpose                                             |
+| ------------------- | --------------------------------------------------- |
+| HTML5               | Semantic page structure and SVG graphics            |
+| CSS3 (Grid/Flexbox) | Layout and mode-specific theming                    |
+| Vanilla JavaScript  | Timer logic, state management, and DOM manipulation |
+| Web Audio API       | Programmatic sound notifications                    |
+| localStorage        | Client-side persistence of user data                |
 
 ---
 

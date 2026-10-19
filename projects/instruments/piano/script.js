@@ -20,7 +20,7 @@ const KEY_CODES = {
   KeyH: "A4",
   KeyU: "A#4",
   KeyJ: "B4",
-  KeyK: "C5"
+  KeyK: "C5",
 };
 
 function getAudioContext() {
@@ -120,7 +120,7 @@ function createPianoVoice(context, frequency, time) {
     fundamental,
     second,
     third,
-    masterGain
+    masterGain,
   };
 }
 
@@ -163,10 +163,7 @@ function stopNote(note) {
     time
   );
 
-  voice.masterGain.gain.exponentialRampToValueAtTime(
-    0.0001,
-    time + 0.4
-  );
+  voice.masterGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.4);
 
   const stopTime = time + 0.45;
 

@@ -39,11 +39,11 @@ The game follows a state-driven loop. The `state` object in `script.js` tracks t
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | UI shell, race track lanes, stats display, and the results overlay |
-| `script.js` | Word generation, WPM calculation, timer management, and car movement logic |
-| `style.css` | Visuals for the race track, animations for cars and streaks, and responsive layout |
+| File         | Responsibility                                                                     |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `index.html` | UI shell, race track lanes, stats display, and the results overlay                 |
+| `script.js`  | Word generation, WPM calculation, timer management, and car movement logic         |
+| `style.css`  | Visuals for the race track, animations for cars and streaks, and responsive layout |
 
 ---
 
@@ -73,28 +73,28 @@ Final WPM calculated → Rank assigned → Results overlay displayed
 
 ## Key Features
 
-| Feature | Description |
-|---|---|
-| **Race Track** | Visual lanes with player and AI cars that move based on typing progress |
-| **3 Difficulty Levels** | Easy (3-letter words), Medium (5-letter words), Hard (8+ letter words) |
-| **Time Modes** | 30s, 60s, or 120s race durations |
-| **Streak System** | Consecutive correct words build streaks with visual feedback |
-| **Boost Mechanic** | Every 5-streak correct words gives the player a speed boost |
-| **AI Opponent** | Moves at difficulty-based speed, creating competitive pressure |
-| **Live Stats** | WPM, accuracy, streak, correct/wrong counts, and time remaining |
-| **Results Screen** | Final stats with rank classification (Sunday Driver → Formula 1 Legend) |
-| **Best Score** | Persisted in localStorage across sessions |
+| Feature                 | Description                                                             |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Race Track**          | Visual lanes with player and AI cars that move based on typing progress |
+| **3 Difficulty Levels** | Easy (3-letter words), Medium (5-letter words), Hard (8+ letter words)  |
+| **Time Modes**          | 30s, 60s, or 120s race durations                                        |
+| **Streak System**       | Consecutive correct words build streaks with visual feedback            |
+| **Boost Mechanic**      | Every 5-streak correct words gives the player a speed boost             |
+| **AI Opponent**         | Moves at difficulty-based speed, creating competitive pressure          |
+| **Live Stats**          | WPM, accuracy, streak, correct/wrong counts, and time remaining         |
+| **Results Screen**      | Final stats with rank classification (Sunday Driver → Formula 1 Legend) |
+| **Best Score**          | Persisted in localStorage across sessions                               |
 
 ---
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic structure and UI components |
-| CSS3 | Animations, race track layout, and responsive design |
-| JavaScript (ES6+) | Game loop, WPM math, and DOM manipulation |
-| localStorage API | Persisting best scores |
+| Technology        | Purpose                                              |
+| ----------------- | ---------------------------------------------------- |
+| HTML5             | Semantic structure and UI components                 |
+| CSS3              | Animations, race track layout, and responsive design |
+| JavaScript (ES6+) | Game loop, WPM math, and DOM manipulation            |
+| localStorage API  | Persisting best scores                               |
 
 ---
 
@@ -159,6 +159,7 @@ None (uses native browser APIs).
 ---
 
 ## License & Attribution
+
 - **Project License:** MIT
 - **Third-Party Assets:** None.
 

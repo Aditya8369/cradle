@@ -17,13 +17,15 @@ test("calculateFrequencyBands divides frequency spectrum into logarithmic bins",
 
   const bands = visualizerEngine.calculateFrequencyBands(mockFreqs, 8);
   assert.strictEqual(bands.length, 8);
-  assert.ok(bands.every(val => typeof val === "number" && val >= 0 && val <= 1));
+  assert.ok(
+    bands.every(val => typeof val === "number" && val >= 0 && val <= 1)
+  );
 });
 
 test("calculateRadialBar computes circular endpoint coordinates", () => {
   const bar = visualizerEngine.calculateRadialBar(0, 4, 100, 50, 200, 200);
   assert.strictEqual(bar.startX, 300); // 200 + 100 * cos(0)
-  assert.strictEqual(bar.endX, 350);   // 200 + 150 * cos(0)
+  assert.strictEqual(bar.endX, 350); // 200 + 150 * cos(0)
 });
 
 test("audioPresetsEngine converts musical MIDI note numbers to Hz frequencies", () => {

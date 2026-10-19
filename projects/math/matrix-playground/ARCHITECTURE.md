@@ -50,13 +50,13 @@ graph TD
 
 ## Component Breakdown
 
-| File | Role |
-| --- | --- |
-| `matrixEngine.js` | Pure mathematical calculation engine for LU decomposition, QR decomposition, eigenvalues, determinants, and inverses. |
-| `matrixStorage.js` | Preset catalog (Identity, Rotation, Shear, Hilbert, Magic Square), LocalStorage cache, and LaTeX/CSV formatting. |
-| `script.js` | Interactive UI controller, event listener setup, animation stepper management, and DOM grid rendering. |
-| `index.html` | Interface layout, operation buttons, dimension selectors, visual timeline controls, and LaTeX export modal. |
-| `style.css` | Design tokens, grid layouts, responsive rules, modal overlays, and animation keyframes. |
+| File               | Role                                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `matrixEngine.js`  | Pure mathematical calculation engine for LU decomposition, QR decomposition, eigenvalues, determinants, and inverses. |
+| `matrixStorage.js` | Preset catalog (Identity, Rotation, Shear, Hilbert, Magic Square), LocalStorage cache, and LaTeX/CSV formatting.      |
+| `script.js`        | Interactive UI controller, event listener setup, animation stepper management, and DOM grid rendering.                |
+| `index.html`       | Interface layout, operation buttons, dimension selectors, visual timeline controls, and LaTeX export modal.           |
+| `style.css`        | Design tokens, grid layouts, responsive rules, modal overlays, and animation keyframes.                               |
 
 ---
 
@@ -91,15 +91,15 @@ DOM render updates result matrix grid & step progress bar
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure, matrix grids, LaTeX export modal |
-| CSS3 (Grid, Flexbox, Custom Properties) | Layout, glassmorphic styling, responsive design |
-| Vanilla JavaScript (ES6+) | UI controller, event handling, step playback |
-| Cradle storage.js | localStorage persistence for saved matrices |
-| Font Awesome 6.5.1 (CDN) | UI icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | Typography |
-| Cradle tokens.css | Shared design tokens |
+| Technology                                          | Purpose                                          |
+| --------------------------------------------------- | ------------------------------------------------ |
+| HTML5                                               | Page structure, matrix grids, LaTeX export modal |
+| CSS3 (Grid, Flexbox, Custom Properties)             | Layout, glassmorphic styling, responsive design  |
+| Vanilla JavaScript (ES6+)                           | UI controller, event handling, step playback     |
+| Cradle storage.js                                   | localStorage persistence for saved matrices      |
+| Font Awesome 6.5.1 (CDN)                            | UI icons                                         |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | Typography                                       |
+| Cradle tokens.css                                   | Shared design tokens                             |
 
 ---
 
@@ -154,13 +154,13 @@ DOM render updates result matrix grid & step progress bar
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Font Awesome | 6.5.1 | CDN (`<link>`) | UI icons |
-| Space Grotesk / Inter / JetBrains Mono | — | Google Fonts CDN | Typography |
-| Cradle tokens.css | — | Local stylesheet | Shared design tokens |
-| Cradle storage.js | — | Local script | localStorage persistence |
-| Cradle BackToHome.js | — | Local script | Home navigation button |
+| Dependency                             | Version | How loaded       | Purpose                  |
+| -------------------------------------- | ------- | ---------------- | ------------------------ |
+| Font Awesome                           | 6.5.1   | CDN (`<link>`)   | UI icons                 |
+| Space Grotesk / Inter / JetBrains Mono | —       | Google Fonts CDN | Typography               |
+| Cradle tokens.css                      | —       | Local stylesheet | Shared design tokens     |
+| Cradle storage.js                      | —       | Local script     | localStorage persistence |
+| Cradle BackToHome.js                   | —       | Local script     | Home navigation button   |
 
 No build step, package manager, or npm dependency.
 

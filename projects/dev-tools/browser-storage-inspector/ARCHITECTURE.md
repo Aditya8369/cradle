@@ -44,13 +44,13 @@ flowchart TD
 
 ## Component Breakdown
 
-| File | Role |
-| --- | --- |
-| `storageEngine.js` | Data type detection (JSON, JWT, Base64, String, Number), byte size estimation, store reading. |
-| `storageExporter.js` | JSON snapshot creation, CSV serialization, backup restoration validation. |
-| `script.js` | Main app controller, event routing, form submissions, DOM table rendering. |
-| `index.html` | Dashboard layout, search & filter toolbar, storage tab sections, input forms. |
-| `style.css` | Glassmorphic cards, data type badge colors, responsive table wrappers. |
+| File                 | Role                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| `storageEngine.js`   | Data type detection (JSON, JWT, Base64, String, Number), byte size estimation, store reading. |
+| `storageExporter.js` | JSON snapshot creation, CSV serialization, backup restoration validation.                     |
+| `script.js`          | Main app controller, event routing, form submissions, DOM table rendering.                    |
+| `index.html`         | Dashboard layout, search & filter toolbar, storage tab sections, input forms.                 |
+| `style.css`          | Glassmorphic cards, data type badge colors, responsive table wrappers.                        |
 
 ---
 
@@ -92,16 +92,16 @@ refreshAll() re-reads and re-renders the dashboard
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Grid, Flexbox, Custom Properties) | Dashboard layout, badges, responsive design |
-| Vanilla JavaScript (ES6+) | Store reading, rendering, event handling |
-| Web Storage API | Reading/writing localStorage and sessionStorage |
-| `document.cookie` API | Reading, writing, and clearing cookies |
-| IndexedDB API | Listing databases and object stores |
-| Blob + `URL.createObjectURL` | Client-side JSON/CSV downloads |
-| Space Grotesk (Google Fonts) | UI typography |
+| Technology                              | Purpose                                         |
+| --------------------------------------- | ----------------------------------------------- |
+| HTML5                                   | Page structure and semantic markup              |
+| CSS3 (Grid, Flexbox, Custom Properties) | Dashboard layout, badges, responsive design     |
+| Vanilla JavaScript (ES6+)               | Store reading, rendering, event handling        |
+| Web Storage API                         | Reading/writing localStorage and sessionStorage |
+| `document.cookie` API                   | Reading, writing, and clearing cookies          |
+| IndexedDB API                           | Listing databases and object stores             |
+| Blob + `URL.createObjectURL`            | Client-side JSON/CSV downloads                  |
+| Space Grotesk (Google Fonts)            | UI typography                                   |
 
 ---
 

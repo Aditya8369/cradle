@@ -53,11 +53,11 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|------|---------------|
-| `index.html` | Page structure, semantic HTML, toolbar buttons, split pane, status bar, loads Cradle tokens and Marked.js |
-| `script.js` | Markdown parsing, toolbar action handlers, keyboard shortcuts, export functions, pane resize, word/char count, auto-save |
-| `style.css` | Split-pane layout, toolbar, markdown body typography, responsive breakpoints, status bar |
+| File         | Responsibility                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `index.html` | Page structure, semantic HTML, toolbar buttons, split pane, status bar, loads Cradle tokens and Marked.js                |
+| `script.js`  | Markdown parsing, toolbar action handlers, keyboard shortcuts, export functions, pane resize, word/char count, auto-save |
+| `style.css`  | Split-pane layout, toolbar, markdown body typography, responsive breakpoints, status bar                                 |
 
 ---
 
@@ -108,17 +108,17 @@ User clicks Export → blob created → browser download prompt
 
 ## Technologies Used
 
-| Technology | Purpose |
-|------------|---------|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Flexbox, Custom Properties) | Split-pane layout, responsive design |
-| Vanilla JavaScript (ES6+) | Editor logic, preview, export, keyboard shortcuts |
-| Marked.js 12.x (CDN) | Markdown-to-HTML parsing with GFM support |
-| localStorage API | Auto-save document content across sessions |
-| Cradle `tokens.css` | Shared design token system |
-| Cradle `BackToHome.js` | Back-to-home navigation component |
-| Font Awesome 6.x (CDN) | Toolbar and UI icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | UI and monospace typography |
+| Technology                                          | Purpose                                           |
+| --------------------------------------------------- | ------------------------------------------------- |
+| HTML5                                               | Page structure and semantic markup                |
+| CSS3 (Flexbox, Custom Properties)                   | Split-pane layout, responsive design              |
+| Vanilla JavaScript (ES6+)                           | Editor logic, preview, export, keyboard shortcuts |
+| Marked.js 12.x (CDN)                                | Markdown-to-HTML parsing with GFM support         |
+| localStorage API                                    | Auto-save document content across sessions        |
+| Cradle `tokens.css`                                 | Shared design token system                        |
+| Cradle `BackToHome.js`                              | Back-to-home navigation component                 |
+| Font Awesome 6.x (CDN)                              | Toolbar and UI icons                              |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | UI and monospace typography                       |
 
 ---
 
@@ -173,13 +173,13 @@ User clicks Export → blob created → browser download prompt
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|------------|---------|------------|---------|
-| Marked.js | 12.x | CDN `<script>` tag | Markdown-to-HTML parsing |
-| Cradle `tokens.css` | — | Local `<link>` tag | Design tokens |
-| Cradle `BackToHome.js` | — | Local `<script>` tag | Navigation |
-| Font Awesome | 6.5.1 | CDN | Icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | — | Google Fonts CDN | Typography |
+| Dependency                                          | Version | How loaded           | Purpose                  |
+| --------------------------------------------------- | ------- | -------------------- | ------------------------ |
+| Marked.js                                           | 12.x    | CDN `<script>` tag   | Markdown-to-HTML parsing |
+| Cradle `tokens.css`                                 | —       | Local `<link>` tag   | Design tokens            |
+| Cradle `BackToHome.js`                              | —       | Local `<script>` tag | Navigation               |
+| Font Awesome                                        | 6.5.1   | CDN                  | Icons                    |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | —       | Google Fonts CDN     | Typography               |
 
 ---
 

@@ -24,9 +24,9 @@
  *   - CradleThemeToggle  Light/dark theme toggle with localStorage + OS preference
  *   - CradleNavbar       Sticky navbar with mobile drawer
  *   - CradleBackToHome   Fixed "Back to Home" pill button
-   *  - CradleEscape       HTML escaping utility (CradleEscape.escapeHtml)
-   *  - CradleSanitize     HTML sanitization utility (CradleSanitize.sanitizeHtml)
-   *  - CradleStorage      localStorage helper (CradleStorage.get/set/...)
+ *  - CradleEscape       HTML escaping utility (CradleEscape.escapeHtml)
+ *  - CradleSanitize     HTML sanitization utility (CradleSanitize.sanitizeHtml)
+ *  - CradleStorage      localStorage helper (CradleStorage.get/set/...)
  *
  * Individual component files:
  *   /src/components/ui/Button/Button.js
@@ -147,8 +147,8 @@
         Promise.all(
           [
             ...COMPONENTS.map(p => p.split("/")[0]),
-            ...UTILITIES.filter(u => u !== "sanitizeHtml.js").map(
-              u => u.replace(/\.js$/, "")
+            ...UTILITIES.filter(u => u !== "sanitizeHtml.js").map(u =>
+              u.replace(/\.js$/, "")
             ),
           ].map(name => this.load(name))
         )

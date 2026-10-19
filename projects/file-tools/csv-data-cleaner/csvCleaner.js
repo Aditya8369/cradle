@@ -45,7 +45,11 @@
               let lookAhead = index + 1;
               while (lookAhead < text.length) {
                 const nextChar = text[lookAhead];
-                if (nextChar === "," || nextChar === "\n" || nextChar === "\r") {
+                if (
+                  nextChar === "," ||
+                  nextChar === "\n" ||
+                  nextChar === "\r"
+                ) {
                   break;
                 }
                 if (nextChar !== " " && nextChar !== "\t") {
@@ -85,7 +89,10 @@
         rows.push(row);
       }
     } catch (err) {
-      if (err.message && err.message.includes("The CSV contains malformed quoting")) {
+      if (
+        err.message &&
+        err.message.includes("The CSV contains malformed quoting")
+      ) {
         throw err;
       }
       throw new Error("The CSV could not be parsed.");
@@ -108,7 +115,9 @@
       const rowIndex = index + headerIndex + 2;
       const isEmpty = cells.every(cell => String(cell).trim() === "");
       if (!isEmpty && cells.length !== headers.length) {
-        warnings.push(`Row ${rowIndex} has an unexpected number of columns (expected ${headers.length}, got ${cells.length}).`);
+        warnings.push(
+          `Row ${rowIndex} has an unexpected number of columns (expected ${headers.length}, got ${cells.length}).`
+        );
       }
       return normalizeRowLength(cells, headers.length);
     });
@@ -182,7 +191,9 @@
     const beforeRows = dataset.rows.length;
     let cleaned = {
       headers: dataset.headers.slice(),
-      rows: dataset.rows.map(row => normalizeRowLength(row, dataset.headers.length)),
+      rows: dataset.rows.map(row =>
+        normalizeRowLength(row, dataset.headers.length)
+      ),
     };
 
     if (options.trimSpaces !== false) {
@@ -232,7 +243,9 @@
     const lines = [
       dataset.headers.map(escapeCsvCell).join(","),
       ...dataset.rows.map(row =>
-        normalizeRowLength(row, dataset.headers.length).map(escapeCsvCell).join(",")
+        normalizeRowLength(row, dataset.headers.length)
+          .map(escapeCsvCell)
+          .join(",")
       ),
     ];
 

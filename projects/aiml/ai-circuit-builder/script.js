@@ -54,7 +54,8 @@ if (typeof document !== "undefined") {
 
     document.getElementById("frequency")?.addEventListener("input", e => {
       const freqVal = document.getElementById("freqValue");
-      if (freqVal) freqVal.innerText = parseFloat(e.target.value).toFixed(2) + " GHz";
+      if (freqVal)
+        freqVal.innerText = parseFloat(e.target.value).toFixed(2) + " GHz";
     });
 
     document
@@ -519,8 +520,14 @@ function loadSavedProject(id) {
   const projects = getStoredProjects();
   const found = projects.find(p => p.id === id);
   if (found) {
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-    const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+    const setTxt = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = txt;
+    };
 
     setVal("projectName", found.name);
     setVal("goal", found.goal);
@@ -555,7 +562,8 @@ function renderSavedProjectsList() {
   if (savedCount) savedCount.innerText = projects.length;
 
   if (projects.length === 0) {
-    if (container) container.innerHTML = `<p class="text-gray-500 italic text-center py-4">No chips saved in vault yet.</p>`;
+    if (container)
+      container.innerHTML = `<p class="text-gray-500 italic text-center py-4">No chips saved in vault yet.</p>`;
     return;
   }
 

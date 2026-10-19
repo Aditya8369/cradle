@@ -3,7 +3,9 @@ const assert = require("node:assert/strict");
 const BrainDumpEngine = require("../projects/productivity/brain-dump-collector/brainDumpEngine");
 
 test("BrainDumpEngine autoCategorize classifies Work keywords correctly", () => {
-  const cat1 = BrainDumpEngine.autoCategorize("Fix critical bug in client project");
+  const cat1 = BrainDumpEngine.autoCategorize(
+    "Fix critical bug in client project"
+  );
   assert.equal(cat1, "Work");
 
   const cat2 = BrainDumpEngine.autoCategorize("Schedule meeting with team");
@@ -14,12 +16,16 @@ test("BrainDumpEngine autoCategorize classifies Health & Finance keywords", () =
   const catHealth = BrainDumpEngine.autoCategorize("Go to gym and drink water");
   assert.equal(catHealth, "Health");
 
-  const catFinance = BrainDumpEngine.autoCategorize("Pay electricity bill and check budget");
+  const catFinance = BrainDumpEngine.autoCategorize(
+    "Pay electricity bill and check budget"
+  );
   assert.equal(catFinance, "Finance");
 });
 
 test("BrainDumpEngine detectPriority identifies High and Low urgency", () => {
-  const prioHigh = BrainDumpEngine.detectPriority("Submit report today! urgent");
+  const prioHigh = BrainDumpEngine.detectPriority(
+    "Submit report today! urgent"
+  );
   assert.equal(prioHigh, "high");
 
   const prioLow = BrainDumpEngine.detectPriority("Read book someday maybe");
@@ -33,7 +39,12 @@ test("BrainDumpEngine filterDumps filters by category and search query", () => {
   const dumps = [
     { text: "Fix bug", category: "Work", priority: "high", completed: false },
     { text: "Buy milk", category: "Errands", priority: "low", completed: true },
-    { text: "Study JS", category: "Study", priority: "medium", completed: false },
+    {
+      text: "Study JS",
+      category: "Study",
+      priority: "medium",
+      completed: false,
+    },
   ];
 
   const workOnly = BrainDumpEngine.filterDumps(dumps, "", "Work", "all");
@@ -60,7 +71,12 @@ test("BrainDumpEngine calculateStats generates correct counters", () => {
 
 test("BrainDumpEngine exportToMarkdown generates clean markdown string", () => {
   const dumps = [
-    { text: "Deploy app", category: "Work", priority: "high", completed: false },
+    {
+      text: "Deploy app",
+      category: "Work",
+      priority: "high",
+      completed: false,
+    },
   ];
 
   const md = BrainDumpEngine.exportToMarkdown(dumps);

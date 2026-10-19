@@ -31,13 +31,13 @@ The project follows a simple separation of concerns. `script.js` is the controll
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Studio layout: control panel, live canvas preview card, preset gallery; loads shared Cradle scripts |
-| `style.css` | Dark studio theme, Poppins typography, responsive two-column workspace, preset grid layout |
-| `memeEngine.js` | Text wrapping math and HTML5 2D canvas drawing logic |
-| `memeStorage.js` | Storage manager for keeping history of up to 10 meme presets in `localStorage` |
-| `script.js` | DOM binding layer, event listeners, and API fetcher |
+| File             | Responsibility                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `index.html`     | Studio layout: control panel, live canvas preview card, preset gallery; loads shared Cradle scripts |
+| `style.css`      | Dark studio theme, Poppins typography, responsive two-column workspace, preset grid layout          |
+| `memeEngine.js`  | Text wrapping math and HTML5 2D canvas drawing logic                                                |
+| `memeStorage.js` | Storage manager for keeping history of up to 10 meme presets in `localStorage`                      |
+| `script.js`      | DOM binding layer, event listeners, and API fetcher                                                 |
 
 ## Data Flow / Execution Flow
 
@@ -64,6 +64,7 @@ The project follows a simple separation of concerns. `script.js` is the controll
 ```
 
 User opens index.html, then:
+
 1. The page loads `memeEngine.js`, `memeStorage.js`, `script.js`, and the shared Cradle scripts.
 2. `loadMemeFromUrl()` starts the hidden source image and `renderPresetsUI()` fills the gallery.
 3. Typing in the text controls or moving the font slider fires `updateMeme()`, which calls `renderMemeCanvas()` and repaints the canvas.
@@ -81,14 +82,14 @@ User opens index.html, then:
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic layout, form controls, and `<canvas>` element |
-| CSS3 (Flexbox, Grid, Custom Properties) | Dark studio theme and responsive layout |
-| Vanilla JavaScript (ES6+) | DOM manipulation, canvas rendering, `fetch`, storage |
-| HTML5 Canvas 2D API | Composite image and caption rendering |
-| localStorage API | Persisting saved meme presets |
-| Google Fonts (Poppins) | UI typography |
+| Technology                              | Purpose                                                |
+| --------------------------------------- | ------------------------------------------------------ |
+| HTML5                                   | Semantic layout, form controls, and `<canvas>` element |
+| CSS3 (Flexbox, Grid, Custom Properties) | Dark studio theme and responsive layout                |
+| Vanilla JavaScript (ES6+)               | DOM manipulation, canvas rendering, `fetch`, storage   |
+| HTML5 Canvas 2D API                     | Composite image and caption rendering                  |
+| localStorage API                        | Persisting saved meme presets                          |
+| Google Fonts (Poppins)                  | UI typography                                          |
 
 ## File Responsibilities
 
@@ -131,12 +132,12 @@ User opens index.html, then:
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Poppins (font) | — | Google Fonts CDN (`<link>` in index.html) | UI typography |
-| Random Meme API | — | Remote `fetch("https://meme-api.com/gimme")` | Random meme template images |
-| Cradle `storage.js` | — | Local repo `<script>` tag | Shared localStorage wrapper |
-| Cradle `BackToHome.js` | — | Local repo `<script>` tag | Back-to-home navigation |
+| Dependency             | Version | How loaded                                   | Purpose                     |
+| ---------------------- | ------- | -------------------------------------------- | --------------------------- |
+| Poppins (font)         | —       | Google Fonts CDN (`<link>` in index.html)    | UI typography               |
+| Random Meme API        | —       | Remote `fetch("https://meme-api.com/gimme")` | Random meme template images |
+| Cradle `storage.js`    | —       | Local repo `<script>` tag                    | Shared localStorage wrapper |
+| Cradle `BackToHome.js` | —       | Local repo `<script>` tag                    | Back-to-home navigation     |
 
 ## Future Improvements
 

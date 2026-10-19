@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const PROJECTS_DIR = path.resolve(__dirname, "..", "projects");
-const DEFAULT_SIMILARITY_THRESHOLD = 0.60;
+const DEFAULT_SIMILARITY_THRESHOLD = 0.6;
 
 function getJsFiles(dir) {
   let results = [];
@@ -30,7 +30,9 @@ function normalizeCode(code) {
   const lines = noComments
     .split("\n")
     .map(line => line.trim())
-    .filter(line => line.length > 0 && line !== "{" && line !== "}" && line !== "};");
+    .filter(
+      line => line.length > 0 && line !== "{" && line !== "}" && line !== "};"
+    );
 
   return lines;
 }
@@ -80,7 +82,7 @@ function analyzeDuplicateModules(threshold = DEFAULT_SIMILARITY_THRESHOLD) {
       relPath,
       lineCount: normalizedLines.length,
       lineSet,
-      tokenSet
+      tokenSet,
     });
   }
 
@@ -105,13 +107,15 @@ function analyzeDuplicateModules(threshold = DEFAULT_SIMILARITY_THRESHOLD) {
           lines2: f2.lineCount,
           similarity: (score * 100).toFixed(1),
           lineSimilarity: (lineSim * 100).toFixed(1),
-          tokenSimilarity: (tokenSim * 100).toFixed(1)
+          tokenSimilarity: (tokenSim * 100).toFixed(1),
         });
       }
     }
   }
 
-  duplicates.sort((a, b) => parseFloat(b.similarity) - parseFloat(a.similarity));
+  duplicates.sort(
+    (a, b) => parseFloat(b.similarity) - parseFloat(a.similarity)
+  );
   return duplicates;
 }
 
@@ -129,17 +133,25 @@ function main() {
     }
   }
 
-  console.log(`Scanning JS modules across projects for code duplication (Threshold: ${(threshold * 100).toFixed(0)}%)...`);
+  console.log(
+    `Scanning JS modules across projects for code duplication (Threshold: ${(threshold * 100).toFixed(0)}%)...`
+  );
   const duplicates = analyzeDuplicateModules(threshold);
 
   if (duplicates.length > 0) {
-    console.log(`\n🔍 Found ${duplicates.length} duplicate or near-identical JS module pair(s):\n`);
+    console.log(
+      `\n🔍 Found ${duplicates.length} duplicate or near-identical JS module pair(s):\n`
+    );
     duplicates.forEach(dup => {
-      console.log(`  - [${dup.similarity}% Overall Similarity | Lines: ${dup.lineSimilarity}% | Tokens: ${dup.tokenSimilarity}%]`);
+      console.log(
+        `  - [${dup.similarity}% Overall Similarity | Lines: ${dup.lineSimilarity}% | Tokens: ${dup.tokenSimilarity}%]`
+      );
       console.log(`    File A: ${dup.file1} (${dup.lines1} lines)`);
       console.log(`    File B: ${dup.file2} (${dup.lines2} lines)\n`);
     });
-    console.log("💡 Recommendation: Extract shared logic into reusable utility modules under scripts/ or a common directory.");
+    console.log(
+      "💡 Recommendation: Extract shared logic into reusable utility modules under scripts/ or a common directory."
+    );
 
     if (failOnDup) {
       process.exit(1);
@@ -158,5 +170,5 @@ module.exports = {
   normalizeCode,
   tokenize,
   calculateJaccardSimilarity,
-  analyzeDuplicateModules
+  analyzeDuplicateModules,
 };

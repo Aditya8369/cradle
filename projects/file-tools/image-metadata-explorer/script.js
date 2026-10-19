@@ -79,7 +79,7 @@ function validateImageFile(file) {
   if (!file) {
     return {
       valid: false,
-      message: "Please select an image file."
+      message: "Please select an image file.",
     };
   }
 
@@ -95,20 +95,20 @@ function validateImageFile(file) {
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      message: `Image is too large (${formatFileSize(file.size)}). Maximum allowed size is 5 MB.`
+      message: `Image is too large (${formatFileSize(file.size)}). Maximum allowed size is 5 MB.`,
     };
   }
 
   if (!ACCEPTED_FILE_TYPES.has(file.type)) {
     return {
       valid: false,
-      message: "Invalid file type. Please select a supported image file."
+      message: "Invalid file type. Please select a supported image file.",
     };
   }
 
   return {
     valid: true,
-    message: ""
+    message: "",
   };
 }
 
@@ -167,8 +167,7 @@ function renderMetadata(metadata) {
   }).length;
 
   if (metadataCount) {
-    metadataCount.textContent =
-      `${count} ${count === 1 ? "field" : "fields"}`;
+    metadataCount.textContent = `${count} ${count === 1 ? "field" : "fields"}`;
   }
 
   if (emptyMetadata) {
@@ -214,9 +213,7 @@ function loadImagePreview(file) {
     };
 
     image.onerror = () => {
-      reject(
-        new Error("The selected image could not be loaded.")
-      );
+      reject(new Error("The selected image could not be loaded."));
     };
 
     image.src = currentObjectUrl;
@@ -275,8 +272,7 @@ async function processImage(file) {
       throw new Error("Image metadata engine is unavailable.");
     }
 
-    const exifMetadata =
-      await globalThis.ImageMetadataEngine.parse(file);
+    const exifMetadata = await globalThis.ImageMetadataEngine.parse(file);
 
     currentMetadata = {
       ...exifMetadata,
@@ -298,9 +294,7 @@ async function processImage(file) {
     currentMetadata = null;
 
     showError(
-      error instanceof Error
-        ? error.message
-        : "Unable to read image metadata."
+      error instanceof Error ? error.message : "Unable to read image metadata."
     );
   }
 }
@@ -322,7 +316,7 @@ if (imageInput) {
       name: file.name,
       size: file.size,
       sizeMB: (file.size / (1024 * 1024)).toFixed(2),
-      type: file.type
+      type: file.type,
     });
 
     const validation = validateImageFile(file);
@@ -465,41 +459,28 @@ if (newImageBtn) {
 if (exportBtn) {
   exportBtn.addEventListener("click", () => {
     if (!currentMetadata) {
-      showError(
-        "Load an image before exporting metadata."
-      );
+      showError("Load an image before exporting metadata.");
       return;
     }
 
     try {
-      const json = JSON.stringify(
-        currentMetadata,
-        null,
-        2
-      );
+      const json = JSON.stringify(currentMetadata, null, 2);
 
-      const blob = new Blob(
-        [json],
-        {
-          type: "application/json",
-        }
-      );
+      const blob = new Blob([json], {
+        type: "application/json",
+      });
 
-      const url =
-        URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
 
-      const link =
-        document.createElement("a");
+      const link = document.createElement("a");
 
       const baseName =
         currentFile?.name
           ?.replace(/\.[^/.]+$/, "")
-          .replace(/[^a-z0-9_-]/gi, "-") ||
-        "image";
+          .replace(/[^a-z0-9_-]/gi, "-") || "image";
 
       link.href = url;
-      link.download =
-        `${baseName}-metadata.json`;
+      link.download = `${baseName}-metadata.json`;
 
       document.body.appendChild(link);
 
@@ -508,16 +489,10 @@ if (exportBtn) {
       link.remove();
 
       URL.revokeObjectURL(url);
-
     } catch (error) {
-      console.error(
-        "Metadata export error:",
-        error
-      );
+      console.error("Metadata export error:", error);
 
-      showError(
-        "Unable to export metadata."
-      );
+      showError("Unable to export metadata.");
     }
   });
 }
@@ -526,16 +501,11 @@ if (exportBtn) {
    Cleanup
 -------------------------------- */
 
-window.addEventListener(
-  "beforeunload",
-  () => {
-    if (currentObjectUrl) {
-      URL.revokeObjectURL(
-        currentObjectUrl
-      );
-    }
+window.addEventListener("beforeunload", () => {
+  if (currentObjectUrl) {
+    URL.revokeObjectURL(currentObjectUrl);
   }
-);
+});
 
 function showError(message) {
   console.error("SHOW ERROR:", message);

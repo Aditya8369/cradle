@@ -72,12 +72,12 @@ projects/aiml/neural-network-playground/
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | UI layout, control panels, and the three visualization canvases |
-| `script.js` | State management, canvas rendering loops, event wiring, CSV import, and model export |
-| `nnEngine.js` | Network math: dataset generation, activations, forward pass, backpropagation |
-| `style.css` | Layout, theming, and responsive styling |
+| File          | Responsibility                                                                       |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `index.html`  | UI layout, control panels, and the three visualization canvases                      |
+| `script.js`   | State management, canvas rendering loops, event wiring, CSV import, and model export |
+| `nnEngine.js` | Network math: dataset generation, activations, forward pass, backpropagation         |
+| `style.css`   | Layout, theming, and responsive styling                                              |
 
 ---
 

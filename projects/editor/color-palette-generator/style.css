@@ -18,7 +18,13 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-main);
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    "Outfit",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -31,8 +37,16 @@ body {
   width: 140%;
   height: 140%;
   background:
-    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 45%);
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(56, 189, 248, 0.05) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(168, 85, 247, 0.05) 0%,
+      transparent 45%
+    );
   z-index: -1;
   pointer-events: none;
 }
@@ -120,7 +134,7 @@ body {
   gap: 0.75rem;
 }
 
-input[type='color'] {
+input[type="color"] {
   width: 56px;
   height: 56px;
   border: 2px solid var(--card-border);
@@ -130,11 +144,11 @@ input[type='color'] {
   padding: 2px;
 }
 
-input[type='color']::-webkit-color-swatch-wrapper {
+input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
-input[type='color']::-webkit-color-swatch {
+input[type="color"]::-webkit-color-swatch {
   border: none;
   border-radius: 8px;
 }
@@ -149,7 +163,7 @@ input[type='color']::-webkit-color-swatch {
 }
 
 .hex-input-group .prefix {
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
   font-size: 1.1rem;
   color: var(--text-muted);
   margin-right: 0.25rem;
@@ -160,7 +174,7 @@ input[type='color']::-webkit-color-swatch {
   background: transparent;
   border: none;
   color: #fff;
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
   font-size: 1.1rem;
   outline: none;
 }
@@ -279,7 +293,7 @@ input[type='color']::-webkit-color-swatch {
 }
 
 .swatch-hex {
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
   font-size: 0.9rem;
   font-weight: 500;
   color: #fff;
@@ -312,7 +326,7 @@ input[type='color']::-webkit-color-swatch {
   font-weight: 500;
 }
 
-.contrast-pick input[type='color'] {
+.contrast-pick input[type="color"] {
   width: 44px;
   height: 44px;
 }
@@ -325,7 +339,7 @@ input[type='color']::-webkit-color-swatch {
 }
 
 .contrast-ratio {
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
   font-size: 2rem;
   font-weight: 700;
   color: #fff;
@@ -392,7 +406,7 @@ input[type='color']::-webkit-color-swatch {
   border: 1px solid var(--card-border);
   border-radius: 10px;
   padding: 1.25rem;
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
   font-size: 0.85rem;
   line-height: 1.6;
   color: var(--text-main);

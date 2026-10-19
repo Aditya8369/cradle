@@ -195,7 +195,14 @@ function setOperation(op) {
 
 function updateOpUI() {
   const op = state.selectedOp;
-  const isUnary = ["determinant", "inverse", "transpose", "lu", "qr", "eigen"].includes(op);
+  const isUnary = [
+    "determinant",
+    "inverse",
+    "transpose",
+    "lu",
+    "qr",
+    "eigen",
+  ].includes(op);
 
   if (cardB) cardB.style.display = isUnary ? "none" : "block";
 
@@ -203,14 +210,14 @@ function updateOpUI() {
     const iconMap = {
       add: '<i class="fa-solid fa-plus"></i>',
       multiply: '<i class="fa-solid fa-times"></i>',
-      determinant: '<strong>det(A)</strong>',
-      inverse: '<strong>A<sup>-1</sup></strong>',
-      transpose: '<strong>A<sup>T</sup></strong>',
-      lu: '<strong>A = L·U</strong>',
-      qr: '<strong>A = Q·R</strong>',
-      eigen: '<strong>λ I</strong>'
+      determinant: "<strong>det(A)</strong>",
+      inverse: "<strong>A<sup>-1</sup></strong>",
+      transpose: "<strong>A<sup>T</sup></strong>",
+      lu: "<strong>A = L·U</strong>",
+      qr: "<strong>A = Q·R</strong>",
+      eigen: "<strong>λ I</strong>",
     };
-    mathOperator.innerHTML = iconMap[op] || '=';
+    mathOperator.innerHTML = iconMap[op] || "=";
   }
 
   if (resultTitle) {
@@ -220,7 +227,7 @@ function updateOpUI() {
       eigen: "Eigenvalues Spectrum λ",
       determinant: "Determinant Scalar",
       inverse: "Inverse Matrix A⁻¹",
-      transpose: "Transposed Matrix Aᵀ"
+      transpose: "Transposed Matrix Aᵀ",
     };
     resultTitle.textContent = titleMap[op] || "Result Matrix C";
   }
@@ -251,7 +258,9 @@ function onDimensionsChange() {
     state.rowsB = state.colsA;
     state.colsB = parseInt(colsBSelect.value, 10);
     if (rowsBSelect) rowsBSelect.value = state.rowsB;
-  } else if (["determinant", "inverse", "lu", "qr", "eigen"].includes(state.selectedOp)) {
+  } else if (
+    ["determinant", "inverse", "lu", "qr", "eigen"].includes(state.selectedOp)
+  ) {
     state.colsA = state.rowsA;
     if (colsASelect) colsASelect.value = state.rowsA;
   } else {
@@ -268,7 +277,14 @@ function rebuildGrids() {
   state.matrixB = createEmptyMatrix(state.rowsB, state.colsB, 1);
 
   renderMatrixGrid(gridA, state.rowsA, state.colsA, "a", state.matrixA);
-  const isUnary = ["determinant", "inverse", "transpose", "lu", "qr", "eigen"].includes(state.selectedOp);
+  const isUnary = [
+    "determinant",
+    "inverse",
+    "transpose",
+    "lu",
+    "qr",
+    "eigen",
+  ].includes(state.selectedOp);
   if (!isUnary) {
     renderMatrixGrid(gridB, state.rowsB, state.colsB, "b", state.matrixB);
   }
@@ -283,7 +299,9 @@ function loadMatrixAData(data) {
   if (colsASelect) colsASelect.value = state.colsA;
   state.matrixA = data.map(r => r.slice());
 
-  if (["determinant", "inverse", "lu", "qr", "eigen"].includes(state.selectedOp)) {
+  if (
+    ["determinant", "inverse", "lu", "qr", "eigen"].includes(state.selectedOp)
+  ) {
     state.colsA = state.rowsA;
     if (colsASelect) colsASelect.value = state.rowsA;
   }
@@ -345,11 +363,13 @@ function computeAndBuildTimeline() {
       buildEigenTimeline();
     }
   } catch (err) {
-    state.steps = [{
-      text: `Error: ${err.message}`,
-      scratchpad: "Execution failed for selected operation.",
-      result: [["N/A"]]
-    }];
+    state.steps = [
+      {
+        text: `Error: ${err.message}`,
+        scratchpad: "Execution failed for selected operation.",
+        result: [["N/A"]],
+      },
+    ];
   }
 
   updateStepUI();
@@ -368,12 +388,12 @@ function buildAddTimeline() {
       result[i][j] = sum;
 
       state.steps.push({
-        text: `Add position [${i+1}, ${j+1}]: ${valA} + ${valB} = ${sum}`,
-        scratchpad: `C[${i+1}][${j+1}] = A[${i+1}][${j+1}] + B[${i+1}][${j+1}] = ${valA} + ${valB} = ${sum}`,
+        text: `Add position [${i + 1}, ${j + 1}]: ${valA} + ${valB} = ${sum}`,
+        scratchpad: `C[${i + 1}][${j + 1}] = A[${i + 1}][${j + 1}] + B[${i + 1}][${j + 1}] = ${valA} + ${valB} = ${sum}`,
         result: JSON.parse(JSON.stringify(result)),
         activeA: [[i, j]],
         activeB: [[i, j]],
-        activeC: [[i, j]]
+        activeC: [[i, j]],
       });
     }
   }
@@ -404,12 +424,12 @@ function buildMultiplyTimeline() {
       result[i][j] = Math.abs(sum) < 1e-12 ? 0 : sum;
 
       state.steps.push({
-        text: `Dot product for C[${i+1}, ${j+1}]: Row ${i+1} of A · Column ${j+1} of B = ${result[i][j]}`,
-        scratchpad: `C[${i+1}][${j+1}] = ${exprTerms.join(" + ")} = ${result[i][j]}`,
+        text: `Dot product for C[${i + 1}, ${j + 1}]: Row ${i + 1} of A · Column ${j + 1} of B = ${result[i][j]}`,
+        scratchpad: `C[${i + 1}][${j + 1}] = ${exprTerms.join(" + ")} = ${result[i][j]}`,
         result: JSON.parse(JSON.stringify(result)),
         activeA,
         activeB,
-        activeC: [[i, j]]
+        activeC: [[i, j]],
       });
     }
   }
@@ -420,7 +440,7 @@ function buildDeterminantTimeline() {
   state.steps.push({
     text: `Determinant of Matrix A computed via Gaussian LU expansion.`,
     scratchpad: `det(A) = ${det}`,
-    result: [[det]]
+    result: [[det]],
   });
 }
 
@@ -429,7 +449,7 @@ function buildInverseTimeline() {
   state.steps.push({
     text: `Inverse of Matrix A calculated via Gauss-Jordan elimination.`,
     scratchpad: `A⁻¹ · A = I`,
-    result: inv
+    result: inv,
   });
 }
 
@@ -438,7 +458,7 @@ function buildTransposeTimeline() {
   state.steps.push({
     text: `Transposed matrix by swapping rows and columns.`,
     scratchpad: `Aᵀ[i][j] = A[j][i]`,
-    result: transp
+    result: transp,
   });
 }
 
@@ -447,7 +467,7 @@ function buildLUTimeline() {
   state.steps.push({
     text: `LU Decomposition complete: A = L · U`,
     scratchpad: `L = Lower Triangular, U = Upper Triangular`,
-    result: decomp.U
+    result: decomp.U,
   });
 }
 
@@ -456,7 +476,7 @@ function buildQRTimeline() {
   state.steps.push({
     text: `QR Decomposition complete via Gram-Schmidt Orthogonalization.`,
     scratchpad: `Q = Orthogonal Matrix, R = Upper Triangular Matrix`,
-    result: decomp.R
+    result: decomp.R,
   });
 }
 
@@ -464,24 +484,28 @@ function buildEigenTimeline() {
   const evs = engine.eigenvalues(state.matrixA);
   const formatted = evs.map((ev, idx) => [
     `λ${idx + 1}`,
-    ev.imag !== 0 ? `${ev.real} ± ${Math.abs(ev.imag)}i` : `${ev.real}`
+    ev.imag !== 0 ? `${ev.real} ± ${Math.abs(ev.imag)}i` : `${ev.real}`,
   ]);
   state.steps.push({
     text: `Calculated Characteristic Polynomial Eigenvalues for Matrix A.`,
     scratchpad: `det(A - λI) = 0`,
-    result: formatted
+    result: formatted,
   });
 }
 
 function updateStepUI() {
   if (!state.steps.length) {
-    if (explanationText) explanationText.textContent = "No calculation steps available.";
+    if (explanationText)
+      explanationText.textContent = "No calculation steps available.";
     if (mathScratchpad) mathScratchpad.textContent = "";
     if (gridResult) gridResult.innerHTML = "";
     return;
   }
 
-  const step = state.currentStep >= 0 ? state.steps[state.currentStep] : state.steps[state.steps.length - 1];
+  const step =
+    state.currentStep >= 0
+      ? state.steps[state.currentStep]
+      : state.steps[state.steps.length - 1];
 
   if (explanationText) explanationText.textContent = step.text;
   if (mathScratchpad) mathScratchpad.textContent = step.scratchpad;
@@ -489,14 +513,20 @@ function updateStepUI() {
   renderResultGrid(step.result);
 
   if (stepCounter) {
-    const displayIndex = state.currentStep >= 0 ? state.currentStep + 1 : state.steps.length;
+    const displayIndex =
+      state.currentStep >= 0 ? state.currentStep + 1 : state.steps.length;
     stepCounter.textContent = `Step ${displayIndex} / ${state.steps.length}`;
   }
 
   if (stepProgressFill) {
-    const percent = state.steps.length > 0
-      ? ((state.currentStep >= 0 ? state.currentStep + 1 : state.steps.length) / state.steps.length) * 100
-      : 0;
+    const percent =
+      state.steps.length > 0
+        ? ((state.currentStep >= 0
+            ? state.currentStep + 1
+            : state.steps.length) /
+            state.steps.length) *
+          100
+        : 0;
     stepProgressFill.style.width = `${percent}%`;
   }
 
@@ -584,7 +614,14 @@ function fillRandom() {
     }
   }
   renderMatrixGrid(gridA, state.rowsA, state.colsA, "a", state.matrixA);
-  const isUnary = ["determinant", "inverse", "transpose", "lu", "qr", "eigen"].includes(state.selectedOp);
+  const isUnary = [
+    "determinant",
+    "inverse",
+    "transpose",
+    "lu",
+    "qr",
+    "eigen",
+  ].includes(state.selectedOp);
   if (!isUnary) {
     renderMatrixGrid(gridB, state.rowsB, state.colsB, "b", state.matrixB);
   }
@@ -592,10 +629,21 @@ function fillRandom() {
 }
 
 function fillIdentity() {
-  state.matrixA = engine ? engine.createIdentity(state.rowsA) : createEmptyMatrix(state.rowsA, state.colsA, 0);
-  state.matrixB = engine ? engine.createIdentity(state.rowsB) : createEmptyMatrix(state.rowsB, state.colsB, 0);
+  state.matrixA = engine
+    ? engine.createIdentity(state.rowsA)
+    : createEmptyMatrix(state.rowsA, state.colsA, 0);
+  state.matrixB = engine
+    ? engine.createIdentity(state.rowsB)
+    : createEmptyMatrix(state.rowsB, state.colsB, 0);
   renderMatrixGrid(gridA, state.rowsA, state.colsA, "a", state.matrixA);
-  const isUnary = ["determinant", "inverse", "transpose", "lu", "qr", "eigen"].includes(state.selectedOp);
+  const isUnary = [
+    "determinant",
+    "inverse",
+    "transpose",
+    "lu",
+    "qr",
+    "eigen",
+  ].includes(state.selectedOp);
   if (!isUnary) {
     renderMatrixGrid(gridB, state.rowsB, state.colsB, "b", state.matrixB);
   }
@@ -606,7 +654,14 @@ function clearAll() {
   state.matrixA = createEmptyMatrix(state.rowsA, state.colsA, 0);
   state.matrixB = createEmptyMatrix(state.rowsB, state.colsB, 0);
   renderMatrixGrid(gridA, state.rowsA, state.colsA, "a", state.matrixA);
-  const isUnary = ["determinant", "inverse", "transpose", "lu", "qr", "eigen"].includes(state.selectedOp);
+  const isUnary = [
+    "determinant",
+    "inverse",
+    "transpose",
+    "lu",
+    "qr",
+    "eigen",
+  ].includes(state.selectedOp);
   if (!isUnary) {
     renderMatrixGrid(gridB, state.rowsB, state.colsB, "b", state.matrixB);
   }
@@ -634,7 +689,8 @@ function copyLatexToClipboard() {
     if (btnCopyLatex) {
       btnCopyLatex.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
       setTimeout(() => {
-        btnCopyLatex.innerHTML = '<i class="fa-solid fa-copy"></i> Copy to Clipboard';
+        btnCopyLatex.innerHTML =
+          '<i class="fa-solid fa-copy"></i> Copy to Clipboard';
       }, 2000);
     }
   });

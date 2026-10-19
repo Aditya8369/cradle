@@ -145,15 +145,15 @@ The graph algorithms are isolated in `graphLogic.js`, allowing Node tests to imp
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page shell, controls panel, SVG workspace |
-| CSS3 (Grid, Flexbox, Custom Properties) | Layout, canvas styling, cards, theme |
-| Vanilla JavaScript (ES6+) | Graph editing, rendering, animation playback |
-| SVG | Graph rendering and state-based highlighting |
-| Font Awesome 6.5.1 (CDN) | UI icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | Typography |
-| Cradle tokens.css | Shared design tokens |
+| Technology                                          | Purpose                                      |
+| --------------------------------------------------- | -------------------------------------------- |
+| HTML5                                               | Page shell, controls panel, SVG workspace    |
+| CSS3 (Grid, Flexbox, Custom Properties)             | Layout, canvas styling, cards, theme         |
+| Vanilla JavaScript (ES6+)                           | Graph editing, rendering, animation playback |
+| SVG                                                 | Graph rendering and state-based highlighting |
+| Font Awesome 6.5.1 (CDN)                            | UI icons                                     |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | Typography                                   |
+| Cradle tokens.css                                   | Shared design tokens                         |
 
 ---
 
@@ -198,12 +198,12 @@ The graph algorithms are isolated in `graphLogic.js`, allowing Node tests to imp
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Font Awesome | 6.5.1 | CDN (`<link>`) | UI icons |
-| Space Grotesk / Inter / JetBrains Mono | — | Google Fonts CDN | Typography |
-| Cradle tokens.css | — | Local stylesheet | Shared design tokens |
-| Cradle BackToHome.js | — | Local script | Home navigation button |
+| Dependency                             | Version | How loaded       | Purpose                |
+| -------------------------------------- | ------- | ---------------- | ---------------------- |
+| Font Awesome                           | 6.5.1   | CDN (`<link>`)   | UI icons               |
+| Space Grotesk / Inter / JetBrains Mono | —       | Google Fonts CDN | Typography             |
+| Cradle tokens.css                      | —       | Local stylesheet | Shared design tokens   |
+| Cradle BackToHome.js                   | —       | Local script     | Home navigation button |
 
 No build step, package manager, or npm dependency.
 

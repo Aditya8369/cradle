@@ -4,14 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CSS Clamp Calculator</title>
-    <meta name="description" content="Calculate fluid CSS clamp() values with minimum, preferred, and maximum viewport parameters." />
-    <link rel="canonical" href="https://facelessism.github.io/cradle/projects/dev-tools/css-clamp-calculator/" />
+    <meta
+      name="description"
+      content="Calculate fluid CSS clamp() values with minimum, preferred, and maximum viewport parameters."
+    />
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/dev-tools/css-clamp-calculator/"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="CSS Clamp Calculator" />
-    <meta property="og:description" content="Calculate fluid CSS clamp() values with minimum, preferred, and maximum viewport parameters." />
-    <meta property="og:url" content="https://facelessism.github.io/cradle/projects/dev-tools/css-clamp-calculator/" />
-        <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
-<link rel="stylesheet" href="style.css" />
+    <meta
+      property="og:description"
+      content="Calculate fluid CSS clamp() values with minimum, preferred, and maximum viewport parameters."
+    />
+    <meta
+      property="og:url"
+      content="https://facelessism.github.io/cradle/projects/dev-tools/css-clamp-calculator/"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="app-shell">
@@ -62,8 +74,12 @@
           </div>
 
           <div class="actions">
-            <button id="copyCssBtn" class="primary-button" type="button">Copy CSS</button>
-            <button id="swapUnitBtn" class="secondary-button" type="button">Convert px/rem</button>
+            <button id="copyCssBtn" class="primary-button" type="button">
+              Copy CSS
+            </button>
+            <button id="swapUnitBtn" class="secondary-button" type="button">
+              Convert px/rem
+            </button>
           </div>
           <p id="message" class="message" role="status"></p>
         </form>
@@ -71,11 +87,14 @@
         <section class="output-panel" aria-label="Generated clamp output">
           <div class="result-card">
             <span class="label">Generated Formula</span>
-            <code id="clampOutput">clamp(1rem, calc(0.5833rem + 2.0833vw), 2.25rem)</code>
+            <code id="clampOutput"
+              >clamp(1rem, calc(0.5833rem + 2.0833vw), 2.25rem)</code
+            >
           </div>
           <div class="result-card">
             <span class="label">CSS Rule</span>
-            <pre id="cssOutput">font-size: clamp(1rem, calc(0.5833rem + 2.0833vw), 2.25rem);</pre>
+            <pre id="cssOutput">
+font-size: clamp(1rem, calc(0.5833rem + 2.0833vw), 2.25rem);</pre>
           </div>
           <div class="result-card">
             <span class="label">Preferred Value Explanation</span>
@@ -87,7 +106,9 @@
       <section class="preview-panel">
         <div class="preview-heading">
           <h2>Live Preview</h2>
-          <p id="previewMeta">Resize the browser or adjust values to test the formula.</p>
+          <p id="previewMeta">
+            Resize the browser or adjust values to test the formula.
+          </p>
         </div>
         <div id="previewBox" class="preview-box">
           <span>Fluid design should feel steady, not jumpy.</span>

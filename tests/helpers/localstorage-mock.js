@@ -28,12 +28,18 @@ function setupLocalStorageMock() {
     const { beforeEach, afterEach } = require("node:test");
     if (typeof beforeEach === "function" && typeof afterEach === "function") {
       beforeEach(() => {
-        if (global.localStorage && typeof global.localStorage.clear === "function") {
+        if (
+          global.localStorage &&
+          typeof global.localStorage.clear === "function"
+        ) {
           global.localStorage.clear();
         }
       });
       afterEach(() => {
-        if (global.localStorage && typeof global.localStorage.clear === "function") {
+        if (
+          global.localStorage &&
+          typeof global.localStorage.clear === "function"
+        ) {
           global.localStorage.clear();
         }
       });
@@ -53,4 +59,3 @@ function resetLocalStorageMock() {
 }
 
 module.exports = { setupLocalStorageMock, resetLocalStorageMock };
-

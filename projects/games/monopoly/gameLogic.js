@@ -17,7 +17,7 @@ function computeRent(space, owner, diceSum, owners, board) {
 
   if (space.type === "railroad") {
     const count = board.filter(
-      (s) => s.type === "railroad" && owners[s.i] === owner.id
+      s => s.type === "railroad" && owners[s.i] === owner.id
     ).length;
 
     return [0, 25, 50, 100, 200][count];
@@ -25,7 +25,7 @@ function computeRent(space, owner, diceSum, owners, board) {
 
   if (space.type === "utility") {
     const count = board.filter(
-      (s) => s.type === "utility" && owners[s.i] === owner.id
+      s => s.type === "utility" && owners[s.i] === owner.id
     ).length;
 
     return diceSum * (count === 2 ? 10 : 4);

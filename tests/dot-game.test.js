@@ -80,13 +80,9 @@ test("getValidMoves returns empty and player-owned cells", () => {
 
   assert.equal(moves.length, 8);
 
-  assert.ok(
-    moves.some(move => move.r === 0 && move.c === 0)
-  );
+  assert.ok(moves.some(move => move.r === 0 && move.c === 0));
 
-  assert.ok(
-    !moves.some(move => move.r === 1 && move.c === 1)
-  );
+  assert.ok(!moves.some(move => move.r === 1 && move.c === 1));
 });
 
 test("getValidMoves returns all cells on an empty board", () => {
@@ -110,9 +106,7 @@ test("getRandomMove returns a valid move", () => {
 
   const cell = board[move.r][move.c];
 
-  assert.ok(
-    !cell.owner || cell.owner === "red"
-  );
+  assert.ok(!cell.owner || cell.owner === "red");
 });
 
 test("getRandomMove can select a player-owned cell", () => {
@@ -123,9 +117,7 @@ test("getRandomMove can select a player-owned cell", () => {
 
   const moves = getValidMoves(board, "red");
 
-  assert.ok(
-    moves.some(move => move.r === 0 && move.c === 0)
-  );
+  assert.ok(moves.some(move => move.r === 0 && move.c === 0));
 });
 
 test("getRandomMove returns null when no valid moves exist", () => {

@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   // Constants
   const HOUR_HEIGHT = 60; // 60px per hour = 1px per minute
@@ -560,9 +559,10 @@ document.addEventListener("DOMContentLoaded", () => {
       showAlert("No time blocks to export!");
       return;
     }
-    const icsContent = typeof PlannerEngine !== "undefined"
-      ? PlannerEngine.generateICalendar(blocks, currentDate)
-      : "";
+    const icsContent =
+      typeof PlannerEngine !== "undefined"
+        ? PlannerEngine.generateICalendar(blocks, currentDate)
+        : "";
 
     downloadFile(icsContent, `schedule_${currentDate}.ics`, "text/calendar");
   });
@@ -583,11 +583,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (b.notes) mdStr += `  *Notes:* ${b.notes}\n`;
     });
 
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.share === "function"
+    ) {
       try {
         await navigator.share({
           title: `Daily Schedule (${currentDate})`,
-          text: mdStr
+          text: mdStr,
         });
         return;
       } catch (err) {

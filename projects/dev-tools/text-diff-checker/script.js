@@ -3,13 +3,8 @@
  * Vanilla JS, dependency-free LCS-based diff engine.
  * Supports side-by-side comparison in Line mode and Word mode.
  */
-const {
-  diffArrays,
-  toLines,
-  toWordTokens,
-  escapeHtml,
-  inlineWordDiff,
-} = DiffEngine;
+const { diffArrays, toLines, toWordTokens, escapeHtml, inlineWordDiff } =
+  DiffEngine;
 
 (() => {
   "use strict";
@@ -33,7 +28,6 @@ const {
   const statMod = document.getElementById("statMod");
 
   let mode = "line"; // 'line' | 'word'
-
 
   // ---------- Row rendering helpers ----------
   function makeRow(lineNum, html, cls) {
@@ -62,14 +56,22 @@ const {
     const rows = [];
     let leftLineNum = 1;
     let rightLineNum = 1;
-    let additions = 0, deletions = 0, modifications = 0;
+    let additions = 0,
+      deletions = 0,
+      modifications = 0;
 
     let idx = 0;
     while (idx < lineOps.length) {
       const op = lineOps[idx];
 
       if (op.type === "equal") {
-        rows.push({ type: "equal", left: op.value, right: op.value, leftNum: leftLineNum++, rightNum: rightLineNum++ });
+        rows.push({
+          type: "equal",
+          left: op.value,
+          right: op.value,
+          leftNum: leftLineNum++,
+          rightNum: rightLineNum++,
+        });
         idx++;
         continue;
       }
@@ -77,7 +79,10 @@ const {
       // Collect a contiguous run of del/add ops (a "change block")
       const dels = [];
       const adds = [];
-      while (idx < lineOps.length && (lineOps[idx].type === "del" || lineOps[idx].type === "add")) {
+      while (
+        idx < lineOps.length &&
+        (lineOps[idx].type === "del" || lineOps[idx].type === "add")
+      ) {
         if (lineOps[idx].type === "del") dels.push(lineOps[idx].value);
         else adds.push(lineOps[idx].value);
         idx++;
@@ -100,19 +105,43 @@ const {
       } else {
         // Line mode (or no pairing possible): render all dels then all adds
         for (let k = 0; k < pairCount; k++) {
-          rows.push({ type: "del", left: dels[k], right: null, leftNum: leftLineNum++, rightNum: null });
-          rows.push({ type: "add", left: null, right: adds[k], leftNum: null, rightNum: rightLineNum++ });
+          rows.push({
+            type: "del",
+            left: dels[k],
+            right: null,
+            leftNum: leftLineNum++,
+            rightNum: null,
+          });
+          rows.push({
+            type: "add",
+            left: null,
+            right: adds[k],
+            leftNum: null,
+            rightNum: rightLineNum++,
+          });
           deletions++;
           additions++;
         }
       }
 
       for (let k = pairCount; k < dels.length; k++) {
-        rows.push({ type: "del", left: dels[k], right: null, leftNum: leftLineNum++, rightNum: null });
+        rows.push({
+          type: "del",
+          left: dels[k],
+          right: null,
+          leftNum: leftLineNum++,
+          rightNum: null,
+        });
         deletions++;
       }
       for (let k = pairCount; k < adds.length; k++) {
-        rows.push({ type: "add", left: null, right: adds[k], leftNum: null, rightNum: rightLineNum++ });
+        rows.push({
+          type: "add",
+          left: null,
+          right: adds[k],
+          leftNum: null,
+          rightNum: rightLineNum++,
+        });
         additions++;
       }
     }
@@ -133,7 +162,10 @@ const {
         leftHtml += EMPTY_ROW;
         rightHtml += makeRow(row.rightNum, escapeHtml(row.right), "add");
       } else if (row.type === "mod") {
-        const { leftHtml: l, rightHtml: r } = inlineWordDiff(row.left, row.right);
+        const { leftHtml: l, rightHtml: r } = inlineWordDiff(
+          row.left,
+          row.right
+        );
         leftHtml += makeRow(row.leftNum, l, "mod");
         rightHtml += makeRow(row.rightNum, r, "mod");
       }
@@ -182,8 +214,8 @@ const {
   wordModeBtn.addEventListener("click", () => setMode("word"));
 
   // Compare with Ctrl/Cmd + Enter from either textarea
-  [originalEl, modifiedEl].forEach((el) => {
-    el.addEventListener("keydown", (e) => {
+  [originalEl, modifiedEl].forEach(el => {
+    el.addEventListener("keydown", e => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         compare();

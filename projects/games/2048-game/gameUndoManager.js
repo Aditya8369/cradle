@@ -18,7 +18,7 @@
         score: state.score,
         won: state.won,
         over: state.over,
-        size: state.size
+        size: state.size,
       };
 
       stack.push(snapshot);
@@ -69,7 +69,7 @@
       undo,
       clear,
       getCanUndo,
-      getHistoryCount
+      getHistoryCount,
     };
   }
 

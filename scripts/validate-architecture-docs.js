@@ -14,7 +14,7 @@ const EXTERNAL_PREFIXES = [
   "javascript:",
   "data:",
   "tel:",
-  "#"
+  "#",
 ];
 
 function isExternal(link) {
@@ -186,7 +186,10 @@ function validateArchitectureStructure(
 
     const noticeBlock = hasTemplateNoticeBlock(content);
 
-    const rawLinks = [...parseMarkdownLinks(content), ...parseHtmlLinks(content)];
+    const rawLinks = [
+      ...parseMarkdownLinks(content),
+      ...parseHtmlLinks(content),
+    ];
     const brokenReferences = [];
 
     for (const { target, lineNumber } of rawLinks) {
@@ -207,7 +210,11 @@ function validateArchitectureStructure(
       }
     }
 
-    if (missingSections.length > 0 || noticeBlock || brokenReferences.length > 0) {
+    if (
+      missingSections.length > 0 ||
+      noticeBlock ||
+      brokenReferences.length > 0
+    ) {
       issues.push({
         projectDir,
         missingSections,
@@ -237,9 +244,7 @@ function validateArchitectureDocs() {
   }
 
   // Validate structure only for projects that have a non-empty ARCHITECTURE.md
-  const presentDocs = projectDirectories.filter(
-    d => !missingDocs.includes(d)
-  );
+  const presentDocs = projectDirectories.filter(d => !missingDocs.includes(d));
   const structureIssues = validateArchitectureStructure(presentDocs);
 
   if (structureIssues.length > 0) {
@@ -247,7 +252,12 @@ function validateArchitectureDocs() {
       `\nStructure issues found in ${structureIssues.length} ${REQUIRED_FILE} file(s):`
     );
 
-    for (const { projectDir, missingSections, hasNoticeBlock, brokenReferences } of structureIssues) {
+    for (const {
+      projectDir,
+      missingSections,
+      hasNoticeBlock,
+      brokenReferences,
+    } of structureIssues) {
       const relPath = formatRelativePaths([projectDir])[0];
       console.error(`\n  ${relPath}/${REQUIRED_FILE}`);
 
@@ -263,7 +273,9 @@ function validateArchitectureDocs() {
 
       if (brokenReferences && brokenReferences.length > 0) {
         for (const ref of brokenReferences) {
-          console.error(`    ✗ Nonexistent file referenced: "${ref.target}" on line ${ref.lineNumber}`);
+          console.error(
+            `    ✗ Nonexistent file referenced: "${ref.target}" on line ${ref.lineNumber}`
+          );
         }
       }
     }

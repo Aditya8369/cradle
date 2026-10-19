@@ -18,7 +18,10 @@
    */
   function parseInlineMarkdown(text) {
     return text
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+      )
       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
       .replace(/\*([^*]+)\*/g, "<em>$1</em>");
   }
@@ -27,13 +30,14 @@
    * Parse Markdown resume text into structured semantic HTML string.
    */
   function parseMarkdownToHTML(markdown) {
-    if (!markdown) return '<div class="resume-empty">No markdown content entered</div>';
+    if (!markdown)
+      return '<div class="resume-empty">No markdown content entered</div>';
 
     const lines = markdown.replace(/\r\n/g, "\n").split("\n");
     const html = [];
     let listOpen = false;
 
-    lines.forEach((line) => {
+    lines.forEach(line => {
       const trimmed = line.trim();
 
       if (trimmed.startsWith("- ")) {
@@ -56,11 +60,17 @@
       }
 
       if (trimmed.startsWith("# ")) {
-        html.push(`<h1 class="resume-title">${parseInlineMarkdown(trimmed.slice(2))}</h1>`);
+        html.push(
+          `<h1 class="resume-title">${parseInlineMarkdown(trimmed.slice(2))}</h1>`
+        );
       } else if (trimmed.startsWith("## ")) {
-        html.push(`<h2 class="section-title">${parseInlineMarkdown(trimmed.slice(3))}</h2>`);
+        html.push(
+          `<h2 class="section-title">${parseInlineMarkdown(trimmed.slice(3))}</h2>`
+        );
       } else if (trimmed.startsWith("### ")) {
-        html.push(`<h3 class="entry-title">${parseInlineMarkdown(trimmed.slice(4))}</h3>`);
+        html.push(
+          `<h3 class="entry-title">${parseInlineMarkdown(trimmed.slice(4))}</h3>`
+        );
       } else {
         html.push(`<p>${parseInlineMarkdown(trimmed)}</p>`);
       }
@@ -113,7 +123,11 @@
   /**
    * Export complete standalone HTML document for printing/downloading.
    */
-  function generateStandaloneHTML(markdown, template = "classic", theme = "slate") {
+  function generateStandaloneHTML(
+    markdown,
+    template = "classic",
+    theme = "slate"
+  ) {
     const parsedBody = parseMarkdownToHTML(markdown);
 
     return `<!DOCTYPE html>

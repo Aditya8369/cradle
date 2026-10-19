@@ -84,7 +84,8 @@ test("HTML structural and syntax problems are detected", () => {
   assert.match(unclosedScriptIssues[0].message, /Unclosed <script>/i);
 
   // Test 2: Missing HTML document structure
-  const invalidStructureHtml = "<div>Just a fragment without document structure</div>";
+  const invalidStructureHtml =
+    "<div>Just a fragment without document structure</div>";
   const structureIssues = validateHtmlStructure(
     invalidStructureHtml,
     "fragment.html"
@@ -123,12 +124,24 @@ test("unrelated/non-demo files are not accidentally included by getDemoHtmlFiles
   fs.mkdirSync(randomDir, { recursive: true });
 
   // Target demo HTML files
-  fs.writeFileSync(path.join(uiDir, "demo.html"), "<!doctype html><html></html>");
-  fs.writeFileSync(path.join(tmpDir, "index.html"), "<!doctype html><html></html>");
-  fs.writeFileSync(path.join(projectDir, "index.html"), "<!doctype html><html></html>");
+  fs.writeFileSync(
+    path.join(uiDir, "demo.html"),
+    "<!doctype html><html></html>"
+  );
+  fs.writeFileSync(
+    path.join(tmpDir, "index.html"),
+    "<!doctype html><html></html>"
+  );
+  fs.writeFileSync(
+    path.join(projectDir, "index.html"),
+    "<!doctype html><html></html>"
+  );
 
   // Non-demo / unrelated files that should NOT be included
-  fs.writeFileSync(path.join(randomDir, "other.html"), "<!doctype html><html></html>");
+  fs.writeFileSync(
+    path.join(randomDir, "other.html"),
+    "<!doctype html><html></html>"
+  );
   fs.writeFileSync(path.join(projectDir, "notes.txt"), "Some notes");
   fs.writeFileSync(path.join(tmpDir, "README.md"), "# Readme");
 

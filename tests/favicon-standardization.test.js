@@ -27,15 +27,25 @@ test("assets/favicon.svg exists and is a valid SVG icon", () => {
   assert.ok(fs.existsSync(FAVICON_PATH), "assets/favicon.svg must exist");
   const content = fs.readFileSync(FAVICON_PATH, "utf-8");
   assert.ok(content.length > 0, "assets/favicon.svg must not be empty");
-  assert.match(content, /<svg[^>]*>/i, "assets/favicon.svg must contain an <svg> element");
-  assert.match(content, /<\/svg>/i, "assets/favicon.svg must have a closing </svg> element");
+  assert.match(
+    content,
+    /<svg[^>]*>/i,
+    "assets/favicon.svg must contain an <svg> element"
+  );
+  assert.match(
+    content,
+    /<\/svg>/i,
+    "assets/favicon.svg must have a closing </svg> element"
+  );
 });
 
 test("root index.html defines the standard favicon link", () => {
   const rootIndex = path.join(REPO_ROOT, "index.html");
   assert.ok(fs.existsSync(rootIndex), "root index.html must exist");
   const content = fs.readFileSync(rootIndex, "utf-8");
-  const match = content.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i);
+  const match = content.match(
+    /<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i
+  );
   assert.ok(match, "root index.html must have a favicon link tag");
   assert.match(match[0], /href=["']assets\/favicon\.svg["']/i);
 });
@@ -44,9 +54,14 @@ test("src/components/ui/demo.html defines the standard favicon link", () => {
   const demoHtml = path.join(REPO_ROOT, "src", "components", "ui", "demo.html");
   assert.ok(fs.existsSync(demoHtml), "src/components/ui/demo.html must exist");
   const content = fs.readFileSync(demoHtml, "utf-8");
-  const match = content.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i);
+  const match = content.match(
+    /<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i
+  );
   assert.ok(match, "demo.html must have a favicon link tag");
-  assert.match(match[0], /href=["']\.\.\/\.\.\/\.\.\/assets\/favicon\.svg["']/i);
+  assert.match(
+    match[0],
+    /href=["']\.\.\/\.\.\/\.\.\/assets\/favicon\.svg["']/i
+  );
 });
 
 test("every registered mini project has a valid standard favicon link", () => {
@@ -55,10 +70,15 @@ test("every registered mini project has a valid standard favicon link", () => {
 
   for (const project of projects) {
     const htmlPath = path.join(REPO_ROOT, project.path, "index.html");
-    assert.ok(fs.existsSync(htmlPath), `Entry point for ${project.title} must exist`);
+    assert.ok(
+      fs.existsSync(htmlPath),
+      `Entry point for ${project.title} must exist`
+    );
 
     const content = fs.readFileSync(htmlPath, "utf-8");
-    const match = content.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i);
+    const match = content.match(
+      /<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i
+    );
     assert.ok(
       match,
       `Project "${project.title}" (${project.path}) is missing a favicon link tag in index.html`
@@ -92,7 +112,9 @@ test("no HTML files in the repository contain broken or missing favicon referenc
   for (const file of htmlFiles) {
     const content = fs.readFileSync(file, "utf-8");
     const relFile = path.relative(REPO_ROOT, file).replace(/\\/g, "/");
-    const match = content.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i);
+    const match = content.match(
+      /<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i
+    );
 
     assert.ok(
       match,

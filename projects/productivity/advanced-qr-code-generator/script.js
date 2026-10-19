@@ -156,7 +156,10 @@ function attachRippleEffect() {
 
 /** Build qr-code-styling options object from current state */
 function buildQrOptions() {
-  if (typeof QREngine !== "undefined" && typeof QREngine.buildConfigPayload === "function") {
+  if (
+    typeof QREngine !== "undefined" &&
+    typeof QREngine.buildConfigPayload === "function"
+  ) {
     return QREngine.buildConfigPayload(state);
   }
   return {
@@ -373,16 +376,24 @@ addListener(el.copyImageBtn, "click", async () => {
   }
 
   // Attempt Web Share API first if supported
-  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.share === "function"
+  ) {
     try {
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, "image/png")
+      );
       if (blob) {
         const file = new File([blob], "qr-code.png", { type: "image/png" });
-        if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        if (
+          typeof navigator.canShare === "function" &&
+          navigator.canShare({ files: [file] })
+        ) {
           await navigator.share({
             title: "QR Code",
             text: state.text,
-            files: [file]
+            files: [file],
           });
           showToast("Shared successfully!", "success");
           return;
@@ -395,7 +406,11 @@ addListener(el.copyImageBtn, "click", async () => {
   }
 
   // Fallback to Clipboard API
-  if (typeof navigator === "undefined" || !navigator.clipboard || !window.ClipboardItem) {
+  if (
+    typeof navigator === "undefined" ||
+    !navigator.clipboard ||
+    !window.ClipboardItem
+  ) {
     showToast(
       "Clipboard image copy is not supported in this browser.",
       "error"

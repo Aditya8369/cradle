@@ -9,7 +9,9 @@ test("parseCsv parses headers and rows", () => {
 });
 
 test("parseCsv handles quoted commas and escaped quotes", () => {
-  const parsed = CsvCleaner.parseCsv('Name,Note\n"Patel, Dev","Said ""hello"""');
+  const parsed = CsvCleaner.parseCsv(
+    'Name,Note\n"Patel, Dev","Said ""hello"""'
+  );
   assert.deepEqual(parsed.rows[0], ["Patel, Dev", 'Said "hello"']);
 });
 
@@ -26,10 +28,17 @@ test("trimCells trims headers and row values", () => {
 test("removeEmptyRows removes rows with only blank cells", () => {
   const cleaned = CsvCleaner.removeEmptyRows({
     headers: ["Name", "Email"],
-    rows: [["Asha", "asha@example.com"], ["", "  "], ["Mira", ""]],
+    rows: [
+      ["Asha", "asha@example.com"],
+      ["", "  "],
+      ["Mira", ""],
+    ],
   });
 
-  assert.deepEqual(cleaned.rows, [["Asha", "asha@example.com"], ["Mira", ""]]);
+  assert.deepEqual(cleaned.rows, [
+    ["Asha", "asha@example.com"],
+    ["Mira", ""],
+  ]);
 });
 
 test("removeDuplicateRows removes repeated rows", () => {
@@ -51,7 +60,10 @@ test("removeDuplicateRows removes repeated rows", () => {
 test("detectMissingValues reports blank cells", () => {
   const missing = CsvCleaner.detectMissingValues({
     headers: ["Name", "Email"],
-    rows: [["Asha", ""], ["", "mira@example.com"]],
+    rows: [
+      ["Asha", ""],
+      ["", "mira@example.com"],
+    ],
   });
 
   assert.deepEqual(missing, [
@@ -61,7 +73,9 @@ test("detectMissingValues reports blank cells", () => {
 });
 
 test("cleanDataset returns summary counts", () => {
-  const result = CsvCleaner.analyzeCsv("Name,Email\n Asha , a@example.com \n,\n Asha , a@example.com \nMira,");
+  const result = CsvCleaner.analyzeCsv(
+    "Name,Email\n Asha , a@example.com \n,\n Asha , a@example.com \nMira,"
+  );
 
   assert.deepEqual(result.dataset.rows, [
     ["Asha", "a@example.com"],
@@ -98,24 +112,44 @@ test("parseCsv throws on empty or whitespace-only CSV input", () => {
 });
 
 test("parseCsv throws on unclosed quote", () => {
-  assert.throws(() => CsvCleaner.parseCsv('Name,Email\n"Asha,asha@example.com'), /The CSV contains malformed quoting\./);
-  assert.throws(() => CsvCleaner.parseCsv('Name,Email\nAsha,"asha@example.com'), /The CSV contains malformed quoting\./);
+  assert.throws(
+    () => CsvCleaner.parseCsv('Name,Email\n"Asha,asha@example.com'),
+    /The CSV contains malformed quoting\./
+  );
+  assert.throws(
+    () => CsvCleaner.parseCsv('Name,Email\nAsha,"asha@example.com'),
+    /The CSV contains malformed quoting\./
+  );
 });
 
 test("parseCsv throws on malformed quote inside field", () => {
-  assert.throws(() => CsvCleaner.parseCsv('Name,Email\nAsha "Dev" Rao,asha@example.com'), /The CSV contains malformed quoting\./);
-  assert.throws(() => CsvCleaner.parseCsv('Name,Email\n"Asha" Rao,asha@example.com'), /The CSV contains malformed quoting\./);
+  assert.throws(
+    () => CsvCleaner.parseCsv('Name,Email\nAsha "Dev" Rao,asha@example.com'),
+    /The CSV contains malformed quoting\./
+  );
+  assert.throws(
+    () => CsvCleaner.parseCsv('Name,Email\n"Asha" Rao,asha@example.com'),
+    /The CSV contains malformed quoting\./
+  );
 });
 
 test("parseCsv detects column count mismatch warnings", () => {
-  const result = CsvCleaner.analyzeCsv("Name,Email\nAsha,asha@example.com,Developer\nMira,mira@example.com\nPatel");
-  
+  const result = CsvCleaner.analyzeCsv(
+    "Name,Email\nAsha,asha@example.com,Developer\nMira,mira@example.com\nPatel"
+  );
+
   assert.deepEqual(result.dataset.rows, [
     ["Asha", "asha@example.com"],
     ["Mira", "mira@example.com"],
     ["Patel", ""],
   ]);
   assert.equal(result.summary.warnings.length, 2);
-  assert.match(result.summary.warnings[0], /Row 2 has an unexpected number of columns/);
-  assert.match(result.summary.warnings[1], /Row 4 has an unexpected number of columns/);
+  assert.match(
+    result.summary.warnings[0],
+    /Row 2 has an unexpected number of columns/
+  );
+  assert.match(
+    result.summary.warnings[1],
+    /Row 4 has an unexpected number of columns/
+  );
 });

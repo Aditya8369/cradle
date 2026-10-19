@@ -15,10 +15,14 @@ const OUTPUT_FILE = path.join(REPO_ROOT, "data", "projects.json");
 function getDateAdded(absPath, repoRoot = REPO_ROOT) {
   try {
     const rel = path.relative(repoRoot, absPath);
-    const out = execFileSync("git", ["log", "--reverse", "--format=%aI", "--", rel], {
-      cwd: repoRoot,
-      stdio: ["ignore", "pipe", "ignore"],
-    })
+    const out = execFileSync(
+      "git",
+      ["log", "--reverse", "--format=%aI", "--", rel],
+      {
+        cwd: repoRoot,
+        stdio: ["ignore", "pipe", "ignore"],
+      }
+    )
       .toString()
       .trim();
     return out.split("\n")[0] || null;
@@ -35,10 +39,14 @@ function getDateAdded(absPath, repoRoot = REPO_ROOT) {
 // dev, offline CI) — the existing-dates fallback below covers that case.
 function ensureFullHistory(repoRoot = REPO_ROOT) {
   try {
-    const isShallow = execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
-      cwd: repoRoot,
-      stdio: ["ignore", "pipe", "ignore"],
-    })
+    const isShallow = execFileSync(
+      "git",
+      ["rev-parse", "--is-shallow-repository"],
+      {
+        cwd: repoRoot,
+        stdio: ["ignore", "pipe", "ignore"],
+      }
+    )
       .toString()
       .trim();
     if (isShallow === "true") {
@@ -95,7 +103,7 @@ const CATEGORY_STYLES = {
       <circle cx="700" cy="500" r="9" fill="#a21caf" />
       <circle cx="900" cy="200" r="16" fill="#d946ef" />
       <circle cx="1100" cy="450" r="11" fill="#a21caf" />
-    </g>`
+    </g>`,
   },
   games: {
     bgStart: "#0f051d",
@@ -110,7 +118,7 @@ const CATEGORY_STYLES = {
       <circle cx="80" cy="450" r="40" fill="none" stroke="#ea580c" stroke-width="2" />
       <circle cx="500" cy="500" r="60" fill="none" stroke="#ea580c" stroke-width="2" />
       <path d="M 800,100 L 950,250 M 150,550 L 300,400" stroke="#ea580c" stroke-width="2" />
-    </g>`
+    </g>`,
   },
   productivity: {
     bgStart: "#022c22",
@@ -122,7 +130,7 @@ const CATEGORY_STYLES = {
       <path d="M 150,0 L 150,675 M 300,0 L 300,675 M 450,0 L 450,675 M 600,0 L 600,675 M 750,0 L 750,675 M 900,0 L 900,675 M 1050,0 L 1050,675" />
       <rect x="330" y="230" width="80" height="40" rx="5" fill="#10b981" opacity="0.3" />
       <rect x="780" y="430" width="80" height="40" rx="5" fill="#10b981" opacity="0.3" />
-    </g>`
+    </g>`,
   },
   "dev-tools": {
     bgStart: "#030712",
@@ -133,7 +141,7 @@ const CATEGORY_STYLES = {
       <path d="M -100,200 L 1300,550 M -100,250 L 1300,600 M -100,150 L 1300,500" />
       <path d="M 200,-100 L 550,800 M 250,-100 L 600,800 M 150,-100 L 500,800" />
       <path d="M 800,-100 L 1150,800 M 850,-100 L 1200,800 M 750,-100 L 1100,800" />
-    </g>`
+    </g>`,
   },
   misc: {
     bgStart: "#18001e",
@@ -147,7 +155,7 @@ const CATEGORY_STYLES = {
       <circle cx="600" cy="337" r="400" fill="none" stroke="#c084fc" stroke-width="1" />
       <line x1="600" y1="37" x2="600" y2="637" stroke="#c084fc" stroke-width="1" opacity="0.3" />
       <line x1="300" y1="337" x2="900" y2="337" stroke="#c084fc" stroke-width="1" opacity="0.3" />
-    </g>`
+    </g>`,
   },
   "file-tools": {
     bgStart: "#060913",
@@ -157,8 +165,8 @@ const CATEGORY_STYLES = {
     pattern: `<g opacity="0.1" fill="none" stroke="#38bdf8" stroke-width="2">
       <path d="M 0,150 L 1200,450 M 0,250 L 1200,550 M 0,50 L 1200,350" />
       <circle cx="600" cy="337" r="150" stroke-dasharray="8 8" />
-    </g>`
-  }
+    </g>`,
+  },
 };
 
 const defaultStyle = {
@@ -169,7 +177,7 @@ const defaultStyle = {
   pattern: `<g opacity="0.1" stroke="#3b82f6" stroke-width="1.5" fill="none">
     <circle cx="200" cy="200" r="150" />
     <circle cx="1000" cy="475" r="250" />
-  </g>`
+  </g>`,
 };
 
 // titleCase has been moved to project-discovery.js
@@ -190,13 +198,18 @@ function wrapText(text, maxChars = 20) {
 }
 
 function escapeXml(unsafe) {
-  return unsafe.replace(/[<>&'"]/g, (c) => {
+  return unsafe.replace(/[<>&'"]/g, c => {
     switch (c) {
-      case "<": return "&lt;";
-      case ">": return "&gt;";
-      case "&": return "&amp;";
-      case "'": return "&apos;";
-      case "\"": return "&quot;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case "&":
+        return "&amp;";
+      case "'":
+        return "&apos;";
+      case '"':
+        return "&quot;";
     }
   });
 }
@@ -222,7 +235,10 @@ function generateSvgThumbnail(title, categoryName, projectAbsPath) {
   else textY = 260;
 
   const textMarkup = lines
-    .map((line, i) => `<text x="100" y="${textY + i * 75}" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="64" font-weight="800" fill="#ffffff" letter-spacing="-1.5">${escapeXml(line)}</text>`)
+    .map(
+      (line, i) =>
+        `<text x="100" y="${textY + i * 75}" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="64" font-weight="800" fill="#ffffff" letter-spacing="-1.5">${escapeXml(line)}</text>`
+    )
     .join("\n");
 
   const badgeWidth = Math.max(120, categoryName.length * 10 + 40);
@@ -295,7 +311,7 @@ function buildProjectsRegistry({
   projectsDir = PROJECTS_DIR,
   repoRoot = REPO_ROOT,
   outputFile = OUTPUT_FILE,
-  generateThumbnails = false
+  generateThumbnails = false,
 } = {}) {
   const projects = [];
   const errors = [];
@@ -303,7 +319,7 @@ function buildProjectsRegistry({
   if (!fs.existsSync(projectsDir)) {
     return {
       projects: [],
-      errors: [`Projects directory not found at ${projectsDir}`]
+      errors: [`Projects directory not found at ${projectsDir}`],
     };
   }
 
@@ -315,11 +331,18 @@ function buildProjectsRegistry({
   const seenTitles = new Set();
 
   for (const proj of discoveredProjects) {
-    const { title, category: categoryName, relPath: projectPathStr, absPath: fullProjectPath } = proj;
+    const {
+      title,
+      category: categoryName,
+      relPath: projectPathStr,
+      absPath: fullProjectPath,
+    } = proj;
 
     // Validation checks
     if (!title || title.trim() === "") {
-      errors.push(`Project in category '${categoryName}' has a missing or empty title.`);
+      errors.push(
+        `Project in category '${categoryName}' has a missing or empty title.`
+      );
     }
     if (!categoryName || categoryName.trim() === "") {
       errors.push(`Project '${proj.name}' has a missing or empty category.`);
@@ -372,7 +395,7 @@ function buildProjectsRegistry({
       title: title,
       category: categoryName,
       path: projectPathStr,
-      dateAdded: dateAdded
+      dateAdded: dateAdded,
     });
   }
 
@@ -407,14 +430,16 @@ function validateProjectEntrypoint(projectPath, repoRoot = REPO_ROOT) {
 function validateProjectsSync({
   projectsDir = PROJECTS_DIR,
   repoRoot = REPO_ROOT,
-  outputFile = OUTPUT_FILE
+  outputFile = OUTPUT_FILE,
 } = {}) {
   const issues = [];
 
   if (!fs.existsSync(outputFile)) {
     return {
       inSync: false,
-      issues: [`Registry file "${path.relative(repoRoot, outputFile)}" does not exist.`]
+      issues: [
+        `Registry file "${path.relative(repoRoot, outputFile)}" does not exist.`,
+      ],
     };
   }
 
@@ -426,14 +451,18 @@ function validateProjectsSync({
   } catch (e) {
     return {
       inSync: false,
-      issues: [`Registry file "${path.relative(repoRoot, outputFile)}" contains invalid JSON: ${e.message}`]
+      issues: [
+        `Registry file "${path.relative(repoRoot, outputFile)}" contains invalid JSON: ${e.message}`,
+      ],
     };
   }
 
   if (!Array.isArray(existingProjects)) {
     return {
       inSync: false,
-      issues: [`Registry file "${path.relative(repoRoot, outputFile)}" must contain a JSON array.`]
+      issues: [
+        `Registry file "${path.relative(repoRoot, outputFile)}" must contain a JSON array.`,
+      ],
     };
   }
 
@@ -442,10 +471,7 @@ function validateProjectsSync({
       continue;
     }
 
-    const entrypointIssue = validateProjectEntrypoint(
-      project.path,
-      repoRoot
-    );
+    const entrypointIssue = validateProjectEntrypoint(project.path, repoRoot);
 
     if (entrypointIssue) {
       issues.push(entrypointIssue);
@@ -456,7 +482,7 @@ function validateProjectsSync({
     projectsDir,
     repoRoot,
     outputFile,
-    generateThumbnails: false
+    generateThumbnails: false,
   });
 
   if (errors.length > 0) {
@@ -465,7 +491,7 @@ function validateProjectsSync({
       inSync: false,
       issues,
       expected: expectedProjects,
-      actual: existingProjects
+      actual: existingProjects,
     };
   }
 
@@ -544,20 +570,20 @@ function validateProjectsSync({
     inSync: issues.length === 0,
     issues,
     expected: expectedProjects,
-    actual: existingProjects
+    actual: existingProjects,
   };
 }
 
 function generateProjects({
   projectsDir = PROJECTS_DIR,
   repoRoot = REPO_ROOT,
-  outputFile = OUTPUT_FILE
+  outputFile = OUTPUT_FILE,
 } = {}) {
   const { projects, errors } = buildProjectsRegistry({
     projectsDir,
     repoRoot,
     outputFile,
-    generateThumbnails: true
+    generateThumbnails: true,
   });
 
   // Report validation errors and fail build if any exist

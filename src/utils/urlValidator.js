@@ -5,8 +5,11 @@
  * @param {Array<string>} [allowedProtocols=['http:', 'https:']] - Allowed protocols.
  * @returns {string|null} - Normalized URL string if valid, otherwise null.
  */
-export function sanitizeExternalUrl(urlString, allowedProtocols = ['http:', 'https:']) {
-  if (typeof urlString !== 'string' || !urlString.trim()) {
+export function sanitizeExternalUrl(
+  urlString,
+  allowedProtocols = ["http:", "https:"]
+) {
+  if (typeof urlString !== "string" || !urlString.trim()) {
     return null;
   }
 
@@ -14,7 +17,9 @@ export function sanitizeExternalUrl(urlString, allowedProtocols = ['http:', 'htt
 
   // Instant rejection of dangerous pseudo-protocols regardless of encoding/case
   if (/^(javascript|data|vbscript):/i.test(trimmed)) {
-    console.warn(`[Security Alert] Blocked attempt to navigate to unsafe protocol: ${trimmed}`);
+    console.warn(
+      `[Security Alert] Blocked attempt to navigate to unsafe protocol: ${trimmed}`
+    );
     return null;
   }
 
@@ -24,7 +29,9 @@ export function sanitizeExternalUrl(urlString, allowedProtocols = ['http:', 'htt
 
     // Protocol check
     if (!allowedProtocols.includes(parsedUrl.protocol)) {
-      console.warn(`[Security Alert] Protocol "${parsedUrl.protocol}" is not permitted for navigation.`);
+      console.warn(
+        `[Security Alert] Protocol "${parsedUrl.protocol}" is not permitted for navigation.`
+      );
       return null;
     }
 
@@ -41,7 +48,7 @@ export function sanitizeExternalUrl(urlString, allowedProtocols = ['http:', 'htt
  * @param {string} targetUrl - The target URL.
  * @param {string} [target='_blank'] - Navigation window target ('_blank', '_self').
  */
-export function safeNavigateTo(targetUrl, target = '_blank') {
+export function safeNavigateTo(targetUrl, target = "_blank") {
   const safeUrl = sanitizeExternalUrl(targetUrl);
 
   if (!safeUrl) {
@@ -49,8 +56,8 @@ export function safeNavigateTo(targetUrl, target = '_blank') {
     return false;
   }
 
-  if (target === '_blank') {
-    const newWindow = window.open(safeUrl, '_blank', 'noopener,noreferrer');
+  if (target === "_blank") {
+    const newWindow = window.open(safeUrl, "_blank", "noopener,noreferrer");
     if (newWindow) {
       newWindow.opener = null;
     }

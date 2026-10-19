@@ -9,17 +9,15 @@ const sampleProjects = [
 ];
 
 test("filters by category and title using shared search rules", () => {
-  assert.deepEqual(
-    filterProjects(sampleProjects, "games", "chess"),
-    [sampleProjects[0]]
-  );
+  assert.deepEqual(filterProjects(sampleProjects, "games", "chess"), [
+    sampleProjects[0],
+  ]);
 });
 
 test("matches formatted category names on the main-thread fallback", () => {
-  assert.deepEqual(
-    filterProjects(sampleProjects, "all", "dev tools"),
-    [sampleProjects[1]]
-  );
+  assert.deepEqual(filterProjects(sampleProjects, "all", "dev tools"), [
+    sampleProjects[1],
+  ]);
 });
 
 test("returns all projects when no filters are active", () => {

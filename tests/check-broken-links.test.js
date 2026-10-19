@@ -6,7 +6,7 @@ const {
   parseHtmlLinks,
   isExternal,
   sanitizePath,
-  validateLinks
+  validateLinks,
 } = require("../scripts/check-broken-links.js");
 
 test("isExternal correctly identifies external or special protocol links", () => {
@@ -23,7 +23,10 @@ test("isExternal correctly identifies external or special protocol links", () =>
 test("sanitizePath strips hash fragments and query strings and decodes URI", () => {
   assert.equal(sanitizePath("doc.md#section-1"), "doc.md");
   assert.equal(sanitizePath("script.js?v=1.2"), "script.js");
-  assert.equal(sanitizePath("my%20folder/file.html#head"), "my folder/file.html");
+  assert.equal(
+    sanitizePath("my%20folder/file.html#head"),
+    "my folder/file.html"
+  );
 });
 
 test("parseMarkdownLinks extracts internal and external markdown link targets", () => {

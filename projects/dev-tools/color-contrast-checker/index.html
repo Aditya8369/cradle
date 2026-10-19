@@ -4,14 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Color Contrast Checker</title>
-    <meta name="description" content="WCAG compliance color contrast checker with palette contrast evaluation and suggestion engine." />
-    <link rel="canonical" href="https://facelessism.github.io/cradle/projects/dev-tools/color-contrast-checker/" />
+    <meta
+      name="description"
+      content="WCAG compliance color contrast checker with palette contrast evaluation and suggestion engine."
+    />
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/dev-tools/color-contrast-checker/"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Color Contrast Checker" />
-    <meta property="og:description" content="WCAG compliance color contrast checker with palette contrast evaluation and suggestion engine." />
-    <meta property="og:url" content="https://facelessism.github.io/cradle/projects/dev-tools/color-contrast-checker/" />
-        <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
-<link rel="stylesheet" href="style.css" />
+    <meta
+      property="og:description"
+      content="WCAG compliance color contrast checker with palette contrast evaluation and suggestion engine."
+    />
+    <meta
+      property="og:url"
+      content="https://facelessism.github.io/cradle/projects/dev-tools/color-contrast-checker/"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="app-shell">
@@ -36,16 +48,36 @@
             <div class="field-group">
               <label for="foregroundHex">Foreground</label>
               <div class="color-row">
-                <input id="foregroundPicker" type="color" value="#ffffff" aria-label="Foreground color picker" />
-                <input id="foregroundHex" type="text" value="#ffffff" spellcheck="false" />
+                <input
+                  id="foregroundPicker"
+                  type="color"
+                  value="#ffffff"
+                  aria-label="Foreground color picker"
+                />
+                <input
+                  id="foregroundHex"
+                  type="text"
+                  value="#ffffff"
+                  spellcheck="false"
+                />
               </div>
             </div>
 
             <div class="field-group">
               <label for="backgroundHex">Background</label>
               <div class="color-row">
-                <input id="backgroundPicker" type="color" value="#020617" aria-label="Background color picker" />
-                <input id="backgroundHex" type="text" value="#020617" spellcheck="false" />
+                <input
+                  id="backgroundPicker"
+                  type="color"
+                  value="#020617"
+                  aria-label="Background color picker"
+                />
+                <input
+                  id="backgroundHex"
+                  type="text"
+                  value="#020617"
+                  spellcheck="false"
+                />
               </div>
             </div>
 
@@ -54,7 +86,11 @@
               <strong>Buttons, labels, and body copy preview here.</strong>
             </div>
 
-            <p id="validationMessage" class="validation-message" role="status"></p>
+            <p
+              id="validationMessage"
+              class="validation-message"
+              role="status"
+            ></p>
 
             <button id="copyCssBtn" class="primary-button" type="button">
               Copy CSS Variables
@@ -67,7 +103,9 @@
             <div class="suggestions">
               <div class="section-heading">
                 <h2>Accessible Suggestions</h2>
-                <p>Foreground options that meet AA normal text when possible.</p>
+                <p>
+                  Foreground options that meet AA normal text when possible.
+                </p>
               </div>
               <div id="suggestionList" class="suggestion-list"></div>
             </div>

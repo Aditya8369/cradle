@@ -343,7 +343,9 @@
 .canvas-wrapper {
   position: relative;
   border: 2px solid #1e1e3a;
-  box-shadow: 0 0 40px rgba(255, 0, 255, 0.1), 0 0 80px rgba(0, 255, 255, 0.05);
+  box-shadow:
+    0 0 40px rgba(255, 0, 255, 0.1),
+    0 0 80px rgba(0, 255, 255, 0.05);
 }
 
 .pixel-canvas {

@@ -45,13 +45,13 @@ flowchart TD
 
 ## Component Breakdown
 
-| File | Role |
-| --- | --- |
-| `asciiEngine.js` | Luminance calculation, character palette mapping, contrast adjustment, Sobel edge filter. |
+| File               | Role                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| `asciiEngine.js`   | Luminance calculation, character palette mapping, contrast adjustment, Sobel edge filter.        |
 | `asciiExporter.js` | Multi-format serialization: plain text (`.txt`), styled HTML (`.html`), and SVG vector (`.svg`). |
-| `script.js` | Media stream lifecycle, frame animation loop, DOM binding, export triggers. |
-| `index.html` | Page structure, video frame, canvas elements, slider controls, export action bar. |
-| `style.css` | CSS tokens, responsive flex/grid layouts, dark theme palette, typography styles. |
+| `script.js`        | Media stream lifecycle, frame animation loop, DOM binding, export triggers.                      |
+| `index.html`       | Page structure, video frame, canvas elements, slider controls, export action bar.                |
+| `style.css`        | CSS tokens, responsive flex/grid layouts, dark theme palette, typography styles.                 |
 
 ---
 
@@ -90,13 +90,13 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 | Layout, styling, and responsive design |
-| Vanilla JavaScript (ES6+) | Capture loop, image processing, and UI binding |
-| Canvas API | Downsampling source frames and pixel analysis |
-| Media Capture API (`getUserMedia`) | Webcam video stream |
+| Technology                         | Purpose                                        |
+| ---------------------------------- | ---------------------------------------------- |
+| HTML5                              | Page structure and semantic markup             |
+| CSS3                               | Layout, styling, and responsive design         |
+| Vanilla JavaScript (ES6+)          | Capture loop, image processing, and UI binding |
+| Canvas API                         | Downsampling source frames and pixel analysis  |
+| Media Capture API (`getUserMedia`) | Webcam video stream                            |
 
 ---
 

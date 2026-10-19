@@ -20,9 +20,7 @@ function findProjectPages(dir) {
 }
 
 test("all mini projects have SEO metadata", () => {
-  const files = findProjectPages(
-    path.join(__dirname, "..", "projects"),
-  );
+  const files = findProjectPages(path.join(__dirname, "..", "projects"));
 
   for (const file of files) {
     const html = fs.readFileSync(file, "utf8");

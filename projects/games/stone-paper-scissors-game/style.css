@@ -99,7 +99,8 @@ main {
   transition: all 0.2s;
 }
 
-.mode-btn.active, .mode-btn:hover {
+.mode-btn.active,
+.mode-btn:hover {
   background: rgba(0, 245, 255, 0.15);
   border-color: var(--cradle-accent);
   color: var(--cradle-accent);
@@ -155,7 +156,9 @@ main {
   height: 10px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
-  transition: background 0.3s, box-shadow 0.3s;
+  transition:
+    background 0.3s,
+    box-shadow 0.3s;
 }
 
 .tally .dot.won {
@@ -203,9 +206,16 @@ main {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  75% { transform: translateX(8px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
 }
 
 .pop {
@@ -213,9 +223,17 @@ main {
 }
 
 @keyframes pop {
-  0% { transform: scale(0.5); opacity: 0.3; }
-  60% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0.3;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .win-glow {
@@ -260,7 +278,10 @@ main {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.15s,
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .choice-btn span {
@@ -295,7 +316,9 @@ main {
   cursor: pointer;
   font-weight: 700;
   letter-spacing: 1px;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 #resetBtn:hover {
@@ -394,7 +417,9 @@ footer {
   align-items: center;
   z-index: 1000;
   opacity: 1;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 .modal-overlay.hidden {
@@ -443,7 +468,9 @@ footer {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: 1px;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
   box-shadow: var(--cradle-shadow);
 }
 
@@ -454,10 +481,23 @@ footer {
 
 /* RESPONSIVE */
 @media (max-width: 500px) {
-  .game-box { padding: 25px; }
-  .choice-btn { width: 80px; height: 80px; font-size: 26px; }
-  .fighter { width: 70px; height: 70px; font-size: 40px; }
-  .nav-links { gap: 15px; font-size: 14px; }
+  .game-box {
+    padding: 25px;
+  }
+  .choice-btn {
+    width: 80px;
+    height: 80px;
+    font-size: 26px;
+  }
+  .fighter {
+    width: 70px;
+    height: 70px;
+    font-size: 40px;
+  }
+  .nav-links {
+    gap: 15px;
+    font-size: 14px;
+  }
 }
 
 .rules-mode-selector {

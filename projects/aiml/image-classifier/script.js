@@ -54,15 +54,18 @@ let customTestImageURL = null;
 let Engine = null;
 
 async function loadModel() {
-  if (resultDiv) resultDiv.innerHTML = `<p class="loading">Loading AI Model...</p>`;
+  if (resultDiv)
+    resultDiv.innerHTML = `<p class="loading">Loading AI Model...</p>`;
   try {
     model = await mobilenet.load();
     knn = knnClassifier.create();
     isModelLoaded = true;
-    if (resultDiv) resultDiv.innerHTML = `<p class="loading">AI Model Ready</p>`;
+    if (resultDiv)
+      resultDiv.innerHTML = `<p class="loading">AI Model Ready</p>`;
   } catch (error) {
     console.error("Failed to load MobileNet model:", error);
-    if (resultDiv) resultDiv.innerHTML = `<p class="loading">Failed to load AI Model</p>`;
+    if (resultDiv)
+      resultDiv.innerHTML = `<p class="loading">Failed to load AI Model</p>`;
   }
 }
 loadModel();
@@ -239,7 +242,7 @@ function removeClass(id) {
   if (knn.getNumClasses() > 0) {
     try {
       knn.clearClass(id);
-    } catch (e) { }
+    } catch (e) {}
   }
   renderClasses();
   updateCustomPredictState();
@@ -255,7 +258,9 @@ async function addImageToClass(event, id) {
 
   const classObj = customClasses.find(c => c.id === id);
   const imagesContainer = document.getElementById(`images-${id}`);
-  const addBtn = imagesContainer ? imagesContainer.querySelector(".add-image-btn") : null;
+  const addBtn = imagesContainer
+    ? imagesContainer.querySelector(".add-image-btn")
+    : null;
 
   for (let file of files) {
     const img = new Image();
@@ -302,7 +307,7 @@ async function addImageToClass(event, id) {
 
   event.target.value = ""; // Reset input
   updateCustomPredictState();
-};
+}
 
 // Prediction Logic
 async function performPrediction() {
@@ -367,7 +372,8 @@ async function performPrediction() {
       renderPredictions(formatted);
     }
   } catch (error) {
-    if (resultDiv) resultDiv.innerHTML = `<p class="loading">❌ Error analyzing image</p>`;
+    if (resultDiv)
+      resultDiv.innerHTML = `<p class="loading">❌ Error analyzing image</p>`;
     console.error(error);
   }
 }
@@ -440,4 +446,3 @@ function cleanupObjectUrls() {
 }
 
 window.addEventListener("beforeunload", cleanupObjectUrls);
-

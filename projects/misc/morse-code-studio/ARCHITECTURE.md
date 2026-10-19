@@ -59,12 +59,12 @@ The project splits pure logic from DOM wiring. `morseEngine.js` is UMD-wrapped: 
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Two-pane editor layout, toolbar, and playback speed slider |
+| File             | Responsibility                                                                   |
+| ---------------- | -------------------------------------------------------------------------------- |
+| `index.html`     | Two-pane editor layout, toolbar, and playback speed slider                       |
 | `morseEngine.js` | Morse dictionary, text encode/decode, WPM timing math, audio sequence generation |
-| `script.js` | UI binding, encode/decode handlers, copy/clear, Web Audio playback |
-| `style.css` | Dark theme styling and responsive layout |
+| `script.js`      | UI binding, encode/decode handlers, copy/clear, Web Audio playback               |
+| `style.css`      | Dark theme styling and responsive layout                                         |
 
 ## Data Flow / Execution Flow
 

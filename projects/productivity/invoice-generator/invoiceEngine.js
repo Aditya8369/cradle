@@ -46,7 +46,8 @@
     }, 0);
 
     const taxAmount = (subtotal * Math.max(0, Number(taxRate) || 0)) / 100;
-    const discountAmount = (subtotal * Math.max(0, Number(discountRate) || 0)) / 100;
+    const discountAmount =
+      (subtotal * Math.max(0, Number(discountRate) || 0)) / 100;
     const grandTotal = Math.max(0, subtotal + taxAmount - discountAmount);
 
     return {

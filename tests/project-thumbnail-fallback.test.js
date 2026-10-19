@@ -169,12 +169,19 @@ test("null, empty, or whitespace thumbnail renders safe fallback element", () =>
     });
 
     const img = card.childNodes.find(node => node.tagName === "IMG");
-    assert.equal(img, undefined, "Card must not render an <img> for empty/null thumbnail");
+    assert.equal(
+      img,
+      undefined,
+      "Card must not render an <img> for empty/null thumbnail"
+    );
 
     const fallback = card.childNodes.find(node =>
       node.classList?.contains("cradle-card__image--fallback")
     );
-    assert.ok(fallback, `Fallback <div> expected for image=${JSON.stringify(emptyImage)}`);
+    assert.ok(
+      fallback,
+      `Fallback <div> expected for image=${JSON.stringify(emptyImage)}`
+    );
     assert.equal(fallback.tagName, "DIV");
     assert.ok(fallback.classList.contains("cradle-card__image"));
     assert.equal(fallback.getAttribute("role"), "img");
@@ -193,12 +200,19 @@ test("malformed thumbnail URLs render safe fallback element", () => {
     });
 
     const img = card.childNodes.find(node => node.tagName === "IMG");
-    assert.equal(img, undefined, `Malformed URL ${malformed} must not render an <img> element`);
+    assert.equal(
+      img,
+      undefined,
+      `Malformed URL ${malformed} must not render an <img> element`
+    );
 
     const fallback = card.childNodes.find(node =>
       node.classList?.contains("cradle-card__image--fallback")
     );
-    assert.ok(fallback, `Fallback <div> expected for malformed image=${malformed}`);
+    assert.ok(
+      fallback,
+      `Fallback <div> expected for malformed image=${malformed}`
+    );
     assert.equal(fallback.textContent, "P");
   }
 });

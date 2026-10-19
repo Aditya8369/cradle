@@ -42,11 +42,11 @@ The project follows a decoupled architecture where the UI and audio logic are se
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the 21-string DOM and status display |
-| `script.js` | Manages input events (click, drag, keyboard) and coordinates with the engine |
-| `style.css` | Handles the visual appearance of the strings and active states |
+| File               | Responsibility                                                                          |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| `index.html`       | Defines the 21-string DOM and status display                                            |
+| `script.js`        | Manages input events (click, drag, keyboard) and coordinates with the engine            |
+| `style.css`        | Handles the visual appearance of the strings and active states                          |
 | `guzhengEngine.js` | Owns the D-major pentatonic frequency data and implements the additive synthesis engine |
 
 ---
@@ -85,12 +85,12 @@ The sound is played through the browser's audio output
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | String layout and semantic UI |
-| CSS3 | Visual styling and responsive layout |
-| JavaScript (ES6+) | Event management and coordination logic |
-| Web Audio API | Real-time sound synthesis and audio routing |
+| Technology        | Purpose                                     |
+| ----------------- | ------------------------------------------- |
+| HTML5             | String layout and semantic UI               |
+| CSS3              | Visual styling and responsive layout        |
+| JavaScript (ES6+) | Event management and coordination logic     |
+| Web Audio API     | Real-time sound synthesis and audio routing |
 
 ---
 

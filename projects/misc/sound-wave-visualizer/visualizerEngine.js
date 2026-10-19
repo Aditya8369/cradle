@@ -41,7 +41,7 @@
         count++;
       }
 
-      bands[i] = count > 0 ? (sum / count) / 255 : 0;
+      bands[i] = count > 0 ? sum / count / 255 : 0;
       startBin = endBin;
     }
 

@@ -59,12 +59,22 @@ test("getContrastReport includes ratio, pass/fail status, and CSS variables", ()
 });
 
 test("suggestAccessibleAlternatives returns AA normal candidates for failing colors", () => {
-  const suggestions = ContrastEngine.suggestAccessibleAlternatives("#94a3b8", "#f8fafc");
+  const suggestions = ContrastEngine.suggestAccessibleAlternatives(
+    "#94a3b8",
+    "#f8fafc"
+  );
   assert.ok(suggestions.length > 0);
-  assert.ok(suggestions.every(item => item.ratio >= ContrastEngine.WCAG_THRESHOLDS.normalAA));
+  assert.ok(
+    suggestions.every(
+      item => item.ratio >= ContrastEngine.WCAG_THRESHOLDS.normalAA
+    )
+  );
 });
 
 test("suggestAccessibleAlternatives returns empty list for already accessible colors", () => {
-  const suggestions = ContrastEngine.suggestAccessibleAlternatives("#ffffff", "#000000");
+  const suggestions = ContrastEngine.suggestAccessibleAlternatives(
+    "#ffffff",
+    "#000000"
+  );
   assert.deepEqual(suggestions, []);
 });

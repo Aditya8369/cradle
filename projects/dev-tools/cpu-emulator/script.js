@@ -130,11 +130,26 @@ function updateHardwareDashboard() {
     const el = document.getElementById(id);
     if (el) el.textContent = txt;
   };
-  setRegText("reg-a", cpu.registers.A.toString(16).toUpperCase().padStart(2, "0"));
-  setRegText("reg-b", cpu.registers.B.toString(16).toUpperCase().padStart(2, "0"));
-  setRegText("reg-c", cpu.registers.C.toString(16).toUpperCase().padStart(2, "0"));
-  setRegText("reg-d", cpu.registers.D.toString(16).toUpperCase().padStart(2, "0"));
-  setRegText("reg-pc", "0x" + cpu.PC.toString(16).toUpperCase().padStart(2, "0"));
+  setRegText(
+    "reg-a",
+    cpu.registers.A.toString(16).toUpperCase().padStart(2, "0")
+  );
+  setRegText(
+    "reg-b",
+    cpu.registers.B.toString(16).toUpperCase().padStart(2, "0")
+  );
+  setRegText(
+    "reg-c",
+    cpu.registers.C.toString(16).toUpperCase().padStart(2, "0")
+  );
+  setRegText(
+    "reg-d",
+    cpu.registers.D.toString(16).toUpperCase().padStart(2, "0")
+  );
+  setRegText(
+    "reg-pc",
+    "0x" + cpu.PC.toString(16).toUpperCase().padStart(2, "0")
+  );
   setRegText("reg-flags", `Z:${cpu.flags.Z} C:${cpu.flags.C}`);
 
   for (let i = 0; i < 16; i++) {

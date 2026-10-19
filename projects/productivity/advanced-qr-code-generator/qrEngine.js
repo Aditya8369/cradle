@@ -36,7 +36,14 @@
   });
 
   const VALID_ERROR_LEVELS = ["L", "M", "Q", "H"];
-  const VALID_DOT_STYLES = ["square", "dots", "rounded", "extra-rounded", "classy", "classy-rounded"];
+  const VALID_DOT_STYLES = [
+    "square",
+    "dots",
+    "rounded",
+    "extra-rounded",
+    "classy",
+    "classy-rounded",
+  ];
   const VALID_CORNER_SQUARE_STYLES = ["square", "dot", "extra-rounded"];
   const VALID_CORNER_DOT_STYLES = ["square", "dot"];
 
@@ -50,16 +57,22 @@
     const opts = { ...DEFAULT_OPTIONS, ...inputOpts };
 
     opts.text = typeof opts.text === "string" ? opts.text : "";
-    opts.fgColor = isValidHex(opts.fgColor) ? opts.fgColor : DEFAULT_OPTIONS.fgColor;
-    opts.bgColor = isValidHex(opts.bgColor) ? opts.bgColor : DEFAULT_OPTIONS.bgColor;
+    opts.fgColor = isValidHex(opts.fgColor)
+      ? opts.fgColor
+      : DEFAULT_OPTIONS.fgColor;
+    opts.bgColor = isValidHex(opts.bgColor)
+      ? opts.bgColor
+      : DEFAULT_OPTIONS.bgColor;
 
-    opts.size = typeof opts.size === "number" && !isNaN(opts.size)
-      ? Math.max(100, Math.min(1000, opts.size))
-      : DEFAULT_OPTIONS.size;
+    opts.size =
+      typeof opts.size === "number" && !isNaN(opts.size)
+        ? Math.max(100, Math.min(1000, opts.size))
+        : DEFAULT_OPTIONS.size;
 
-    opts.margin = typeof opts.margin === "number" && !isNaN(opts.margin)
-      ? Math.max(0, Math.min(100, opts.margin))
-      : DEFAULT_OPTIONS.margin;
+    opts.margin =
+      typeof opts.margin === "number" && !isNaN(opts.margin)
+        ? Math.max(0, Math.min(100, opts.margin))
+        : DEFAULT_OPTIONS.margin;
 
     opts.errorLevel = VALID_ERROR_LEVELS.includes(opts.errorLevel)
       ? opts.errorLevel
@@ -69,7 +82,9 @@
       ? opts.dotStyle
       : DEFAULT_OPTIONS.dotStyle;
 
-    opts.cornerSquareStyle = VALID_CORNER_SQUARE_STYLES.includes(opts.cornerSquareStyle)
+    opts.cornerSquareStyle = VALID_CORNER_SQUARE_STYLES.includes(
+      opts.cornerSquareStyle
+    )
       ? opts.cornerSquareStyle
       : DEFAULT_OPTIONS.cornerSquareStyle;
 
@@ -127,10 +142,13 @@
     if (!name || typeof name !== "string") return false;
     const presets = getSavedPresets();
     const cleanOpts = sanitizeOptions(options);
-    const existingIndex = presets.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+    const existingIndex = presets.findIndex(
+      p => p.name.toLowerCase() === name.toLowerCase()
+    );
 
     const presetObj = {
-      id: existingIndex >= 0 ? presets[existingIndex].id : Date.now().toString(),
+      id:
+        existingIndex >= 0 ? presets[existingIndex].id : Date.now().toString(),
       name: name.trim(),
       createdAt: new Date().toISOString(),
       options: {

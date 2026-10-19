@@ -40,8 +40,16 @@ body {
   margin: 0;
   background: var(--chrome-bg);
   background-image:
-    radial-gradient(circle at 15% 0%, rgba(94, 234, 212, 0.05), transparent 45%),
-    radial-gradient(circle at 100% 100%, rgba(94, 234, 212, 0.04), transparent 40%);
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(94, 234, 212, 0.05),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(94, 234, 212, 0.04),
+      transparent 40%
+    );
   color: var(--chrome-text);
   font-family: var(--font-body);
   min-height: 100vh;
@@ -95,9 +103,15 @@ body {
   display: block;
 }
 
-.dots i:nth-child(1) { background: #4b3535; }
-.dots i:nth-child(2) { background: #4b4635; }
-.dots i:nth-child(3) { background: #354b3b; }
+.dots i:nth-child(1) {
+  background: #4b3535;
+}
+.dots i:nth-child(2) {
+  background: #4b4635;
+}
+.dots i:nth-child(3) {
+  background: #354b3b;
+}
 
 .pane-title {
   font-family: var(--font-label);
@@ -413,8 +427,13 @@ button {
 }
 
 @keyframes caret-blink {
-  0%, 100% { caret-color: var(--term-cursor); }
-  50% { caret-color: transparent; }
+  0%,
+  100% {
+    caret-color: var(--term-cursor);
+  }
+  50% {
+    caret-color: transparent;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -77,7 +77,9 @@
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 .timer-label {
@@ -91,14 +93,29 @@
 }
 
 /* Mode colors */
-.mode-focus .timer-display { color: #6366f1; text-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
-.mode-focus #infinityPath { stroke: #6366f1; }
+.mode-focus .timer-display {
+  color: #6366f1;
+  text-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+}
+.mode-focus #infinityPath {
+  stroke: #6366f1;
+}
 
-.mode-short .timer-display { color: #10b981; text-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
-.mode-short #infinityPath { stroke: #10b981; }
+.mode-short .timer-display {
+  color: #10b981;
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+}
+.mode-short #infinityPath {
+  stroke: #10b981;
+}
 
-.mode-long .timer-display { color: #f59e0b; text-shadow: 0 0 30px rgba(245, 158, 11, 0.4); }
-.mode-long #infinityPath { stroke: #f59e0b; }
+.mode-long .timer-display {
+  color: #f59e0b;
+  text-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+}
+.mode-long #infinityPath {
+  stroke: #f59e0b;
+}
 
 /* ═══ Controls ═══ */
 .controls {
@@ -351,9 +368,18 @@
   font-weight: 600;
 }
 
-.log-type.focus { background: #6366f120; color: #818cf8; }
-.log-type.short { background: #10b98120; color: #10b981; }
-.log-type.long { background: #f59e0b20; color: #f59e0b; }
+.log-type.focus {
+  background: #6366f120;
+  color: #818cf8;
+}
+.log-type.short {
+  background: #10b98120;
+  color: #10b981;
+}
+.log-type.long {
+  background: #f59e0b20;
+  color: #f59e0b;
+}
 
 .log-time {
   color: var(--text-muted, #94a3b8);
@@ -362,8 +388,13 @@
 
 /* ═══ Animations ═══ */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .timer-display.paused {

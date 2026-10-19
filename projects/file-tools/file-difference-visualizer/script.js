@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let htmlMod = "";
     let htmlUni = "";
 
-    alignment.forEach((item) => {
+    alignment.forEach(item => {
       if (item.type === "equal") {
         const safeVal = escapeHtml(item.valA);
         htmlOrig += `<div class="diff-line line-equal"><span class="line-num">${item.lineA}</span><span class="line-text">${safeVal}</span></div>`;
@@ -131,11 +131,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // File Upload Handlers
-  fileInputA.addEventListener("change", (e) => {
+  fileInputA.addEventListener("change", e => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > DiffEngine.DEFAULT_MAX_FILE_SIZE_BYTES) {
-        const maxFormatted = formatBytes(DiffEngine.DEFAULT_MAX_FILE_SIZE_BYTES);
+        const maxFormatted = formatBytes(
+          DiffEngine.DEFAULT_MAX_FILE_SIZE_BYTES
+        );
         const fileFormatted = formatBytes(file.size);
         fileInfoA.textContent = `${file.name} (${fileFormatted}) - EXCEEDS LIMIT!`;
         diffStatus.textContent = `⚠️ Error: Original file "${file.name}" (${fileFormatted}) exceeds maximum limit of ${maxFormatted}. File rejected.`;
@@ -148,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       fileInfoA.textContent = `${file.name} (${file.size} bytes)`;
       const reader = new FileReader();
-      reader.onload = (evt) => {
+      reader.onload = evt => {
         textInputA.value = evt.target.result;
         renderDiff();
       };
@@ -156,11 +158,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  fileInputB.addEventListener("change", (e) => {
+  fileInputB.addEventListener("change", e => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > DiffEngine.DEFAULT_MAX_FILE_SIZE_BYTES) {
-        const maxFormatted = formatBytes(DiffEngine.DEFAULT_MAX_FILE_SIZE_BYTES);
+        const maxFormatted = formatBytes(
+          DiffEngine.DEFAULT_MAX_FILE_SIZE_BYTES
+        );
         const fileFormatted = formatBytes(file.size);
         fileInfoB.textContent = `${file.name} (${fileFormatted}) - EXCEEDS LIMIT!`;
         diffStatus.textContent = `⚠️ Error: Modified file "${file.name}" (${fileFormatted}) exceeds maximum limit of ${maxFormatted}. File rejected.`;
@@ -173,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       fileInfoB.textContent = `${file.name} (${file.size} bytes)`;
       const reader = new FileReader();
-      reader.onload = (evt) => {
+      reader.onload = evt => {
         textInputB.value = evt.target.result;
         renderDiff();
       };
@@ -213,7 +217,11 @@ document.addEventListener("DOMContentLoaded", () => {
       ignoreWhitespace: ignoreWhitespace.checked,
       ignoreCase: ignoreCase.checked,
     });
-    const patchText = DiffEngine.generateUnifiedPatch("fileA.txt", "fileB.txt", alignment);
+    const patchText = DiffEngine.generateUnifiedPatch(
+      "fileA.txt",
+      "fileB.txt",
+      alignment
+    );
     const blob = new Blob([patchText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

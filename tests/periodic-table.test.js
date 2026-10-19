@@ -12,7 +12,7 @@ const mockElements = [
     block: "s",
     phaseAtSTP: "Gas",
     meltingPoint: 13.99,
-    boilingPoint: 20.271
+    boilingPoint: 20.271,
   },
   {
     number: 3,
@@ -22,7 +22,7 @@ const mockElements = [
     block: "s",
     phaseAtSTP: "Solid",
     meltingPoint: 453.65,
-    boilingPoint: 1603
+    boilingPoint: 1603,
   },
   {
     number: 80,
@@ -32,7 +32,7 @@ const mockElements = [
     block: "d",
     phaseAtSTP: "Liquid",
     meltingPoint: 234.32,
-    boilingPoint: 629.88
+    boilingPoint: 629.88,
   },
   {
     number: 118,
@@ -42,8 +42,8 @@ const mockElements = [
     block: "p",
     phaseAtSTP: "Synthetic",
     meltingPoint: null,
-    boilingPoint: null
-  }
+    boilingPoint: null,
+  },
 ];
 
 test("convertTemperature handles K, C, and F conversions", () => {
@@ -54,13 +54,25 @@ test("convertTemperature handles K, C, and F conversions", () => {
 
 test("calculatePhaseState determines states based on thermal points", () => {
   // Hydrogen at 10K (Solid)
-  assert.strictEqual(periodicEngine.calculatePhaseState(13.99, 20.27, 10), "Solid");
+  assert.strictEqual(
+    periodicEngine.calculatePhaseState(13.99, 20.27, 10),
+    "Solid"
+  );
   // Hydrogen at 15K (Liquid)
-  assert.strictEqual(periodicEngine.calculatePhaseState(13.99, 20.27, 15), "Liquid");
+  assert.strictEqual(
+    periodicEngine.calculatePhaseState(13.99, 20.27, 15),
+    "Liquid"
+  );
   // Hydrogen at 300K (Gas)
-  assert.strictEqual(periodicEngine.calculatePhaseState(13.99, 20.27, 300), "Gas");
+  assert.strictEqual(
+    periodicEngine.calculatePhaseState(13.99, 20.27, 300),
+    "Gas"
+  );
   // Oganesson (Synthetic)
-  assert.strictEqual(periodicEngine.calculatePhaseState(null, null, 298, "Synthetic"), "Synthetic");
+  assert.strictEqual(
+    periodicEngine.calculatePhaseState(null, null, 298, "Synthetic"),
+    "Synthetic"
+  );
 });
 
 test("parseShellElectrons parses electron configurations", () => {
@@ -72,11 +84,15 @@ test("parseShellElectrons parses electron configurations", () => {
 });
 
 test("filterElements filters by search query and category", () => {
-  const hMatch = periodicEngine.filterElements(mockElements, { search: "hydrogen" });
+  const hMatch = periodicEngine.filterElements(mockElements, {
+    search: "hydrogen",
+  });
   assert.strictEqual(hMatch.length, 1);
   assert.strictEqual(hMatch[0].symbol, "H");
 
-  const alkali = periodicEngine.filterElements(mockElements, { category: "alkali" });
+  const alkali = periodicEngine.filterElements(mockElements, {
+    category: "alkali",
+  });
   assert.strictEqual(alkali.length, 1);
   assert.strictEqual(alkali[0].symbol, "Li");
 });

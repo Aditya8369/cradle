@@ -29,10 +29,10 @@ Or load only what you need:
 
 ## Utilities
 
-| Utility    | File                | Global         |
-| ---------- | ------------------- | -------------- |
-| EscapeHtml | `escapeHtml.js`     | `CradleEscape` |
-| Storage    | `storage.js`        | `CradleStorage` |
+| Utility    | File            | Global          |
+| ---------- | --------------- | --------------- |
+| EscapeHtml | `escapeHtml.js` | `CradleEscape`  |
+| Storage    | `storage.js`    | `CradleStorage` |
 
 ## Storage
 
@@ -82,17 +82,17 @@ const { set, get, namespace } = require("src/components/ui/storage.js");
 
 ### API
 
-| Method                          | Description                                              |
-| ------------------------------- | -------------------------------------------------------- |
-| `isAvailable()`                 | Whether a working localStorage is present.               |
-| `get(key, fallback)`            | Read + JSON.parse a value; fallback on missing/corrupt.  |
-| `getRaw(key, fallback)`         | Read a verbatim string value.                            |
-| `set(key, value)`               | JSON.serialize + write; returns success boolean.         |
-| `setRaw(key, value)`            | Write a verbatim string value.                           |
-| `remove(key)`                   | Delete one key.                                          |
-| `keys(prefix)`                  | List stored keys, optionally filtered by prefix.         |
-| `clear(prefix)`                 | Remove keys by prefix (or all); returns count removed.   |
-| `namespace(prefix)`             | Namespaced handle (`get`/`getRaw`/`set`/`setRaw`/`remove`/`keys`/`clear`). |
+| Method                  | Description                                                                |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `isAvailable()`         | Whether a working localStorage is present.                                 |
+| `get(key, fallback)`    | Read + JSON.parse a value; fallback on missing/corrupt.                    |
+| `getRaw(key, fallback)` | Read a verbatim string value.                                              |
+| `set(key, value)`       | JSON.serialize + write; returns success boolean.                           |
+| `setRaw(key, value)`    | Write a verbatim string value.                                             |
+| `remove(key)`           | Delete one key.                                                            |
+| `keys(prefix)`          | List stored keys, optionally filtered by prefix.                           |
+| `clear(prefix)`         | Remove keys by prefix (or all); returns count removed.                     |
+| `namespace(prefix)`     | Namespaced handle (`get`/`getRaw`/`set`/`setRaw`/`remove`/`keys`/`clear`). |
 
 ## EscapeHtml
 

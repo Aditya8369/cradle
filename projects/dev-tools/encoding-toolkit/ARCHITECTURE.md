@@ -45,12 +45,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell: format `<select>`, encode/decode mode toggle, swap button, input/output textareas, toolbar |
-| `logic.js` | Pure encode/decode function pairs for all six formats, no DOM dependency, throws on invalid input |
-| `script.js` | Reads DOM state, calls the matching `logic.js` function pair, renders output/errors, handles copy/export/clear |
-| `style.css` | Dark theme, responsive two-column editor grid, error/success states |
+| File         | Responsibility                                                                                                 |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| `index.html` | Page shell: format `<select>`, encode/decode mode toggle, swap button, input/output textareas, toolbar         |
+| `logic.js`   | Pure encode/decode function pairs for all six formats, no DOM dependency, throws on invalid input              |
+| `script.js`  | Reads DOM state, calls the matching `logic.js` function pair, renders output/errors, handles copy/export/clear |
+| `style.css`  | Dark theme, responsive two-column editor grid, error/success states                                            |
 
 ---
 
@@ -94,14 +94,14 @@ User can Copy, Export as .txt, Swap input/output, or Clear
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Grid, Flexbox, Custom Properties) | Layout, dark theme, responsive design |
-| Vanilla JavaScript (ES6+) | Conversion logic and DOM manipulation |
-| `TextEncoder` / `TextDecoder` | UTF-8 safe byte-level conversion for Base64, Hex, and Binary |
-| Clipboard API | Copy-to-clipboard |
-| Blob + `URL.createObjectURL` | Client-side `.txt` export, no server required |
+| Technology                              | Purpose                                                      |
+| --------------------------------------- | ------------------------------------------------------------ |
+| HTML5                                   | Page structure and semantic markup                           |
+| CSS3 (Grid, Flexbox, Custom Properties) | Layout, dark theme, responsive design                        |
+| Vanilla JavaScript (ES6+)               | Conversion logic and DOM manipulation                        |
+| `TextEncoder` / `TextDecoder`           | UTF-8 safe byte-level conversion for Base64, Hex, and Binary |
+| Clipboard API                           | Copy-to-clipboard                                            |
+| Blob + `URL.createObjectURL`            | Client-side `.txt` export, no server required                |
 
 ---
 

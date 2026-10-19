@@ -10,7 +10,9 @@ function hasAriaLive(html) {
 }
 
 function hasAsyncOperations(js) {
-  return /async function|setTimeout|setInterval|fetch\(|\.Worker|postMessage/.test(js);
+  return /async function|setTimeout|setInterval|fetch\(|\.Worker|postMessage/.test(
+    js
+  );
 }
 
 // Find all projects
@@ -40,13 +42,16 @@ test("projects with async operations have aria-live regions", async t => {
     const js = fs.readFileSync(jsPath, "utf-8");
     if (hasAsyncOperations(js)) {
       const html = fs.readFileSync(htmlPath, "utf-8");
-      
-      await t.test(`${path.relative(PROJECTS_ROOT, proj)} should have aria-live`, () => {
-        assert.ok(
-          hasAriaLive(html),
-          `Project uses async operations but is missing ARIA live regions in index.html.`
-        );
-      });
+
+      await t.test(
+        `${path.relative(PROJECTS_ROOT, proj)} should have aria-live`,
+        () => {
+          assert.ok(
+            hasAriaLive(html),
+            `Project uses async operations but is missing ARIA live regions in index.html.`
+          );
+        }
+      );
     }
   }
 });

@@ -177,7 +177,14 @@
   width: 100%;
   -webkit-appearance: none;
   height: 6px;
-  background: linear-gradient(90deg, #3b82f6, #a855f7, #ef4444, #f59e0b, #3b82f6);
+  background: linear-gradient(
+    90deg,
+    #3b82f6,
+    #a855f7,
+    #ef4444,
+    #f59e0b,
+    #3b82f6
+  );
   border-radius: 3px;
   outline: none;
 }
@@ -209,15 +216,27 @@
   min-width: 50px;
   font-size: 0.8rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
 }
 
-.sin-label { color: #ef4444; }
-.cos-label { color: #3b82f6; }
-.tan-label { color: #10b981; }
-.csc-label { color: #f97316; }
-.sec-label { color: #a855f7; }
-.cot-label { color: #eab308; }
+.sin-label {
+  color: #ef4444;
+}
+.cos-label {
+  color: #3b82f6;
+}
+.tan-label {
+  color: #10b981;
+}
+.csc-label {
+  color: #f97316;
+}
+.sec-label {
+  color: #a855f7;
+}
+.cot-label {
+  color: #eab308;
+}
 
 .trig-bar-container {
   flex: 1;
@@ -235,16 +254,25 @@
   position: absolute;
 }
 
-.sin-bar { background: #ef4444; left: 50%; }
-.cos-bar { background: #3b82f6; left: 50%; }
-.tan-bar { background: #10b981; left: 50%; }
+.sin-bar {
+  background: #ef4444;
+  left: 50%;
+}
+.cos-bar {
+  background: #3b82f6;
+  left: 50%;
+}
+.tan-bar {
+  background: #10b981;
+  left: 50%;
+}
 
 .trig-value {
   min-width: 65px;
   text-align: right;
   font-size: 0.85rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   color: #e2e8f0;
   font-variant-numeric: tabular-nums;
 }
@@ -256,13 +284,19 @@
   gap: 0.2rem;
   font-size: 1.3rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   font-variant-numeric: tabular-nums;
 }
 
-.coord-text { color: #64748b; }
-.coord-x { color: #3b82f6; }
-.coord-y { color: #ef4444; }
+.coord-text {
+  color: #64748b;
+}
+.coord-x {
+  color: #3b82f6;
+}
+.coord-y {
+  color: #ef4444;
+}
 
 /* ═══ Quadrant ═══ */
 .quadrant-visual {

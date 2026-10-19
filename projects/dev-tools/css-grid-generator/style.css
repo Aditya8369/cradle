@@ -26,8 +26,8 @@
   --radius: 14px;
   --radius-sm: 8px;
   --transition: 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Fira Code', 'Cascadia Code', monospace;
+  --font-sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono: "Fira Code", "Cascadia Code", monospace;
 }
 
 html.light-theme {
@@ -50,11 +50,14 @@ html.light-theme {
 body {
   min-height: 100vh;
   font-family: var(--font-sans);
-  background: radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 45%),
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 45%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
   color: var(--text);
   line-height: 1.6;
-  transition: background var(--transition), color var(--transition);
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 
 .glow-bg {
@@ -142,7 +145,9 @@ html.light-theme .app-header h1 {
   border-radius: var(--radius);
   padding: 1.25rem;
   margin-bottom: 1rem;
-  transition: background var(--transition), border-color var(--transition),
+  transition:
+    background var(--transition),
+    border-color var(--transition),
     box-shadow var(--transition);
 }
 
@@ -184,8 +189,8 @@ html.light-theme .app-header h1 {
   letter-spacing: 0.04em;
 }
 
-.config-group input[type='text'],
-.config-group input[type='number'] {
+.config-group input[type="text"],
+.config-group input[type="number"] {
   width: 100%;
   padding: 0.55rem 0.75rem;
   border: 1px solid var(--border);
@@ -195,7 +200,9 @@ html.light-theme .app-header h1 {
   font-family: var(--font-mono);
   font-size: 0.88rem;
   outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
 .config-group input:focus {
@@ -203,7 +210,7 @@ html.light-theme .app-header h1 {
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-.config-group input[type='color'] {
+.config-group input[type="color"] {
   width: 100%;
   height: 38px;
   border: 1px solid var(--border);
@@ -213,7 +220,7 @@ html.light-theme .app-header h1 {
   padding: 2px;
 }
 
-.config-group input[type='checkbox'] {
+.config-group input[type="checkbox"] {
   width: 16px;
   height: 16px;
   accent-color: var(--accent);
@@ -221,7 +228,7 @@ html.light-theme .app-header h1 {
   vertical-align: middle;
 }
 
-.config-group label:has(input[type='checkbox']) {
+.config-group label:has(input[type="checkbox"]) {
   display: flex;
   align-items: center;
   font-size: 0.88rem;
@@ -265,7 +272,9 @@ html.light-theme .app-header h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--transition), color var(--transition);
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 
 .stepper-btn:first-child {
@@ -292,7 +301,9 @@ html.light-theme .app-header h1 {
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition),
+  transition:
+    background var(--transition),
+    border-color var(--transition),
     transform 0.15s ease;
 }
 
@@ -378,42 +389,44 @@ html.light-theme .app-header h1 {
 }
 
 .preview-container::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 19px,
-    rgba(255, 255, 255, 0.015) 19px,
-    rgba(255, 255, 255, 0.015) 20px
-  ),
-  repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 19px,
-    rgba(255, 255, 255, 0.015) 19px,
-    rgba(255, 255, 255, 0.015) 20px
-  );
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 19px,
+      rgba(255, 255, 255, 0.015) 19px,
+      rgba(255, 255, 255, 0.015) 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 19px,
+      rgba(255, 255, 255, 0.015) 19px,
+      rgba(255, 255, 255, 0.015) 20px
+    );
   pointer-events: none;
   border-radius: var(--radius-sm);
 }
 
 html.light-theme .preview-container::before {
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 19px,
-    rgba(0, 0, 0, 0.03) 19px,
-    rgba(0, 0, 0, 0.03) 20px
-  ),
-  repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 19px,
-    rgba(0, 0, 0, 0.03) 19px,
-    rgba(0, 0, 0, 0.03) 20px
-  );
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 19px,
+      rgba(0, 0, 0, 0.03) 19px,
+      rgba(0, 0, 0, 0.03) 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 19px,
+      rgba(0, 0, 0, 0.03) 19px,
+      rgba(0, 0, 0, 0.03) 20px
+    );
 }
 
 .grid-preview {
@@ -429,7 +442,10 @@ html.light-theme .preview-container::before {
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, outline 0.15s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    outline 0.15s ease;
   position: relative;
   display: flex;
   align-items: center;
@@ -448,7 +464,9 @@ html.light-theme .preview-container::before {
 .grid-item.selected {
   outline: 3px solid #fff;
   outline-offset: -3px;
-  box-shadow: 0 0 0 3px var(--accent), 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 4px 20px rgba(59, 130, 246, 0.4);
   z-index: 2;
 }
 
@@ -559,7 +577,9 @@ html.light-theme .code-output {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--transition), border-color var(--transition);
+  transition:
+    background var(--transition),
+    border-color var(--transition);
   z-index: 2;
 }
 
@@ -629,6 +649,9 @@ html.light-theme .code-output {
 .btn,
 input,
 .tab-btn {
-  transition: background var(--transition), border-color var(--transition),
-    color var(--transition), box-shadow var(--transition);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition),
+    box-shadow var(--transition);
 }

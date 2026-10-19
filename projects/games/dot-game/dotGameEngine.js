@@ -10,19 +10,13 @@ function createBoard(size) {
 function getCapacity(row, col, boardSize) {
   const last = boardSize - 1;
 
-  const edges =
-    (row === 0) +
-    (row === last) +
-    (col === 0) +
-    (col === last);
+  const edges = (row === 0) + (row === last) + (col === 0) + (col === last);
 
   return edges === 2 ? 2 : edges === 1 ? 3 : 4;
 }
 
 function hasPieces(board, player) {
-  return board.some(row =>
-    row.some(cell => cell.owner === player)
-  );
+  return board.some(row => row.some(cell => cell.owner === player));
 }
 
 function getRandomMove(board, player) {
@@ -71,8 +65,10 @@ let activeCanvasWidth = 0;
 let activeCanvasHeight = 0;
 
 function setCanvasDimensions(width, height) {
-  const safeWidth = typeof width === "number" && !isNaN(width) && width >= 0 ? width : 0;
-  const safeHeight = typeof height === "number" && !isNaN(height) && height >= 0 ? height : 0;
+  const safeWidth =
+    typeof width === "number" && !isNaN(width) && width >= 0 ? width : 0;
+  const safeHeight =
+    typeof height === "number" && !isNaN(height) && height >= 0 ? height : 0;
 
   activeCanvasWidth = safeWidth;
   activeCanvasHeight = safeHeight;
@@ -94,7 +90,12 @@ function getCanvasDimensions() {
   };
 }
 
-function validateCoordinates(x, y, width = activeCanvasWidth, height = activeCanvasHeight) {
+function validateCoordinates(
+  x,
+  y,
+  width = activeCanvasWidth,
+  height = activeCanvasHeight
+) {
   let posX = x;
   let posY = y;
 
@@ -112,17 +113,29 @@ function validateCoordinates(x, y, width = activeCanvasWidth, height = activeCan
     else if (typeof obj.r === "number") posY = obj.r;
   }
 
-  const safeWidth = typeof width === "number" && !isNaN(width) && width >= 0 ? width : 0;
-  const safeHeight = typeof height === "number" && !isNaN(height) && height >= 0 ? height : 0;
+  const safeWidth =
+    typeof width === "number" && !isNaN(width) && width >= 0 ? width : 0;
+  const safeHeight =
+    typeof height === "number" && !isNaN(height) && height >= 0 ? height : 0;
 
-  if (typeof posX !== "number" || isNaN(posX) || typeof posY !== "number" || isNaN(posY)) {
+  if (
+    typeof posX !== "number" ||
+    isNaN(posX) ||
+    typeof posY !== "number" ||
+    isNaN(posY)
+  ) {
     return false;
   }
 
   return posX >= 0 && posX <= safeWidth && posY >= 0 && posY <= safeHeight;
 }
 
-function clampCoordinates(x, y, width = activeCanvasWidth, height = activeCanvasHeight) {
+function clampCoordinates(
+  x,
+  y,
+  width = activeCanvasWidth,
+  height = activeCanvasHeight
+) {
   let isObj = false;
   let originalObj = null;
   let posX = x;
@@ -143,8 +156,10 @@ function clampCoordinates(x, y, width = activeCanvasWidth, height = activeCanvas
     else if (typeof x.r === "number") posY = x.r;
   }
 
-  const safeWidth = typeof width === "number" && !isNaN(width) && width >= 0 ? width : 0;
-  const safeHeight = typeof height === "number" && !isNaN(height) && height >= 0 ? height : 0;
+  const safeWidth =
+    typeof width === "number" && !isNaN(width) && width >= 0 ? width : 0;
+  const safeHeight =
+    typeof height === "number" && !isNaN(height) && height >= 0 ? height : 0;
 
   let clampedX = typeof posX === "number" && !isNaN(posX) ? posX : 0;
   let clampedY = typeof posY === "number" && !isNaN(posY) ? posY : 0;
@@ -154,8 +169,16 @@ function clampCoordinates(x, y, width = activeCanvasWidth, height = activeCanvas
 
   if (isObj) {
     const res = { ...originalObj };
-    if ("x" in originalObj || (!("col" in originalObj) && !("c" in originalObj))) res.x = clampedX;
-    if ("y" in originalObj || (!("row" in originalObj) && !("r" in originalObj))) res.y = clampedY;
+    if (
+      "x" in originalObj ||
+      (!("col" in originalObj) && !("c" in originalObj))
+    )
+      res.x = clampedX;
+    if (
+      "y" in originalObj ||
+      (!("row" in originalObj) && !("r" in originalObj))
+    )
+      res.y = clampedY;
     if ("col" in originalObj) res.col = clampedX;
     if ("row" in originalObj) res.row = clampedY;
     if ("c" in originalObj) res.c = clampedX;
@@ -166,7 +189,11 @@ function clampCoordinates(x, y, width = activeCanvasWidth, height = activeCanvas
   return { x: clampedX, y: clampedY };
 }
 
-function clampDots(dots, width = activeCanvasWidth, height = activeCanvasHeight) {
+function clampDots(
+  dots,
+  width = activeCanvasWidth,
+  height = activeCanvasHeight
+) {
   if (!Array.isArray(dots)) return [];
   return dots.map(dot => clampCoordinates(dot, width, height));
 }

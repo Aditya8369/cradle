@@ -131,7 +131,10 @@ class MockElement {
 }
 
 class MockDocument extends MockElement {
-  constructor({ pathname = "/cradle/projects/demo/index.html", scriptSrc } = {}) {
+  constructor({
+    pathname = "/cradle/projects/demo/index.html",
+    scriptSrc,
+  } = {}) {
     super("document", null);
     this.ownerDocument = this;
     this.head = new MockElement("head", this);
@@ -251,9 +254,13 @@ test("create() injects component styles only once", () => {
   api.create();
   api.create();
 
-  const styles = document.walk().filter(node =>
-    node.tagName === "STYLE" && node.getAttribute("id") === "cradle-back-home-styles"
-  );
+  const styles = document
+    .walk()
+    .filter(
+      node =>
+        node.tagName === "STYLE" &&
+        node.getAttribute("id") === "cradle-back-home-styles"
+    );
   assert.equal(styles.length, 1);
 });
 

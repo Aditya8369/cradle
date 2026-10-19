@@ -34,9 +34,20 @@
 
   /* ── HTML sanitizer ──────────────────────────────────────── */
   const _sanitize =
-    (typeof window !== "undefined" && window.CradleSanitize && window.CradleSanitize.sanitizeHtml) ||
-    (typeof require === "function" && (function () { try { return require("../sanitizeHtml.js").sanitizeHtml; } catch { return null; } })()) ||
-    function (html) { return String(html ?? ""); };
+    (typeof window !== "undefined" &&
+      window.CradleSanitize &&
+      window.CradleSanitize.sanitizeHtml) ||
+    (typeof require === "function" &&
+      (function () {
+        try {
+          return require("../sanitizeHtml.js").sanitizeHtml;
+        } catch {
+          return null;
+        }
+      })()) ||
+    function (html) {
+      return String(html ?? "");
+    };
 
   /* ── Inject styles once ───────────────────────────────── */
   const STYLE_ID = "cradle-btn-styles";

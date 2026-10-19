@@ -11,6 +11,7 @@ All contributors must adhere to these rules when adding or modifying mini-projec
 Any third-party script or model must be loaded from a reputable, widely recognized Content Delivery Network (CDN) or hosting provider.
 
 **Allowed CDNs:**
+
 - `unpkg.com`
 - `jsdelivr.net`
 - `cdnjs.cloudflare.com`
@@ -20,31 +21,37 @@ If a library is only available on an obscure or unverified server, it must be do
 
 ## 2. Integrity Verification (SRI)
 
-Security is paramount. Every remote `<script>` tag loading an external library **MUST** include a Subresource Integrity (SRI) hash. 
+Security is paramount. Every remote `<script>` tag loading an external library **MUST** include a Subresource Integrity (SRI) hash.
 
 ### What is SRI?
+
 SRI ensures that the script loaded from a CDN has not been maliciously modified or compromised.
 
 ### Rule
+
 You must include `integrity` and `crossorigin="anonymous"` attributes on all remote scripts.
 
 **Allowed (Correct):**
+
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" 
-        integrity="sha512-..." 
-        crossorigin="anonymous"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"
+  integrity="sha512-..."
+  crossorigin="anonymous"
+></script>
 ```
 
 **Forbidden (Incorrect):**
+
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 ```
 
-*(You can generate SRI hashes using tools like [SRI Hash Generator](https://www.srihash.org/)).*
+_(You can generate SRI hashes using tools like [SRI Hash Generator](https://www.srihash.org/))._
 
 ## 3. Large Model Hosting & Loading
 
-Machine learning models (e.g., `.bin`, `.onnx`, `.json` weights) can be extremely large. 
+Machine learning models (e.g., `.bin`, `.onnx`, `.json` weights) can be extremely large.
 
 - **Hosting**: Do not commit large model weights directly to the repository (no files > 50MB). Models should ideally be loaded dynamically from the Hugging Face Hub or a reliable CDN.
 - **Lazy Loading**: Do not load massive models immediately on page load. Model fetching must be deferred until the user explicitly initiates an action (e.g., clicking "Start AI Model").
@@ -54,9 +61,11 @@ Machine learning models (e.g., `.bin`, `.onnx`, `.json` weights) can be extremel
 Many users run strict privacy blockers (e.g., uBlock Origin, Brave Shields) that may arbitrarily block CDNs.
 
 ### Rule
+
 Your project must gracefully degrade if a script or model fails to load.
+
 - Wrap model loading in `try/catch` blocks.
-- If a model or script fetch fails, display a clear, non-intrusive on-screen error message (e.g., *"Failed to load AI model. Check your network or adblocker."*).
+- If a model or script fetch fails, display a clear, non-intrusive on-screen error message (e.g., _"Failed to load AI model. Check your network or adblocker."_).
 - Never allow the UI to "freeze" silently or crash the tab if a remote asset is blocked.
 
 ## 5. Isolation Boundaries

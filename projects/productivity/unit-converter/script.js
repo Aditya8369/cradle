@@ -11,14 +11,14 @@ const UNITS = {
     label: "Length",
     base: "meter",
     units: {
-      meter:      { label: "Meters",      abbr: "m",    toBase: 1 },
-      kilometer:  { label: "Kilometers",  abbr: "km",   toBase: 1000 },
-      centimeter: { label: "Centimeters", abbr: "cm",   toBase: 0.01 },
-      millimeter: { label: "Millimeters", abbr: "mm",   toBase: 0.001 },
-      mile:       { label: "Miles",       abbr: "mi",   toBase: 1609.344 },
-      yard:       { label: "Yards",       abbr: "yd",   toBase: 0.9144 },
-      foot:       { label: "Feet",        abbr: "ft",   toBase: 0.3048 },
-      inch:       { label: "Inches",      abbr: "in",   toBase: 0.0254 },
+      meter: { label: "Meters", abbr: "m", toBase: 1 },
+      kilometer: { label: "Kilometers", abbr: "km", toBase: 1000 },
+      centimeter: { label: "Centimeters", abbr: "cm", toBase: 0.01 },
+      millimeter: { label: "Millimeters", abbr: "mm", toBase: 0.001 },
+      mile: { label: "Miles", abbr: "mi", toBase: 1609.344 },
+      yard: { label: "Yards", abbr: "yd", toBase: 0.9144 },
+      foot: { label: "Feet", abbr: "ft", toBase: 0.3048 },
+      inch: { label: "Inches", abbr: "in", toBase: 0.0254 },
       nauticalMile: { label: "Nautical Miles", abbr: "nmi", toBase: 1852 },
     },
   },
@@ -26,89 +26,109 @@ const UNITS = {
     label: "Weight",
     base: "kilogram",
     units: {
-      kilogram:   { label: "Kilograms",   abbr: "kg",   toBase: 1 },
-      gram:       { label: "Grams",       abbr: "g",    toBase: 0.001 },
-      milligram:  { label: "Milligrams",  abbr: "mg",   toBase: 0.000001 },
-      tonne:      { label: "Metric Tons", abbr: "t",    toBase: 1000 },
-      pound:      { label: "Pounds",      abbr: "lb",   toBase: 0.45359237 },
-      ounce:      { label: "Ounces",      abbr: "oz",   toBase: 0.028349523125 },
-      stone:      { label: "Stone",       abbr: "st",   toBase: 6.35029318 },
+      kilogram: { label: "Kilograms", abbr: "kg", toBase: 1 },
+      gram: { label: "Grams", abbr: "g", toBase: 0.001 },
+      milligram: { label: "Milligrams", abbr: "mg", toBase: 0.000001 },
+      tonne: { label: "Metric Tons", abbr: "t", toBase: 1000 },
+      pound: { label: "Pounds", abbr: "lb", toBase: 0.45359237 },
+      ounce: { label: "Ounces", abbr: "oz", toBase: 0.028349523125 },
+      stone: { label: "Stone", abbr: "st", toBase: 6.35029318 },
     },
   },
   temperature: {
     label: "Temperature",
     base: null, // Special conversion — not ratio-based
     units: {
-      celsius:    { label: "Celsius",    abbr: "°C" },
+      celsius: { label: "Celsius", abbr: "°C" },
       fahrenheit: { label: "Fahrenheit", abbr: "°F" },
-      kelvin:     { label: "Kelvin",     abbr: "K" },
+      kelvin: { label: "Kelvin", abbr: "K" },
     },
   },
   volume: {
     label: "Volume",
     base: "liter",
     units: {
-      liter:       { label: "Liters",       abbr: "L",    toBase: 1 },
-      milliliter:  { label: "Milliliters",  abbr: "mL",   toBase: 0.001 },
-      cubicMeter:  { label: "Cubic Meters", abbr: "m³",   toBase: 1000 },
-      gallon:      { label: "US Gallons",    abbr: "gal",  toBase: 3.785411784 },
-      quart:       { label: "US Quarts",     abbr: "qt",   toBase: 0.946352946 },
-      pint:        { label: "US Pints",      abbr: "pt",   toBase: 0.473176473 },
-      cup:         { label: "US Cups",       abbr: "cup",  toBase: 0.2365882365 },
-      tablespoon:  { label: "Tablespoons",   abbr: "tbsp", toBase: 0.01478676478125 },
-      teaspoon:    { label: "Teaspoons",     abbr: "tsp",  toBase: 0.00492892159375 },
-      fluidOunce:  { label: "Fluid Ounces",  abbr: "fl oz", toBase: 0.0295735295625 },
+      liter: { label: "Liters", abbr: "L", toBase: 1 },
+      milliliter: { label: "Milliliters", abbr: "mL", toBase: 0.001 },
+      cubicMeter: { label: "Cubic Meters", abbr: "m³", toBase: 1000 },
+      gallon: { label: "US Gallons", abbr: "gal", toBase: 3.785411784 },
+      quart: { label: "US Quarts", abbr: "qt", toBase: 0.946352946 },
+      pint: { label: "US Pints", abbr: "pt", toBase: 0.473176473 },
+      cup: { label: "US Cups", abbr: "cup", toBase: 0.2365882365 },
+      tablespoon: {
+        label: "Tablespoons",
+        abbr: "tbsp",
+        toBase: 0.01478676478125,
+      },
+      teaspoon: { label: "Teaspoons", abbr: "tsp", toBase: 0.00492892159375 },
+      fluidOunce: {
+        label: "Fluid Ounces",
+        abbr: "fl oz",
+        toBase: 0.0295735295625,
+      },
     },
   },
   speed: {
     label: "Speed",
     base: "meterPerSecond",
     units: {
-      meterPerSecond: { label: "Meters/second",  abbr: "m/s",  toBase: 1 },
-      kilometerPerHour: { label: "Kilometers/hour", abbr: "km/h", toBase: 0.277777778 },
-      milePerHour:   { label: "Miles/hour",     abbr: "mph",  toBase: 0.44704 },
-      knot:          { label: "Knots",           abbr: "kn",   toBase: 0.514444444 },
-      footPerSecond: { label: "Feet/second",     abbr: "ft/s", toBase: 0.3048 },
+      meterPerSecond: { label: "Meters/second", abbr: "m/s", toBase: 1 },
+      kilometerPerHour: {
+        label: "Kilometers/hour",
+        abbr: "km/h",
+        toBase: 0.277777778,
+      },
+      milePerHour: { label: "Miles/hour", abbr: "mph", toBase: 0.44704 },
+      knot: { label: "Knots", abbr: "kn", toBase: 0.514444444 },
+      footPerSecond: { label: "Feet/second", abbr: "ft/s", toBase: 0.3048 },
     },
   },
   data: {
     label: "Data",
     base: "byte",
     units: {
-      bit:      { label: "Bits",       abbr: "b",   toBase: 0.125 },
-      byte:     { label: "Bytes",      abbr: "B",   toBase: 1 },
-      kilobyte: { label: "Kilobytes",  abbr: "KB",  toBase: 1024 },
-      megabyte: { label: "Megabytes",  abbr: "MB",  toBase: 1048576 },
-      gigabyte: { label: "Gigabytes",  abbr: "GB",  toBase: 1073741824 },
-      terabyte: { label: "Terabytes",  abbr: "TB",  toBase: 1099511627776 },
-      petabyte: { label: "Petabytes",  abbr: "PB",  toBase: 1125899906842624 },
+      bit: { label: "Bits", abbr: "b", toBase: 0.125 },
+      byte: { label: "Bytes", abbr: "B", toBase: 1 },
+      kilobyte: { label: "Kilobytes", abbr: "KB", toBase: 1024 },
+      megabyte: { label: "Megabytes", abbr: "MB", toBase: 1048576 },
+      gigabyte: { label: "Gigabytes", abbr: "GB", toBase: 1073741824 },
+      terabyte: { label: "Terabytes", abbr: "TB", toBase: 1099511627776 },
+      petabyte: { label: "Petabytes", abbr: "PB", toBase: 1125899906842624 },
     },
   },
   area: {
     label: "Area",
     base: "squareMeter",
     units: {
-      squareMeter:  { label: "Square Meters",  abbr: "m²",  toBase: 1 },
-      squareKilometer: { label: "Square Kilometers", abbr: "km²", toBase: 1000000 },
-      hectare:      { label: "Hectares",       abbr: "ha",  toBase: 10000 },
-      acre:         { label: "Acres",          abbr: "ac",  toBase: 4046.8564224 },
-      squareFoot:   { label: "Square Feet",    abbr: "ft²", toBase: 0.09290304 },
-      squareInch:   { label: "Square Inches",  abbr: "in²", toBase: 0.00064516 },
-      squareMile:   { label: "Square Miles",   abbr: "mi²", toBase: 2589988.110336 },
-      squareYard:   { label: "Square Yards",   abbr: "yd²", toBase: 0.83612736 },
+      squareMeter: { label: "Square Meters", abbr: "m²", toBase: 1 },
+      squareKilometer: {
+        label: "Square Kilometers",
+        abbr: "km²",
+        toBase: 1000000,
+      },
+      hectare: { label: "Hectares", abbr: "ha", toBase: 10000 },
+      acre: { label: "Acres", abbr: "ac", toBase: 4046.8564224 },
+      squareFoot: { label: "Square Feet", abbr: "ft²", toBase: 0.09290304 },
+      squareInch: { label: "Square Inches", abbr: "in²", toBase: 0.00064516 },
+      squareMile: {
+        label: "Square Miles",
+        abbr: "mi²",
+        toBase: 2589988.110336,
+      },
+      squareYard: { label: "Square Yards", abbr: "yd²", toBase: 0.83612736 },
     },
   },
   time: {
     label: "Time",
     base: "second",
     units: {
-      second:  { label: "Seconds",  abbr: "s",   toBase: 1 },
-      minute:  { label: "Minutes",  abbr: "min", toBase: 60 },
-      hour:    { label: "Hours",    abbr: "h",   toBase: 3600 },
-      day:     { label: "Days",     abbr: "d",   toBase: 86400 },
-      week:    { label: "Weeks",    abbr: "wk",  toBase: 604800 },
-      month:   { label: "Months (30d)", abbr: "mo", toBase: 2592000 },
-      year:    { label: "Years (365d)", abbr: "yr", toBase: 31536000 },
+      second: { label: "Seconds", abbr: "s", toBase: 1 },
+      minute: { label: "Minutes", abbr: "min", toBase: 60 },
+      hour: { label: "Hours", abbr: "h", toBase: 3600 },
+      day: { label: "Days", abbr: "d", toBase: 86400 },
+      week: { label: "Weeks", abbr: "wk", toBase: 604800 },
+      month: { label: "Months (30d)", abbr: "mo", toBase: 2592000 },
+      year: { label: "Years (365d)", abbr: "yr", toBase: 31536000 },
     },
   },
 };
@@ -116,24 +136,24 @@ const UNITS = {
 /* ── Temperature Special Conversion ─────────────────────────────── */
 
 const tempConvert = {
-  "celsius→fahrenheit": v => v * 9 / 5 + 32,
-  "celsius→kelvin":     v => v + 273.15,
-  "fahrenheit→celsius": v => (v - 32) * 5 / 9,
-  "fahrenheit→kelvin":  v => (v - 32) * 5 / 9 + 273.15,
-  "kelvin→celsius":     v => v - 273.15,
-  "kelvin→fahrenheit":  v => (v - 273.15) * 9 / 5 + 32,
-  "celsius→celsius":    v => v,
+  "celsius→fahrenheit": v => (v * 9) / 5 + 32,
+  "celsius→kelvin": v => v + 273.15,
+  "fahrenheit→celsius": v => ((v - 32) * 5) / 9,
+  "fahrenheit→kelvin": v => ((v - 32) * 5) / 9 + 273.15,
+  "kelvin→celsius": v => v - 273.15,
+  "kelvin→fahrenheit": v => ((v - 273.15) * 9) / 5 + 32,
+  "celsius→celsius": v => v,
   "fahrenheit→fahrenheit": v => v,
-  "kelvin→kelvin":      v => v,
+  "kelvin→kelvin": v => v,
 };
 
 const tempFormula = {
   "celsius→fahrenheit": "°F = °C × 9/5 + 32",
-  "celsius→kelvin":     "K = °C + 273.15",
+  "celsius→kelvin": "K = °C + 273.15",
   "fahrenheit→celsius": "°C = (°F − 32) × 5/9",
-  "fahrenheit→kelvin":  "K = (°F − 32) × 5/9 + 273.15",
-  "kelvin→celsius":     "°C = K − 273.15",
-  "kelvin→fahrenheit":  "°F = (K − 273.15) × 9/5 + 32",
+  "fahrenheit→kelvin": "K = (°F − 32) × 5/9 + 273.15",
+  "kelvin→celsius": "°C = K − 273.15",
+  "kelvin→fahrenheit": "°F = (K − 273.15) × 9/5 + 32",
 };
 
 /* ── State ──────────────────────────────────────────────────────── */
@@ -146,12 +166,12 @@ let suppressFromInput = false;
 /* ── DOM References ─────────────────────────────────────────────── */
 
 const $fromValue = document.getElementById("fromValue");
-const $toValue   = document.getElementById("toValue");
-const $fromUnit  = document.getElementById("fromUnit");
-const $toUnit    = document.getElementById("toUnit");
-const $swapBtn   = document.getElementById("swapBtn");
-const $copyBtn   = document.getElementById("copyBtn");
-const $resetBtn  = document.getElementById("resetBtn");
+const $toValue = document.getElementById("toValue");
+const $fromUnit = document.getElementById("fromUnit");
+const $toUnit = document.getElementById("toUnit");
+const $swapBtn = document.getElementById("swapBtn");
+const $copyBtn = document.getElementById("copyBtn");
+const $resetBtn = document.getElementById("resetBtn");
 const $formulaText = document.getElementById("formulaText");
 const $historyList = document.getElementById("historyList");
 const $historyCount = document.getElementById("historyCount");
@@ -171,7 +191,7 @@ function populateSelects(category) {
   keys.forEach((key, i) => {
     const u = cat.units[key];
     const optFrom = new Option(`${u.label} (${u.abbr})`, key);
-    const optTo   = new Option(`${u.label} (${u.abbr})`, key);
+    const optTo = new Option(`${u.label} (${u.abbr})`, key);
     $fromUnit.add(optFrom);
     $toUnit.add(optTo);
   });
@@ -192,8 +212,8 @@ function convert(value, fromKey, toKey, category) {
     return fn ? fn(value) : NaN;
   }
   const fromBase = cat.units[fromKey].toBase;
-  const toBase   = cat.units[toKey].toBase;
-  return value * fromBase / toBase;
+  const toBase = cat.units[toKey].toBase;
+  return (value * fromBase) / toBase;
 }
 
 function getFormula(fromKey, toKey, category) {
@@ -202,8 +222,8 @@ function getFormula(fromKey, toKey, category) {
   }
   const cat = UNITS[category];
   const fromUnit = cat.units[fromKey];
-  const toUnit   = cat.units[toKey];
-  const factor   = fromUnit.toBase / toUnit.toBase;
+  const toUnit = cat.units[toKey];
+  const factor = fromUnit.toBase / toUnit.toBase;
   return `1 ${fromUnit.abbr} = ${formatNumber(factor)} ${toUnit.abbr}`;
 }
 
@@ -211,7 +231,8 @@ function getFormula(fromKey, toKey, category) {
 
 function formatNumber(n) {
   if (n === 0) return "0";
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toLocaleString("en-US");
+  if (Number.isInteger(n) && Math.abs(n) < 1e15)
+    return n.toLocaleString("en-US");
   if (Math.abs(n) >= 1e15 || (Math.abs(n) < 1e-6 && n !== 0)) {
     return n.toExponential(6);
   }
@@ -249,8 +270,8 @@ function performConversion() {
   }
 
   const fromKey = $fromUnit.value;
-  const toKey   = $toUnit.value;
-  const result  = convert(value, fromKey, toKey, currentCategory);
+  const toKey = $toUnit.value;
+  const result = convert(value, fromKey, toKey, currentCategory);
 
   suppressFromInput = true;
   $toValue.value = formatResult(result);
@@ -289,7 +310,7 @@ function renderRefTable(category) {
   $refTableBody.innerHTML = "";
   displayKeys.forEach((fromKey, rowIdx) => {
     const tr = document.createElement("tr");
-    displayKeys.forEach((toKey) => {
+    displayKeys.forEach(toKey => {
       const td = document.createElement("td");
       if (fromKey === toKey) {
         td.textContent = "1";
@@ -359,7 +380,8 @@ function renderHistory() {
   $historyCount.textContent = `${history.length} ${history.length === 1 ? "entry" : "entries"}`;
 
   if (history.length === 0) {
-    $historyList.innerHTML = '<p class="history-empty">No conversions yet. Start converting!</p>';
+    $historyList.innerHTML =
+      '<p class="history-empty">No conversions yet. Start converting!</p>';
     return;
   }
 
@@ -374,7 +396,9 @@ function renderHistory() {
 
     const meta = document.createElement("div");
     meta.className = "history-meta";
-    const catLabel = UNITS[entry.category] ? UNITS[entry.category].label : entry.category;
+    const catLabel = UNITS[entry.category]
+      ? UNITS[entry.category].label
+      : entry.category;
     meta.textContent = `${catLabel} · ${timeAgo(entry.timestamp)}`;
 
     const del = document.createElement("button");
@@ -403,7 +427,7 @@ function clearHistory() {
 
 function timeAgo(ts) {
   const diff = Date.now() - ts;
-  const sec  = Math.floor(diff / 1000);
+  const sec = Math.floor(diff / 1000);
   if (sec < 60) return "just now";
   const min = Math.floor(sec / 60);
   if (min < 60) return `${min}m ago`;
@@ -433,11 +457,11 @@ function switchCategory(category) {
 /* ── Swap Units ─────────────────────────────────────────────────── */
 
 function swapUnits() {
-  const tmpKey  = $fromUnit.value;
-  const tmpVal  = $fromValue.value;
+  const tmpKey = $fromUnit.value;
+  const tmpVal = $fromValue.value;
 
   $fromUnit.value = $toUnit.value;
-  $toUnit.value   = tmpKey;
+  $toUnit.value = tmpKey;
 
   // Move result to input
   if ($toValue.value !== "" && $toValue.value !== "Invalid number") {
@@ -453,19 +477,24 @@ function copyResult() {
   const val = $toValue.value;
   if (!val || val === "Invalid number") return;
 
-  navigator.clipboard.writeText(val).then(() => {
-    const orig = $copyBtn.innerHTML;
-    $copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-    setTimeout(() => { $copyBtn.innerHTML = orig; }, 1200);
-  }).catch(() => {
-    // Clipboard API not available — try fallback
-    const ta = document.createElement("textarea");
-    ta.value = val;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-  });
+  navigator.clipboard
+    .writeText(val)
+    .then(() => {
+      const orig = $copyBtn.innerHTML;
+      $copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      setTimeout(() => {
+        $copyBtn.innerHTML = orig;
+      }, 1200);
+    })
+    .catch(() => {
+      // Clipboard API not available — try fallback
+      const ta = document.createElement("textarea");
+      ta.value = val;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    });
 }
 
 /* ── Reset ──────────────────────────────────────────────────────── */
@@ -480,7 +509,7 @@ function resetConverter() {
 /* ── Event Listeners ────────────────────────────────────────────── */
 
 // Category tabs
-document.getElementById("categoryTabs").addEventListener("click", (e) => {
+document.getElementById("categoryTabs").addEventListener("click", e => {
   const tab = e.target.closest(".cat-tab");
   if (tab) switchCategory(tab.dataset.category);
 });
@@ -508,7 +537,7 @@ document.getElementById("btn-clear-history").addEventListener("click", () => {
 });
 
 // Keyboard shortcuts
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", e => {
   // Ignore if user is typing in an input
   const tag = document.activeElement.tagName;
   const isInput = tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA";

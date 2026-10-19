@@ -130,12 +130,12 @@ Visual styling for the grid, player colour classes (`red`, `blue`, `green`, `yel
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Controls, board container, player stats, analytics panels |
-| CSS3 (CSS Grid) | Board layout, player colours, hint highlight, charts |
-| Vanilla JavaScript | Game rules, AI, rendering, and analytics |
-| localStorage API | Persisting match history |
+| Technology         | Purpose                                                   |
+| ------------------ | --------------------------------------------------------- |
+| HTML5              | Controls, board container, player stats, analytics panels |
+| CSS3 (CSS Grid)    | Board layout, player colours, hint highlight, charts      |
+| Vanilla JavaScript | Game rules, AI, rendering, and analytics                  |
+| localStorage API   | Persisting match history                                  |
 
 ---
 
@@ -260,4 +260,4 @@ None. The project is pure HTML, CSS, and JavaScript with no external libraries o
 
 ## References
 
-- [Chain reaction game — Wikipedia](https://en.wikipedia.org/wiki/Chain_reaction_(game))
+- [Chain reaction game — Wikipedia](https://en.wikipedia.org/wiki/Chain_reaction_%28game%29)

@@ -148,10 +148,10 @@ DOM re-renders from state (no partial patching)
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-| --- | --- | --- | --- |
-| Outfit | — | Google Fonts CDN (`<link>` tags) | UI typography |
-| JetBrains Mono | — | Google Fonts CDN (`<link>` tags) | Monospace numbers and labels |
+| Dependency     | Version | How loaded                       | Purpose                      |
+| -------------- | ------- | -------------------------------- | ---------------------------- |
+| Outfit         | —       | Google Fonts CDN (`<link>` tags) | UI typography                |
+| JetBrains Mono | —       | Google Fonts CDN (`<link>` tags) | Monospace numbers and labels |
 
 This project otherwise uses only native browser APIs and the shared Cradle `escapeHtml.js` component — no external libraries are required.
 

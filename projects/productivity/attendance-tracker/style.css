@@ -15,11 +15,25 @@ body {
   margin: 0;
   padding: var(--cradle-space-6, 24px);
   background:
-    radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.22), transparent 34rem),
-    radial-gradient(circle at 90% 0%, rgba(22, 163, 74, 0.13), transparent 28rem),
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(37, 99, 235, 0.22),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(22, 163, 74, 0.13),
+      transparent 28rem
+    ),
     var(--cradle-bg, #05070d);
   color: var(--cradle-text, #f3f4f6);
-  font-family: var(--cradle-font-body, "Space Grotesk", Inter, system-ui, sans-serif);
+  font-family: var(
+    --cradle-font-body,
+    "Space Grotesk",
+    Inter,
+    system-ui,
+    sans-serif
+  );
   line-height: 1.5;
 }
 
@@ -40,7 +54,7 @@ textarea {
   margin: 0 auto;
 }
 
-.shell>*+* {
+.shell > * + * {
   margin-top: var(--cradle-space-5, 20px);
 }
 

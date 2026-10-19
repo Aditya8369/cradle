@@ -12,7 +12,7 @@
 function encodeBase64(input) {
   const bytes = new TextEncoder().encode(input);
   let binary = "";
-  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  bytes.forEach(b => (binary += String.fromCharCode(b)));
   return btoa(binary);
 }
 
@@ -26,7 +26,7 @@ function decodeBase64(input) {
 
   try {
     const binary = atob(clean);
-    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
     throw new Error("Invalid Base64 input.");
@@ -63,7 +63,7 @@ const HTML_ENTITIES_REVERSE = {
 };
 
 function encodeHTML(input) {
-  return input.replace(/[&<>"']/g, (ch) => HTML_ENTITIES[ch]);
+  return input.replace(/[&<>"']/g, ch => HTML_ENTITIES[ch]);
 }
 
 function decodeHTML(input) {
@@ -89,7 +89,7 @@ function decodeHTML(input) {
 
 function encodeUnicode(input) {
   return Array.from(input)
-    .map((ch) => {
+    .map(ch => {
       const codePoint = ch.codePointAt(0);
       return codePoint > 0xffff
         ? "\\u{" + codePoint.toString(16) + "}"
@@ -114,7 +114,7 @@ function decodeUnicode(input) {
 function encodeHex(input) {
   const bytes = new TextEncoder().encode(input);
   return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
+    .map(b => b.toString(16).padStart(2, "0"))
     .join(" ");
 }
 
@@ -141,7 +141,7 @@ function decodeHex(input) {
 function encodeBinary(input) {
   const bytes = new TextEncoder().encode(input);
   return Array.from(bytes)
-    .map((b) => b.toString(2).padStart(8, "0"))
+    .map(b => b.toString(2).padStart(8, "0"))
     .join(" ");
 }
 
@@ -150,11 +150,11 @@ function decodeBinary(input) {
   if (clean === "") return "";
 
   const groups = clean.split(" ");
-  if (!groups.every((g) => /^[01]{8}$/.test(g))) {
+  if (!groups.every(g => /^[01]{8}$/.test(g))) {
     throw new Error("Invalid Binary input. Use 8-bit groups of 0s and 1s.");
   }
 
-  const bytes = new Uint8Array(groups.map((g) => parseInt(g, 2)));
+  const bytes = new Uint8Array(groups.map(g => parseInt(g, 2)));
 
   try {
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);

@@ -117,12 +117,12 @@ Handles all visual presentation. Tile colours are assigned through CSS classes n
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (CSS Grid) | Board layout and tile colour theming |
+| Technology                | Purpose                                   |
+| ------------------------- | ----------------------------------------- |
+| HTML5                     | Page structure and semantic markup        |
+| CSS3 (CSS Grid)           | Board layout and tile colour theming      |
 | Vanilla JavaScript (ES6+) | Game logic, storage, and DOM manipulation |
-| localStorage API | Persisting the best score across sessions |
+| localStorage API          | Persisting the best score across sessions |
 
 ---
 

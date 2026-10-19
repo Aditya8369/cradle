@@ -46,12 +46,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Controls sidebar, preset buttons, handle container, code tabs |
-| `shapeEngine.js` | Pure shape logic, clip-path string generator, SVG exporter, Tailwind generator |
-| `script.js` | Mouse/touch drag events, preview element background, handle position synchronization |
-| `style.css` | Canvas container styles, drag handle visuals, glassmorphism UI rules |
+| File             | Responsibility                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------ |
+| `index.html`     | Controls sidebar, preset buttons, handle container, code tabs                        |
+| `shapeEngine.js` | Pure shape logic, clip-path string generator, SVG exporter, Tailwind generator       |
+| `script.js`      | Mouse/touch drag events, preview element background, handle position synchronization |
+| `style.css`      | Canvas container styles, drag handle visuals, glassmorphism UI rules                 |
 
 ---
 
@@ -85,29 +85,33 @@ Preview element clip-path / border-radius & exporters are updated
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Canvas shell, inputs, code export areas |
-| CSS3 | UI layout, CSS variables, glassmorphism effects |
-| Vanilla JavaScript (ES6+) | Shape Engine, SVG math, DOM drag handlers |
+| Technology                | Purpose                                         |
+| ------------------------- | ----------------------------------------------- |
+| HTML5                     | Canvas shell, inputs, code export areas         |
+| CSS3                      | UI layout, CSS variables, glassmorphism effects |
+| Vanilla JavaScript (ES6+) | Shape Engine, SVG math, DOM drag handlers       |
 
 ---
 
 ## File Responsibilities
 
 ### `index.html`
+
 - Contains controls panel, preset containers, drag handle overlay container, and preview box.
 
 ### `shapeEngine.js`
+
 - `generateClipPathCSS(type, shapeData)` — Formats CSS clip-path or border-radius rules.
 - `generateSVGCode(type, shapeData, width, height)` — Generates standalone vector `<svg>` markup.
 - `generateTailwindCode(type, shapeData)` — Produces Tailwind CSS arbitrary utility classes.
 
 ### `script.js`
+
 - `updateCanvas()` — Re-evaluates handles, shapes, and exports.
 - `handleDocumentMouseMove(e)` — Updates coordinates during handle dragging.
 
 ### `style.css`
+
 - Modern dark mode variables, handle styles, SVG tracer overlays.
 
 ---

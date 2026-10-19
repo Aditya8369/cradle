@@ -19,15 +19,17 @@
     if (cols === 0) {
       throw new Error(`${name} must have at least one column.`);
     }
-    
+
     let iter = 0;
     for (let r = 0; r < matrix.length; r++) {
-      if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded during validation.");
+      if (++iter > MAX_ITERATIONS)
+        throw new Error("Iteration limit exceeded during validation.");
       if (!Array.isArray(matrix[r]) || matrix[r].length !== cols) {
         throw new Error(`${name} must have consistent row dimensions.`);
       }
       for (let c = 0; c < cols; c++) {
-        if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded during validation.");
+        if (++iter > MAX_ITERATIONS)
+          throw new Error("Iteration limit exceeded during validation.");
         const val = matrix[r][c];
         if (typeof val !== "number" || !Number.isFinite(val)) {
           throw new Error(`${name} elements must be valid finite numbers.`);
@@ -45,7 +47,9 @@
     for (let r = 0; r < rows; r++) {
       const row = [];
       for (let c = 0; c < cols; c++) {
-        row.push(typeof initialValue === "function" ? initialValue(r, c) : initialValue);
+        row.push(
+          typeof initialValue === "function" ? initialValue(r, c) : initialValue
+        );
       }
       matrix.push(row);
     }
@@ -95,14 +99,17 @@
     const colsB = b[0].length;
 
     if (colsA !== rowsB) {
-      throw new Error(`Cannot multiply matrix of shape (${rowsA}x${colsA}) with (${rowsB}x${colsB}).`);
+      throw new Error(
+        `Cannot multiply matrix of shape (${rowsA}x${colsA}) with (${rowsB}x${colsB}).`
+      );
     }
 
     const result = createMatrix(rowsA, colsB, 0);
     let iter = 0;
     for (let i = 0; i < rowsA; i++) {
       for (let j = 0; j < colsB; j++) {
-        if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded in multiply.");
+        if (++iter > MAX_ITERATIONS)
+          throw new Error("Iteration limit exceeded in multiply.");
         let sum = 0;
         for (let k = 0; k < colsA; k++) {
           sum += a[i][k] * b[k][j];
@@ -165,7 +172,8 @@
       throw new Error("Determinant is only defined for square matrices.");
     }
     if (n === 1) return matrix[0][0];
-    if (n === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+    if (n === 2)
+      return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 
     // LU decomposition approach for n >= 3
     const copy = matrix.map(r => r.slice());
@@ -174,7 +182,8 @@
     let iter = 0;
 
     for (let i = 0; i < n; i++) {
-      if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded in determinant.");
+      if (++iter > MAX_ITERATIONS)
+        throw new Error("Iteration limit exceeded in determinant.");
       let pivot = i;
       for (let j = i + 1; j < n; j++) {
         if (Math.abs(copy[j][i]) > Math.abs(copy[pivot][i])) {
@@ -220,7 +229,8 @@
 
     let iter = 0;
     for (let i = 0; i < n; i++) {
-      if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded in inverse.");
+      if (++iter > MAX_ITERATIONS)
+        throw new Error("Iteration limit exceeded in inverse.");
       let pivot = i;
       for (let j = i + 1; j < n; j++) {
         if (Math.abs(aug[j][i]) > Math.abs(aug[pivot][i])) {
@@ -253,7 +263,9 @@
       }
     }
 
-    return aug.map(row => row.slice(n).map(val => (Math.abs(val) < 1e-12 ? 0 : val)));
+    return aug.map(row =>
+      row.slice(n).map(val => (Math.abs(val) < 1e-12 ? 0 : val))
+    );
   }
 
   /**
@@ -268,7 +280,8 @@
     let r = 0;
     let iter = 0;
     for (let c = 0; c < cols && r < rows; c++) {
-      if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded in rank.");
+      if (++iter > MAX_ITERATIONS)
+        throw new Error("Iteration limit exceeded in rank.");
       let pivot = r;
       for (let i = r + 1; i < rows; i++) {
         if (Math.abs(copy[i][c]) > Math.abs(copy[pivot][c])) {
@@ -311,7 +324,8 @@
 
     let iter = 0;
     for (let i = 0; i < n; i++) {
-      if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded in luDecomposition.");
+      if (++iter > MAX_ITERATIONS)
+        throw new Error("Iteration limit exceeded in luDecomposition.");
       // Upper Triangular U
       for (let k = i; k < n; k++) {
         let sum = 0;
@@ -335,7 +349,10 @@
     }
 
     // Clean small epsilon rounding errors
-    const clean = m => m.map(row => row.map(val => (Math.abs(val) < 1e-12 ? 0 : Number(val.toFixed(6)))));
+    const clean = m =>
+      m.map(row =>
+        row.map(val => (Math.abs(val) < 1e-12 ? 0 : Number(val.toFixed(6))))
+      );
     return { L: clean(L), U: clean(U) };
   }
 
@@ -354,7 +371,8 @@
 
     let iter = 0;
     for (let j = 0; j < cols; j++) {
-      if (++iter > MAX_ITERATIONS) throw new Error("Iteration limit exceeded in qrDecomposition.");
+      if (++iter > MAX_ITERATIONS)
+        throw new Error("Iteration limit exceeded in qrDecomposition.");
       let v = A.map(row => row[j]);
 
       for (let i = 0; i < j; i++) {
@@ -378,7 +396,10 @@
       }
     }
 
-    const clean = m => m.map(row => row.map(val => (Math.abs(val) < 1e-12 ? 0 : Number(val.toFixed(6)))));
+    const clean = m =>
+      m.map(row =>
+        row.map(val => (Math.abs(val) < 1e-12 ? 0 : Number(val.toFixed(6))))
+      );
     return { Q: clean(Q), R: clean(R) };
   }
 
@@ -389,7 +410,9 @@
     validateMatrix(matrix);
     const n = matrix.length;
     if (n !== matrix[0].length || (n !== 2 && n !== 3)) {
-      throw new Error("Eigenvalue computation supports 2x2 or 3x3 square matrices.");
+      throw new Error(
+        "Eigenvalue computation supports 2x2 or 3x3 square matrices."
+      );
     }
 
     if (n === 2) {
@@ -406,12 +429,12 @@
         const imag = Math.sqrt(-discriminant) / 2;
         return [
           { real, imag },
-          { real, imag: -imag }
+          { real, imag: -imag },
         ];
       }
       return [
         { real: (tr + Math.sqrt(discriminant)) / 2, imag: 0 },
-        { real: (tr - Math.sqrt(discriminant)) / 2, imag: 0 }
+        { real: (tr - Math.sqrt(discriminant)) / 2, imag: 0 },
       ];
     }
 
@@ -433,7 +456,7 @@
     const P = subDetSum - (tr * tr) / 3;
     const Q = (-2 * tr * tr * tr) / 27 + (tr * subDetSum) / 3 - det;
 
-    const round6 = (x) => Number(x.toFixed(6));
+    const round6 = x => Number(x.toFixed(6));
     const discriminant = (Q * Q) / 4 + (P * P * P) / 27;
 
     if (discriminant > 1e-9) {
@@ -447,7 +470,7 @@
       return [
         { real: round6(realRoot + shift), imag: 0 },
         { real: round6(realPart + shift), imag: round6(imagPart) },
-        { real: round6(realPart + shift), imag: round6(-imagPart) }
+        { real: round6(realPart + shift), imag: round6(-imagPart) },
       ];
     }
 
@@ -456,9 +479,9 @@
       const m = 2 * Math.sqrt(-P / 3);
       const arg = Math.max(-1, Math.min(1, (3 * Q) / (P * m)));
       const theta = Math.acos(arg) / 3;
-      return [0, 1, 2].map((k) => ({
+      return [0, 1, 2].map(k => ({
         real: round6(m * Math.cos(theta - (2 * Math.PI * k) / 3) + shift),
-        imag: 0
+        imag: 0,
       }));
     }
 
@@ -467,14 +490,14 @@
       return [
         { real: round6(shift), imag: 0 },
         { real: round6(shift), imag: 0 },
-        { real: round6(shift), imag: 0 }
+        { real: round6(shift), imag: 0 },
       ];
     }
     const w = Math.cbrt(-Q / 2);
     return [
       { real: round6(2 * w + shift), imag: 0 },
       { real: round6(-w + shift), imag: 0 },
-      { real: round6(-w + shift), imag: 0 }
+      { real: round6(-w + shift), imag: 0 },
     ];
   }
 

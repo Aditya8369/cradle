@@ -16,7 +16,11 @@
    * Export ASCII lines to styled HTML document string.
    */
   function toHTML(lines, options = {}) {
-    const { title = "ASCII Art Export", bgColor = "#0f172a", textColor = "#38bdf8" } = options;
+    const {
+      title = "ASCII Art Export",
+      bgColor = "#0f172a",
+      textColor = "#38bdf8",
+    } = options;
     const content = toPlainText(lines);
     return `<!DOCTYPE html>
 <html lang="en">
@@ -45,17 +49,28 @@ ${content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}
    * Export ASCII lines to scalable SVG document string.
    */
   function toSVG(lines, options = {}) {
-    const { fontSize = 12, charWidth = 7, charHeight = 12, bgColor = "#0f172a", textColor = "#38bdf8" } = options;
+    const {
+      fontSize = 12,
+      charWidth = 7,
+      charHeight = 12,
+      bgColor = "#0f172a",
+      textColor = "#38bdf8",
+    } = options;
     if (!lines || !lines.length) return "";
 
     const width = lines[0].length * charWidth;
     const height = lines.length * charHeight;
 
-    const textNodes = lines.map((line, idx) => {
-      const y = (idx + 1) * charHeight;
-      const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      return `  <text x="0" y="${y}">${escaped}</text>`;
-    }).join("\n");
+    const textNodes = lines
+      .map((line, idx) => {
+        const y = (idx + 1) * charHeight;
+        const escaped = line
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        return `  <text x="0" y="${y}">${escaped}</text>`;
+      })
+      .join("\n");
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
   <rect width="100%" height="100%" fill="${bgColor}"/>

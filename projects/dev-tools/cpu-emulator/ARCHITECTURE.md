@@ -62,13 +62,13 @@ projects/dev-tools/cpu-emulator/
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | UI shell: assembly editor, preset selector, console, pipeline/register/RAM panels |
-| `assembler.js` | Assembly parser that converts mnemonics and operands into 16-byte machine code |
+| File              | Responsibility                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| `index.html`      | UI shell: assembly editor, preset selector, console, pipeline/register/RAM panels              |
+| `assembler.js`    | Assembly parser that converts mnemonics and operands into 16-byte machine code                 |
 | `emulatorCore.js` | CPU state (registers, flags, RAM) plus a per-instruction reference executor; exports `OPCODES` |
-| `script.js` | DOM bindings, 5-stage pipeline simulation, forwarding/stalling/flushing, data-flow animations |
-| `style.css` | Theme, dashboard grid, pipeline stage states, RAM cells |
+| `script.js`       | DOM bindings, 5-stage pipeline simulation, forwarding/stalling/flushing, data-flow animations  |
+| `style.css`       | Theme, dashboard grid, pipeline stage states, RAM cells                                        |
 
 ---
 
@@ -146,14 +146,14 @@ Dashboard re-renders; optional SVG packets animate the data flow
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Grid, Flexbox, Custom Properties) | Dashboard layout and pipeline visuals |
-| Vanilla JavaScript (ES6+) | Assembler, emulator core, pipeline simulation |
-| SVG (via the DOM) | Data-flow packet animations |
-| `Uint8Array` | Compact 16-byte RAM vector |
-| Node.js (`module.exports`) | Headless unit testing of the core modules |
+| Technology                              | Purpose                                       |
+| --------------------------------------- | --------------------------------------------- |
+| HTML5                                   | Page structure and semantic markup            |
+| CSS3 (Grid, Flexbox, Custom Properties) | Dashboard layout and pipeline visuals         |
+| Vanilla JavaScript (ES6+)               | Assembler, emulator core, pipeline simulation |
+| SVG (via the DOM)                       | Data-flow packet animations                   |
+| `Uint8Array`                            | Compact 16-byte RAM vector                    |
+| Node.js (`module.exports`)              | Headless unit testing of the core modules     |
 
 ---
 
@@ -248,7 +248,5 @@ None. This project uses only native browser APIs and Node.js built-in modules fo
 ## References
 
 - [Instruction pipelining — Wikipedia](https://en.wikipedia.org/wiki/Instruction_pipelining)
-- [Hazard (computer architecture) — Wikipedia](https://en.wikipedia.org/wiki/Hazard_(computer_architecture))
+- [Hazard (computer architecture) — Wikipedia](https://en.wikipedia.org/wiki/Hazard_%28computer_architecture%29)
 - [MDN Web Docs — Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)
-
-

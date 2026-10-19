@@ -36,11 +36,11 @@ for hints and auto-solving.
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell: 9×9 board, number pad, difficulty select, timer/stats, and controls (New Game, Hint, Solve, Reset) |
-| `script.js` | Puzzle generation and backtracking solver, move validation, cell selection/highlighting, timer, and all rendering |
-| `style.css` | Grid layout, 3×3 box borders, cell states (selected, error, given), and responsive sizing |
+| File         | Responsibility                                                                                                    |
+| ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `index.html` | Page shell: 9×9 board, number pad, difficulty select, timer/stats, and controls (New Game, Hint, Solve, Reset)    |
+| `script.js`  | Puzzle generation and backtracking solver, move validation, cell selection/highlighting, timer, and all rendering |
+| `style.css`  | Grid layout, 3×3 box borders, cell states (selected, error, given), and responsive sizing                         |
 
 ## Data Flow / Execution Flow
 
@@ -77,12 +77,12 @@ checkCompletion() detects a finished, correct board and stops the timer
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Grid) | 9×9 board layout and responsive design |
-| Vanilla JavaScript (ES6+) | Puzzle generation, backtracking solver, and DOM updates |
-| Cradle `Button.js` / `Card.js` / `BackToHome.js` | Shared UI components for controls and navigation |
+| Technology                                       | Purpose                                                 |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| HTML5                                            | Page structure and semantic markup                      |
+| CSS3 (Grid)                                      | 9×9 board layout and responsive design                  |
+| Vanilla JavaScript (ES6+)                        | Puzzle generation, backtracking solver, and DOM updates |
+| Cradle `Button.js` / `Card.js` / `BackToHome.js` | Shared UI components for controls and navigation        |
 
 ## File Responsibilities
 
@@ -131,11 +131,11 @@ checkCompletion() detects a finished, correct board and stops the timer
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Cradle `Button.js` | — | Local script tag | Styled control buttons |
-| Cradle `Card.js` | — | Local script tag | Card layout for the board/stats panel |
-| Cradle `BackToHome.js` | — | Local script tag | Shared back-to-home navigation |
+| Dependency             | Version | How loaded       | Purpose                               |
+| ---------------------- | ------- | ---------------- | ------------------------------------- |
+| Cradle `Button.js`     | —       | Local script tag | Styled control buttons                |
+| Cradle `Card.js`       | —       | Local script tag | Card layout for the board/stats panel |
+| Cradle `BackToHome.js` | —       | Local script tag | Shared back-to-home navigation        |
 
 ## Future Improvements
 

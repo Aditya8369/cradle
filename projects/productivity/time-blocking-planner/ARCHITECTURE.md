@@ -123,10 +123,10 @@ Mouse position snapped to 15-minute steps → Block state updated → Saved to l
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-| --- | --- | --- | --- |
-| Outfit | — | Google Fonts CDN (`<link>` tags) | UI typography |
-| JetBrains Mono | — | Google Fonts CDN (`<link>` tags) | Monospace times and labels |
+| Dependency     | Version | How loaded                       | Purpose                    |
+| -------------- | ------- | -------------------------------- | -------------------------- |
+| Outfit         | —       | Google Fonts CDN (`<link>` tags) | UI typography              |
+| JetBrains Mono | —       | Google Fonts CDN (`<link>` tags) | Monospace times and labels |
 
 The project otherwise relies exclusively on native browser Web APIs and the shared Cradle `storage.js` and `escapeHtml.js` components.
 

@@ -48,12 +48,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Two-column split layout, theme selector options, action buttons, live preview area |
+| File              | Responsibility                                                                            |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| `index.html`      | Two-column split layout, theme selector options, action buttons, live preview area        |
 | `resumeEngine.js` | Core Markdown parser, regex inline element replacer, ATS score computation, HTML exporter |
-| `script.js` | Input debouncing, template theme switcher, PDF trigger, local storage sync |
-| `style.css` | Print media CSS rules (`@media print`), template variant styles, responsive split grid |
+| `script.js`       | Input debouncing, template theme switcher, PDF trigger, local storage sync                |
+| `style.css`       | Print media CSS rules (`@media print`), template variant styles, responsive split grid    |
 
 ---
 
@@ -85,10 +85,10 @@ Word count and ATS completeness score updated
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Split pane container, template selectors |
-| CSS3 | Print media styling, CSS template themes |
+| Technology                | Purpose                                           |
+| ------------------------- | ------------------------------------------------- |
+| HTML5                     | Split pane container, template selectors          |
+| CSS3                      | Print media styling, CSS template themes          |
 | Vanilla JavaScript (ES6+) | Resume Engine parser, DOM rendering, localStorage |
 
 ---
@@ -96,19 +96,23 @@ Word count and ATS completeness score updated
 ## File Responsibilities
 
 ### `index.html`
+
 - Contains Markdown editor textarea, action control buttons, template selects, and live preview container.
 
 ### `resumeEngine.js`
+
 - `parseMarkdownToHTML(markdown)` — Converts Markdown string into semantic HTML resume tags.
 - `parseInlineMarkdown(text)` — Handles links, strong tags, and emphasis inline replacements.
 - `calculateATSScore(markdown)` — Computes percentage score based on key resume section headers.
 - `generateStandaloneHTML(markdown, template, theme)` — Generates printable HTML string wrapper.
 
 ### `script.js`
+
 - `initializeResumeGenerator()` — Loads saved state from localStorage and binds handlers.
 - `updatePreview()` — Evaluates Markdown input and updates DOM.
 
 ### `style.css`
+
 - `@media print` rules, theme color palettes, and template layout rules.
 
 ---

@@ -63,13 +63,13 @@ projects/dev-tools/url-parser/
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell: URL input field, Parse button, result container |
-| `urlEngine.js` | Pure functions: `parseURLComponents`, `buildQueryString`, safe encode/decode, `detectFileType`, `detectURLType` |
-| `script.js` | UI bindings: reads input, calls the engine, renders label/value/copy rows |
-| `style.css` | Card layout, result rows, responsive styling |
-| `tests/url-parser.test.js` | Unit test suite covering protocol normalization, query parameter building, and URL encoding |
+| File                       | Responsibility                                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `index.html`               | Page shell: URL input field, Parse button, result container                                                     |
+| `urlEngine.js`             | Pure functions: `parseURLComponents`, `buildQueryString`, safe encode/decode, `detectFileType`, `detectURLType` |
+| `script.js`                | UI bindings: reads input, calls the engine, renders label/value/copy rows                                       |
+| `style.css`                | Card layout, result rows, responsive styling                                                                    |
+| `tests/url-parser.test.js` | Unit test suite covering protocol normalization, query parameter building, and URL encoding                     |
 
 ---
 
@@ -108,14 +108,14 @@ Query parameters render as their own section
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Flexbox, Custom Properties) | Card layout and result styling |
-| Vanilla JavaScript (ES6+) | Parsing logic and DOM rendering |
-| URL / URLSearchParams APIs | Native component extraction and query parsing |
-| Clipboard API | Per-row copy buttons |
-| Node.js (`module.exports`) | Headless unit testing of `urlEngine.js` |
+| Technology                        | Purpose                                       |
+| --------------------------------- | --------------------------------------------- |
+| HTML5                             | Page structure and semantic markup            |
+| CSS3 (Flexbox, Custom Properties) | Card layout and result styling                |
+| Vanilla JavaScript (ES6+)         | Parsing logic and DOM rendering               |
+| URL / URLSearchParams APIs        | Native component extraction and query parsing |
+| Clipboard API                     | Per-row copy buttons                          |
+| Node.js (`module.exports`)        | Headless unit testing of `urlEngine.js`       |
 
 ---
 

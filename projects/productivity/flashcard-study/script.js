@@ -13,24 +13,24 @@ let studyState = null; // { deckId, cardIds, index, known, unknown, isFlipped }
 
 /* ── DOM Refs ───────────────────────────────────────────────────── */
 
-const $deckGrid     = document.getElementById("deckGrid");
-const $emptyState   = document.getElementById("emptyState");
-const $deckSection  = document.getElementById("deckSection");
-const $studyView    = document.getElementById("studyView");
-const $sessionDone  = document.getElementById("sessionDone");
+const $deckGrid = document.getElementById("deckGrid");
+const $emptyState = document.getElementById("emptyState");
+const $deckSection = document.getElementById("deckSection");
+const $studyView = document.getElementById("studyView");
+const $sessionDone = document.getElementById("sessionDone");
 
-const $deckModal    = document.getElementById("deckModal");
-const $cardModal    = document.getElementById("cardModal");
-const $detailModal  = document.getElementById("detailModal");
+const $deckModal = document.getElementById("deckModal");
+const $cardModal = document.getElementById("cardModal");
+const $detailModal = document.getElementById("detailModal");
 
-const $deckForm     = document.getElementById("deckForm");
-const $cardForm     = document.getElementById("cardForm");
+const $deckForm = document.getElementById("deckForm");
+const $cardForm = document.getElementById("cardForm");
 
-const $flashcard    = document.getElementById("flashcard");
+const $flashcard = document.getElementById("flashcard");
 const $flashcardInner = document.getElementById("flashcardInner");
 
-const $statDecks    = document.getElementById("statDecks");
-const $statCards    = document.getElementById("statCards");
+const $statDecks = document.getElementById("statDecks");
+const $statCards = document.getElementById("statCards");
 const $statMastered = document.getElementById("statMastered");
 const $statSessions = document.getElementById("statSessions");
 
@@ -38,14 +38,23 @@ const $statSessions = document.getElementById("statSessions");
 
 function loadData() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { decks: [], sessions: 0 };
+    return (
+      JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+        decks: [],
+        sessions: 0,
+      }
+    );
   } catch {
     return { decks: [], sessions: 0 };
   }
 }
 
 function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { /* ignore */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    /* ignore */
+  }
 }
 
 /* ── Helpers ────────────────────────────────────────────────────── */
@@ -101,7 +110,10 @@ function renderDashboard() {
     card.setAttribute("aria-label", `Open deck: ${deck.name}`);
 
     const masteredCount = deck.cards.filter(c => c.mastery >= 3).length;
-    const pct = deck.cards.length > 0 ? Math.round((masteredCount / deck.cards.length) * 100) : 0;
+    const pct =
+      deck.cards.length > 0
+        ? Math.round((masteredCount / deck.cards.length) * 100)
+        : 0;
 
     card.innerHTML = `
       <div class="deck-card-header">
@@ -125,14 +137,14 @@ function renderDashboard() {
       </div>
     `;
 
-    card.addEventListener("click", (e) => {
+    card.addEventListener("click", e => {
       const action = e.target.closest("[data-action]");
       if (!action) return;
       if (action.dataset.action === "open") openDeckDetail(deck.id);
       if (action.dataset.action === "study") startStudy(deck.id);
     });
 
-    card.addEventListener("keydown", (e) => {
+    card.addEventListener("keydown", e => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         openDeckDetail(deck.id);
@@ -172,7 +184,7 @@ function closeDeckModal() {
   $deckForm.reset();
 }
 
-$deckForm.addEventListener("submit", (e) => {
+$deckForm.addEventListener("submit", e => {
   e.preventDefault();
   const name = document.getElementById("deckName").value.trim();
   const desc = document.getElementById("deckDesc").value.trim();
@@ -183,7 +195,13 @@ $deckForm.addEventListener("submit", (e) => {
     deck.name = name;
     deck.description = desc;
   } else {
-    data.decks.push({ id: uid(), name, description: desc, cards: [], createdAt: Date.now() });
+    data.decks.push({
+      id: uid(),
+      name,
+      description: desc,
+      cards: [],
+      createdAt: Date.now(),
+    });
   }
   saveData();
   closeDeckModal();
@@ -229,7 +247,7 @@ function closeCardModal() {
   $cardForm.reset();
 }
 
-$cardForm.addEventListener("submit", (e) => {
+$cardForm.addEventListener("submit", e => {
   e.preventDefault();
   const deckId = $cardForm.dataset.deckId;
   const front = document.getElementById("cardFrontInput").value.trim();
@@ -272,12 +290,15 @@ function openDeckDetail(deckId) {
   cardList.innerHTML = "";
 
   if (deck.cards.length === 0) {
-    cardList.innerHTML = '<p class="empty-state">No cards yet. Add one above!</p>';
+    cardList.innerHTML =
+      '<p class="empty-state">No cards yet. Add one above!</p>';
   } else {
     deck.cards.forEach((card, idx) => {
       const item = document.createElement("div");
       item.className = "card-list-item";
-      const masteryDots = "●".repeat(Math.min(card.mastery, 5)) + "○".repeat(Math.max(0, 5 - card.mastery));
+      const masteryDots =
+        "●".repeat(Math.min(card.mastery, 5)) +
+        "○".repeat(Math.max(0, 5 - card.mastery));
       item.innerHTML = `
         <div class="card-list-num">${idx + 1}</div>
         <div class="card-list-content">
@@ -290,8 +311,12 @@ function openDeckDetail(deckId) {
           <button class="card-list-btn danger" data-action="delete" title="Delete"><i class="fa-solid fa-trash"></i></button>
         </div>
       `;
-      item.querySelector("[data-action='edit']").addEventListener("click", () => openCardModal(deckId, card.id));
-      item.querySelector("[data-action='delete']").addEventListener("click", () => deleteCard(deckId, card.id));
+      item
+        .querySelector("[data-action='edit']")
+        .addEventListener("click", () => openCardModal(deckId, card.id));
+      item
+        .querySelector("[data-action='delete']")
+        .addEventListener("click", () => deleteCard(deckId, card.id));
       cardList.appendChild(item);
     });
   }
@@ -329,14 +354,18 @@ function startStudy(deckId) {
 function showStudyCard() {
   if (!studyState) return;
   const deck = data.decks.find(d => d.id === studyState.deckId);
-  const card = deck.cards.find(c => c.id === studyState.cardIds[studyState.index]);
+  const card = deck.cards.find(
+    c => c.id === studyState.cardIds[studyState.index]
+  );
 
   document.getElementById("cardFront").textContent = card.front;
   document.getElementById("cardBack").textContent = card.back;
   document.getElementById("studyProgress").textContent =
     `Card ${studyState.index + 1} of ${studyState.cardIds.length}`;
-  document.getElementById("scoreKnown").textContent = `${studyState.known.length} ✓`;
-  document.getElementById("scoreUnknown").textContent = `${studyState.unknown.length} ✗`;
+  document.getElementById("scoreKnown").textContent =
+    `${studyState.known.length} ✓`;
+  document.getElementById("scoreUnknown").textContent =
+    `${studyState.unknown.length} ✗`;
 
   studyState.isFlipped = false;
   $flashcardInner.classList.remove("flipped");
@@ -351,7 +380,9 @@ function flipCard() {
 function markKnown() {
   if (!studyState || !studyState.isFlipped) return;
   const deck = data.decks.find(d => d.id === studyState.deckId);
-  const card = deck.cards.find(c => c.id === studyState.cardIds[studyState.index]);
+  const card = deck.cards.find(
+    c => c.id === studyState.cardIds[studyState.index]
+  );
   card.mastery = Math.min(card.mastery + 1, 5);
   card.lastReviewed = Date.now();
   studyState.known.push(card.id);
@@ -361,7 +392,9 @@ function markKnown() {
 function markDontKnow() {
   if (!studyState || !studyState.isFlipped) return;
   const deck = data.decks.find(d => d.id === studyState.deckId);
-  const card = deck.cards.find(c => c.id === studyState.cardIds[studyState.index]);
+  const card = deck.cards.find(
+    c => c.id === studyState.cardIds[studyState.index]
+  );
   card.mastery = Math.max(card.mastery - 1, 0);
   card.lastReviewed = Date.now();
   studyState.unknown.push(card.id);
@@ -389,7 +422,8 @@ function finishStudy() {
 
   const total = studyState.known.length + studyState.unknown.length;
   document.getElementById("summaryKnown").textContent = studyState.known.length;
-  document.getElementById("summaryUnknown").textContent = studyState.unknown.length;
+  document.getElementById("summaryUnknown").textContent =
+    studyState.unknown.length;
   document.getElementById("summaryAccuracy").textContent =
     `${total > 0 ? Math.round((studyState.known.length / total) * 100) : 0}%`;
 }
@@ -404,7 +438,9 @@ function exitStudy() {
 /* ── Import / Export ────────────────────────────────────────────── */
 
 function exportDecks() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -417,7 +453,7 @@ function exportDecks() {
 
 function importDecks(file) {
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = e => {
     try {
       const imported = JSON.parse(e.target.result);
       if (imported.decks && Array.isArray(imported.decks)) {
@@ -438,26 +474,40 @@ function importDecks(file) {
 /* ── Event Listeners ────────────────────────────────────────────── */
 
 // New deck
-document.getElementById("btn-new-deck").addEventListener("click", () => openDeckModal(null));
-document.getElementById("deckModalClose").addEventListener("click", closeDeckModal);
-$deckModal.addEventListener("click", (e) => { if (e.target === $deckModal) closeDeckModal(); });
+document
+  .getElementById("btn-new-deck")
+  .addEventListener("click", () => openDeckModal(null));
+document
+  .getElementById("deckModalClose")
+  .addEventListener("click", closeDeckModal);
+$deckModal.addEventListener("click", e => {
+  if (e.target === $deckModal) closeDeckModal();
+});
 
 // Card modal
-document.getElementById("cardModalClose").addEventListener("click", closeCardModal);
-$cardModal.addEventListener("click", (e) => { if (e.target === $cardModal) closeCardModal(); });
+document
+  .getElementById("cardModalClose")
+  .addEventListener("click", closeCardModal);
+$cardModal.addEventListener("click", e => {
+  if (e.target === $cardModal) closeCardModal();
+});
 
 // Detail modal
 document.getElementById("detailModalClose").addEventListener("click", () => {
   $detailModal.classList.add("hidden");
   renderDashboard();
 });
-$detailModal.addEventListener("click", (e) => { if (e.target === $detailModal) {
-  $detailModal.classList.add("hidden");
-  renderDashboard();
-}});
+$detailModal.addEventListener("click", e => {
+  if (e.target === $detailModal) {
+    $detailModal.classList.add("hidden");
+    renderDashboard();
+  }
+});
 
 // Detail actions
-document.getElementById("btn-add-card").addEventListener("click", () => openCardModal(currentDeckId, null));
+document
+  .getElementById("btn-add-card")
+  .addEventListener("click", () => openCardModal(currentDeckId, null));
 document.getElementById("btn-start-study").addEventListener("click", () => {
   $detailModal.classList.add("hidden");
   startStudy(currentDeckId);
@@ -471,15 +521,24 @@ document.getElementById("btn-delete-deck").addEventListener("click", () => {
 $flashcard.addEventListener("click", flipCard);
 document.getElementById("btn-flip").addEventListener("click", flipCard);
 document.getElementById("btn-know").addEventListener("click", markKnown);
-document.getElementById("btn-dont-know").addEventListener("click", markDontKnow);
+document
+  .getElementById("btn-dont-know")
+  .addEventListener("click", markDontKnow);
 document.getElementById("btn-back").addEventListener("click", exitStudy);
-document.getElementById("btn-study-again").addEventListener("click", () => startStudy(studyState.deckId));
-document.getElementById("btn-session-back").addEventListener("click", exitStudy);
+document
+  .getElementById("btn-study-again")
+  .addEventListener("click", () => startStudy(studyState.deckId));
+document
+  .getElementById("btn-session-back")
+  .addEventListener("click", exitStudy);
 
 // Keyboard shortcuts for study
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", e => {
   if (!$studyView.classList.contains("hidden") && studyState) {
-    if (e.key === " " || e.key === "Spacebar") { e.preventDefault(); flipCard(); }
+    if (e.key === " " || e.key === "Spacebar") {
+      e.preventDefault();
+      flipCard();
+    }
     if (e.key === "ArrowRight" || e.key === "k") markKnown();
     if (e.key === "ArrowLeft" || e.key === "j") markDontKnow();
   }
@@ -487,8 +546,12 @@ document.addEventListener("keydown", (e) => {
 
 // Import / Export
 document.getElementById("btn-export").addEventListener("click", exportDecks);
-document.getElementById("btn-import").addEventListener("click", () => document.getElementById("fileImport").click());
-document.getElementById("fileImport").addEventListener("change", (e) => {
+document
+  .getElementById("btn-import")
+  .addEventListener("click", () =>
+    document.getElementById("fileImport").click()
+  );
+document.getElementById("fileImport").addEventListener("change", e => {
   if (e.target.files[0]) importDecks(e.target.files[0]);
   e.target.value = "";
 });

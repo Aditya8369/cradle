@@ -9,7 +9,7 @@
  *  - Toggles <html class="light-theme"> — same convention as the homepage
  *  - Animated icon transition (moon ↔ sun)
  *  - Accessible: role="switch", aria-checked, aria-label
-*  - Dispatches a custom "cradle:themechange" event on <html>
+ *  - Dispatches a custom "cradle:themechange" event on <html>
  *  - Can be dropped anywhere; multiple instances stay in sync
  *
  * Events:
@@ -204,7 +204,9 @@
      */
     init() {
       const storedTheme = getStoredTheme();
-      applyTheme(storedTheme || getSystemTheme(), { persist: Boolean(storedTheme) });
+      applyTheme(storedTheme || getSystemTheme(), {
+        persist: Boolean(storedTheme),
+      });
     },
 
     /**

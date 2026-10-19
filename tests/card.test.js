@@ -97,10 +97,13 @@ class MockElement {
       .map(part => part.trim())
       .filter(part => part.startsWith("."))
       .map(part => part.slice(1));
-    return this.childNodes.find(child =>
-      child instanceof MockElement &&
-      classNames.some(className => child.classList.contains(className))
-    ) || null;
+    return (
+      this.childNodes.find(
+        child =>
+          child instanceof MockElement &&
+          classNames.some(className => child.classList.contains(className))
+      ) || null
+    );
   }
 }
 
@@ -178,8 +181,14 @@ test("create builds a base card with title, subtitle, badge and icon", () => {
   assert.ok(header.classList.contains("cradle-card__header"));
   assert.equal(header.childNodes[0].innerHTML, "♟️");
   assert.equal(header.childNodes[0].getAttribute("aria-hidden"), "true");
-  assert.equal(header.childNodes[1].childNodes[0].childNodes[0].textContent, "Chess");
-  assert.equal(header.childNodes[1].childNodes[0].childNodes[1].textContent, "New");
+  assert.equal(
+    header.childNodes[1].childNodes[0].childNodes[0].textContent,
+    "Chess"
+  );
+  assert.equal(
+    header.childNodes[1].childNodes[0].childNodes[1].textContent,
+    "New"
+  );
   assert.equal(header.childNodes[1].childNodes[1].textContent, "Strategy game");
 });
 
@@ -195,7 +204,9 @@ test("create renders children content and footer with the requested alignment", 
   assert.equal(element.childNodes.length, 3);
   assert.ok(element.childNodes[1].classList.contains("cradle-card__content"));
   assert.equal(element.childNodes[1].innerHTML, "<p>Hello</p>");
-  assert.ok(element.childNodes[2].classList.contains("cradle-card__footer--between"));
+  assert.ok(
+    element.childNodes[2].classList.contains("cradle-card__footer--between")
+  );
   assert.equal(element.childNodes[2].innerHTML, "<button>Open</button>");
 });
 
@@ -268,12 +279,16 @@ test("clickable cards expose button semantics, keyboard activation and custom cl
   element.dispatchEvent({
     type: "keydown",
     key: "Enter",
-    preventDefault() { this.prevented = true; },
+    preventDefault() {
+      this.prevented = true;
+    },
   });
   element.dispatchEvent({
     type: "keydown",
     key: " ",
-    preventDefault() { this.prevented = true; },
+    preventDefault() {
+      this.prevented = true;
+    },
   });
 
   assert.equal(clicks, 3);
@@ -299,13 +314,18 @@ test("isNew adds the New ribbon without affecting the card structure", () => {
   const element = card.create({ title: "Fresh", isNew: true });
 
   assert.equal(element.childNodes[0].textContent, "New");
-  assert.ok(element.childNodes[0].classList.contains("cradle-card__new-ribbon"));
+  assert.ok(
+    element.childNodes[0].classList.contains("cradle-card__new-ribbon")
+  );
   assert.ok(element.childNodes[1].classList.contains("cradle-card__header"));
 });
 
 test("subtitle falls back into content when there is no title", () => {
   const { card } = loadCard();
-  const element = card.create({ subtitle: "A useful description", children: "Body" });
+  const element = card.create({
+    subtitle: "A useful description",
+    children: "Body",
+  });
   const content = element.childNodes[0];
 
   assert.ok(content.classList.contains("cradle-card__content"));
@@ -344,7 +364,10 @@ test("HTML auto-upgrade adds card styling and wraps unstructured content", () =>
   assert.ok(element.classList.contains("cradle-card--clickable"));
   assert.equal(element.getAttribute("tabindex"), "0");
   assert.ok(element.childNodes[0].classList.contains("cradle-card__content"));
-  assert.equal(element.childNodes[0].childNodes[0].textContent, "Existing content");
+  assert.equal(
+    element.childNodes[0].childNodes[0].textContent,
+    "Existing content"
+  );
 });
 
 test("HTML auto-upgrade injects header metadata and preserves existing content", () => {
@@ -364,8 +387,14 @@ test("HTML auto-upgrade injects header metadata and preserves existing content",
   assert.equal(element.childNodes.length, 2);
   const header = element.childNodes[0];
   assert.equal(header.childNodes[0].innerHTML, "📊");
-  assert.equal(header.childNodes[1].childNodes[0].childNodes[0].textContent, "Dashboard");
-  assert.equal(header.childNodes[1].childNodes[0].childNodes[1].textContent, "Beta");
+  assert.equal(
+    header.childNodes[1].childNodes[0].childNodes[0].textContent,
+    "Dashboard"
+  );
+  assert.equal(
+    header.childNodes[1].childNodes[0].childNodes[1].textContent,
+    "Beta"
+  );
   assert.equal(header.childNodes[1].childNodes[1].textContent, "Overview");
   assert.equal(element.childNodes[1].childNodes[0].textContent, "Stats");
 });
@@ -386,8 +415,10 @@ test("HTML auto-upgrade is idempotent for classes and structured content", () =>
   assert.equal(classes.filter(name => name === "cradle-card").length, 1);
   assert.equal(element.childNodes.length, 3);
   assert.equal(
-    element.childNodes.filter(child =>
-      child instanceof MockElement && child.classList.contains("cradle-card__header")
+    element.childNodes.filter(
+      child =>
+        child instanceof MockElement &&
+        child.classList.contains("cradle-card__header")
     ).length,
     2
   );

@@ -26,10 +26,7 @@ test("returns base rent for a property", () => {
     rent: 20,
   };
 
-  assert.equal(
-    computeRent(property, {}, 0, {}, []),
-    20
-  );
+  assert.equal(computeRent(property, {}, 0, {}, []), 20);
 });
 
 test("returns correct railroad rent for one owned railroad", () => {
@@ -46,10 +43,7 @@ test("returns correct railroad rent for one owned railroad", () => {
     5: 0,
   };
 
-  assert.equal(
-    computeRent(board[0], owner, 0, owners, board),
-    25
-  );
+  assert.equal(computeRent(board[0], owner, 0, owners, board), 25);
 });
 
 test("returns correct utility rent when both utilities are owned", () => {
@@ -71,10 +65,7 @@ test("returns correct utility rent when both utilities are owned", () => {
     28: 0,
   };
 
-  assert.equal(
-    computeRent(board[0], owner, 7, owners, board),
-    70
-  );
+  assert.equal(computeRent(board[0], owner, 7, owners, board), 70);
 });
 
 test("player names are rendered as text instead of HTML", () => {

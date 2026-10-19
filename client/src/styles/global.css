@@ -1,9 +1,15 @@
-@import './tokens.css';
+@import "./tokens.css";
 
 body {
   background-color: var(--cradle-bg-primary);
   color: var(--cradle-color-text-main);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   margin: 0;
 }
 

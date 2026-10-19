@@ -6,12 +6,12 @@
 
 /* ── DOM References ─────────────────────────────────────────────── */
 
-const $editor     = document.getElementById("editor");
-const $preview    = document.getElementById("preview");
-const $charCount  = document.getElementById("charCount");
-const $wordCount  = document.getElementById("wordCount");
-const $lineInfo   = document.getElementById("lineInfo");
-const $readTime   = document.getElementById("readTime");
+const $editor = document.getElementById("editor");
+const $preview = document.getElementById("preview");
+const $charCount = document.getElementById("charCount");
+const $wordCount = document.getElementById("wordCount");
+const $lineInfo = document.getElementById("lineInfo");
+const $readTime = document.getElementById("readTime");
 const $paneDivider = document.getElementById("paneDivider");
 const $editorContainer = document.getElementById("editorContainer");
 
@@ -227,7 +227,7 @@ function wrapSelection(before, after, placeholder) {
   if (!sel.text) {
     /* Select the placeholder so user can type over it */
     $editor.selectionStart = sel.start + before.length;
-    $editor.selectionEnd   = sel.start + before.length + placeholder.length;
+    $editor.selectionEnd = sel.start + before.length + placeholder.length;
   }
   suppressInput = false;
   $editor.focus();
@@ -240,7 +240,10 @@ function getSelectedLines() {
   const lineStart = before.lastIndexOf("\n") + 1;
   const after = $editor.value.substring(sel.end);
   const lineEnd = sel.end + after.indexOf("\n");
-  const block = $editor.value.substring(lineStart, lineEnd === sel.end - 1 ? $editor.value.length : lineEnd);
+  const block = $editor.value.substring(
+    lineStart,
+    lineEnd === sel.end - 1 ? $editor.value.length : lineEnd
+  );
   const lines = block.split("\n");
   return lines.map((text, i) => ({
     text,
@@ -319,14 +322,14 @@ function downloadFile(filename, content, mime) {
 
 let isDragging = false;
 
-$paneDivider.addEventListener("mousedown", (e) => {
+$paneDivider.addEventListener("mousedown", e => {
   isDragging = true;
   document.body.style.cursor = "col-resize";
   document.body.style.userSelect = "none";
   e.preventDefault();
 });
 
-document.addEventListener("mousemove", (e) => {
+document.addEventListener("mousemove", e => {
   if (!isDragging) return;
   const rect = $editorContainer.getBoundingClientRect();
   const x = e.clientX - rect.left;
@@ -347,7 +350,7 @@ document.addEventListener("mouseup", () => {
 
 /* ── Keyboard Shortcuts ─────────────────────────────────────────── */
 
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", e => {
   if (!e.ctrlKey && !e.metaKey) return;
 
   const key = e.key.toLowerCase();
@@ -379,18 +382,22 @@ $editor.addEventListener("input", syncAll);
 $editor.addEventListener("keyup", updateLineInfo);
 $editor.addEventListener("click", updateLineInfo);
 
-document.getElementById("toolbar").addEventListener("click", (e) => {
+document.getElementById("toolbar").addEventListener("click", e => {
   const btn = e.target.closest(".tool-btn");
   if (btn && btn.dataset.action && actions[btn.dataset.action]) {
     actions[btn.dataset.action]();
   }
 });
 
-document.getElementById("btn-export-md").addEventListener("click", exportMarkdown);
-document.getElementById("btn-export-html").addEventListener("click", exportHTML);
+document
+  .getElementById("btn-export-md")
+  .addEventListener("click", exportMarkdown);
+document
+  .getElementById("btn-export-html")
+  .addEventListener("click", exportHTML);
 
 /* Tab key inserts spaces instead of moving focus */
-$editor.addEventListener("keydown", (e) => {
+$editor.addEventListener("keydown", e => {
   if (e.key === "Tab") {
     e.preventDefault();
     insertAtCursor("  ");

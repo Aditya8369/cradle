@@ -36,6 +36,12 @@
     "dateAdded": "2026-06-18T12:02:12+05:30"
   },
   {
+    "title": "Audio Spectrogram Analyzer",
+    "category": "misc",
+    "path": "projects/misc/audio-spectrogram-analyzer/",
+    "dateAdded": "2026-08-31T12:46:36Z"
+  },
+  {
     "title": "Audio Waveform Generator",
     "category": "misc",
     "path": "projects/misc/audio-waveform-generator/",
@@ -70,6 +76,12 @@
     "category": "games",
     "path": "projects/games/chess/",
     "dateAdded": "2026-06-18T12:02:12+05:30"
+  },
+  {
+    "title": "Collaborative Whiteboard",
+    "category": "misc",
+    "path": "projects/misc/collaborative-whiteboard/",
+    "dateAdded": "2026-08-31T12:21:19Z"
   },
   {
     "title": "Color Contrast Checker",
@@ -150,6 +162,12 @@
     "dateAdded": "2026-07-24T02:10:21+05:30"
   },
   {
+    "title": "Flashcard Study",
+    "category": "productivity",
+    "path": "projects/productivity/flashcard-study/",
+    "dateAdded": "2026-08-31T06:39:20+05:30"
+  },
+  {
     "title": "Fourier Series Visualizer",
     "category": "math",
     "path": "projects/math/fourier-series-visualizer/",
@@ -204,10 +222,22 @@
     "dateAdded": "2026-08-29T19:03:26+05:30"
   },
   {
+    "title": "Knowledge Graph",
+    "category": "productivity",
+    "path": "projects/productivity/knowledge-graph/",
+    "dateAdded": "2026-08-31T12:43:04Z"
+  },
+  {
     "title": "Ludo Game",
     "category": "games",
     "path": "projects/games/ludo-game/",
     "dateAdded": "2026-06-19T14:31:47+05:30"
+  },
+  {
+    "title": "Markdown Editor",
+    "category": "editor",
+    "path": "projects/editor/markdown-editor/",
+    "dateAdded": "2026-08-31T06:31:59+05:30"
   },
   {
     "title": "Markdown Resume Generator",
@@ -252,6 +282,12 @@
     "dateAdded": "2026-06-18T16:52:15+05:30"
   },
   {
+    "title": "Pathfinding Visualizer",
+    "category": "math",
+    "path": "projects/math/pathfinding-visualizer/",
+    "dateAdded": "2026-08-31T12:17:09Z"
+  },
+  {
     "title": "Percussion",
     "category": "instruments",
     "path": "projects/instruments/percussion/",
@@ -280,6 +316,12 @@
     "category": "productivity",
     "path": "projects/productivity/pomodoro-timer/",
     "dateAdded": "2026-08-30T05:52:29+05:30"
+  },
+  {
+    "title": "Procedural Dungeon Generator",
+    "category": "games",
+    "path": "projects/games/procedural-dungeon-generator/",
+    "dateAdded": "2026-08-31T12:29:25Z"
   },
   {
     "title": "Reading Progress Tracker",
@@ -336,6 +378,12 @@
     "dateAdded": "2026-08-29T18:47:15+05:30"
   },
   {
+    "title": "Typing Speed Test",
+    "category": "misc",
+    "path": "projects/misc/typing-speed-test/",
+    "dateAdded": "2026-08-31T06:46:27+05:30"
+  },
+  {
     "title": "Unit Circle Explorer",
     "category": "math",
     "path": "projects/math/unit-circle-explorer/",
@@ -343,9 +391,9 @@
   },
   {
     "title": "Unit Converter",
-    "category": "dev-tools",
-    "path": "projects/dev-tools/unit-converter/",
-    "dateAdded": "2026-08-30T05:55:24+05:30"
+    "category": "productivity",
+    "path": "projects/productivity/unit-converter/",
+    "dateAdded": "2026-08-31T06:27:15+05:30"
   },
   {
     "title": "URL Parser",

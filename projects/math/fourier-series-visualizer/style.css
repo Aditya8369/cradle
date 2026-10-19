@@ -36,7 +36,9 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  transition: background-color var(--cradle-transition), color var(--cradle-transition);
+  transition:
+    background-color var(--cradle-transition),
+    color var(--cradle-transition);
 }
 
 /* ===================== HEADER ===================== */
@@ -84,7 +86,11 @@ body {
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(to right, var(--cradle-text), var(--theme-accent));
+  background: linear-gradient(
+    to right,
+    var(--cradle-text),
+    var(--theme-accent)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -540,9 +546,12 @@ body {
   --cradle-text-secondary: #334155;
   --cradle-muted: #64748b;
 
-  --cradle-shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-  --cradle-shadow: 0 8px 24px rgba(99, 102, 241, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --cradle-shadow-lg: 0 20px 50px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --cradle-shadow-sm:
+    0 2px 8px rgba(99, 102, 241, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --cradle-shadow:
+    0 8px 24px rgba(99, 102, 241, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --cradle-shadow-lg:
+    0 20px 50px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
 
   /* ── Project-specific light tokens ── */
   --canvas-bg: #0a0e1a;
@@ -575,7 +584,11 @@ body {
 
 /* ── Brand text gradient adapts ── */
 [data-theme="light"] .brand-text h1 {
-  background: linear-gradient(to right, var(--cradle-text), var(--theme-accent));
+  background: linear-gradient(
+    to right,
+    var(--cradle-text),
+    var(--theme-accent)
+  );
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -618,7 +631,9 @@ body {
   background: #dfe2ea;
 }
 
-[data-theme="light"] .harmonic-control input[type="range"]::-webkit-slider-thumb {
+[data-theme="light"]
+  .harmonic-control
+  input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
 }
 

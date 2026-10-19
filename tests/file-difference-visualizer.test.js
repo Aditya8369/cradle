@@ -12,14 +12,14 @@ test("DiffEngine computeLineDiff detects identical content", () => {
   const text = "apple\nbanana\ncherry";
   const diff = DiffEngine.computeLineDiff(text, text);
   assert.equal(diff.length, 3);
-  assert.ok(diff.every((item) => item.type === "equal"));
+  assert.ok(diff.every(item => item.type === "equal"));
 });
 
 test("DiffEngine computeLineDiff detects additions and deletions", () => {
   const textA = "apple\nbanana";
   const textB = "apple\norange\nbanana";
   const diff = DiffEngine.computeLineDiff(textA, textB);
-  
+
   const stats = DiffEngine.computeDiffStats(diff);
   assert.equal(stats.additions, 1);
   assert.equal(stats.deletions, 0);
@@ -29,12 +29,16 @@ test("DiffEngine computeLineDiff detects additions and deletions", () => {
 test("DiffEngine computeLineDiff respects ignoreWhitespace option", () => {
   const textA = "  apple  \nbanana";
   const textB = "apple\n  banana  ";
-  
-  const diffNormal = DiffEngine.computeLineDiff(textA, textB, { ignoreWhitespace: false });
+
+  const diffNormal = DiffEngine.computeLineDiff(textA, textB, {
+    ignoreWhitespace: false,
+  });
   const statsNormal = DiffEngine.computeDiffStats(diffNormal);
   assert.ok(statsNormal.totalChanges > 0);
 
-  const diffIgnore = DiffEngine.computeLineDiff(textA, textB, { ignoreWhitespace: true });
+  const diffIgnore = DiffEngine.computeLineDiff(textA, textB, {
+    ignoreWhitespace: true,
+  });
   const statsIgnore = DiffEngine.computeDiffStats(diffIgnore);
   assert.equal(statsIgnore.totalChanges, 0);
 });
@@ -65,7 +69,10 @@ test("DiffEngine.validateInputSize accepts inputs below default limits", () => {
 test("DiffEngine.validateInputSize accepts inputs exactly at configured limit", () => {
   const textA = "hello"; // 5 bytes
   const textB = "world"; // 5 bytes
-  const res = DiffEngine.validateInputSize(textA, textB, { maxSizeBytes: 5, maxLines: 10 });
+  const res = DiffEngine.validateInputSize(textA, textB, {
+    maxSizeBytes: 5,
+    maxLines: 10,
+  });
 
   assert.equal(res.valid, true);
   assert.equal(res.error, null);
@@ -103,7 +110,10 @@ test("DiffEngine.validateInputSize rejects when line count exceeds maxLines for 
   assert.equal(res.valid, false);
   assert.equal(res.exceededLimit, "lines");
   assert.equal(res.file, "A");
-  assert.match(res.error, /Original file \(A\) line count \(15\) exceeds maximum limit of 10 lines/);
+  assert.match(
+    res.error,
+    /Original file \(A\) line count \(15\) exceeds maximum limit of 10 lines/
+  );
 });
 
 test("DiffEngine.validateInputSize rejects when line count exceeds maxLines for file B", () => {
@@ -114,7 +124,10 @@ test("DiffEngine.validateInputSize rejects when line count exceeds maxLines for 
   assert.equal(res.valid, false);
   assert.equal(res.exceededLimit, "lines");
   assert.equal(res.file, "B");
-  assert.match(res.error, /Modified file \(B\) line count \(15\) exceeds maximum limit of 10 lines/);
+  assert.match(
+    res.error,
+    /Modified file \(B\) line count \(15\) exceeds maximum limit of 10 lines/
+  );
 });
 
 test("DiffEngine.computeLineDiff rejects oversized input without producing diff output", () => {
@@ -140,4 +153,3 @@ test("DiffEngine.computeDiffStats and generateUnifiedPatch handle rejected diff 
   const patch = DiffEngine.generateUnifiedPatch("fileA.txt", "fileB.txt", diff);
   assert.match(patch, /# Error generating patch/);
 });
-

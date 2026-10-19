@@ -53,9 +53,8 @@
     "C#6": 1108.73,
     D6: 1174.66,
     "D#6": 1244.51,
-    E6: 1318.51
+    E6: 1318.51,
   });
-
 
   const KEY_TO_NOTE = Object.freeze({
     // C3 → B3
@@ -88,31 +87,29 @@
 
     // C5 → B5
     k: "C5",
-    "1": "C#5",
+    1: "C#5",
     l: "D5",
-    "2": "D#5",
+    2: "D#5",
     ";": "E5",
     "'": "F5",
-    "3": "F#5",
+    3: "F#5",
     ",": "G5",
-    "4": "G#5",
+    4: "G#5",
     ".": "A5",
-    "5": "A#5",
+    5: "A#5",
     "/": "B5",
 
     // C6 → E6
-    "6": "C6",
-    "7": "C#6",
-    "8": "D6",
-    "9": "D#6",
-    "0": "E6"
+    6: "C6",
+    7: "C#6",
+    8: "D6",
+    9: "D#6",
+    0: "E6",
   });
 
   const NOTE_TO_KEY = Object.freeze(
     Object.fromEntries(
-      Object.entries(KEY_TO_NOTE).map(
-        ([key, note]) => [note, key]
-      )
+      Object.entries(KEY_TO_NOTE).map(([key, note]) => [note, key])
     )
   );
 
@@ -125,9 +122,7 @@
       return null;
     }
 
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
 
     if (!AudioContext) {
       return null;
@@ -145,86 +140,45 @@
   }
 
   function createNoiseBuffer(context, duration) {
-    const length = Math.floor(
-      context.sampleRate * duration
-    );
+    const length = Math.floor(context.sampleRate * duration);
 
-    const buffer = context.createBuffer(
-      1,
-      length,
-      context.sampleRate
-    );
+    const buffer = context.createBuffer(1, length, context.sampleRate);
 
     const data = buffer.getChannelData(0);
 
     for (let i = 0; i < length; i++) {
       const progress = i / length;
-      const decay = Math.pow(
-        1 - progress,
-        2.5
-      );
+      const decay = Math.pow(1 - progress, 2.5);
 
-      data[i] =
-        (Math.random() * 2 - 1) *
-        decay;
+      data[i] = (Math.random() * 2 - 1) * decay;
     }
 
     return buffer;
   }
 
-  function createHammerAttack(
-    context,
-    destination,
-    frequency,
-    time
-  ) {
-    const source =
-      context.createBufferSource();
+  function createHammerAttack(context, destination, frequency, time) {
+    const source = context.createBufferSource();
 
-    const filter =
-      context.createBiquadFilter();
+    const filter = context.createBiquadFilter();
 
-    const gain =
-      context.createGain();
+    const gain = context.createGain();
 
-    source.buffer =
-      createNoiseBuffer(
-        context,
-        0.035
-      );
+    source.buffer = createNoiseBuffer(context, 0.035);
 
     filter.type = "bandpass";
 
     filter.frequency.setValueAtTime(
-      Math.min(
-        Math.max(
-          frequency * 5,
-          1800
-        ),
-        6500
-      ),
+      Math.min(Math.max(frequency * 5, 1800), 6500),
       time
     );
 
-    filter.Q.setValueAtTime(
-      1.8,
-      time
-    );
+    filter.Q.setValueAtTime(1.8, time);
 
-    gain.gain.setValueAtTime(
-      0.0001,
-      time
-    );
+    gain.gain.setValueAtTime(0.0001, time);
 
-    gain.gain.exponentialRampToValueAtTime(
-      0.24,
-      time + 0.001
-    );
+    gain.gain.exponentialRampToValueAtTime(0.24, time + 0.001);
 
-    gain.gain.exponentialRampToValueAtTime(
-      0.0001,
-      time + 0.032
-    );
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.032);
 
     source.connect(filter);
     filter.connect(gain);
@@ -234,52 +188,26 @@
     source.stop(time + 0.04);
   }
 
-  function createStringAttack(
-    context,
-    destination,
-    frequency,
-    time
-  ) {
-    const oscillator =
-      context.createOscillator();
+  function createStringAttack(context, destination, frequency, time) {
+    const oscillator = context.createOscillator();
 
-    const gain =
-      context.createGain();
+    const gain = context.createGain();
 
-    const filter =
-      context.createBiquadFilter();
+    const filter = context.createBiquadFilter();
 
     oscillator.type = "sawtooth";
 
-    oscillator.frequency.setValueAtTime(
-      frequency * 2.01,
-      time
-    );
+    oscillator.frequency.setValueAtTime(frequency * 2.01, time);
 
     filter.type = "highpass";
 
-    filter.frequency.setValueAtTime(
-      Math.min(
-        frequency * 1.5,
-        3000
-      ),
-      time
-    );
+    filter.frequency.setValueAtTime(Math.min(frequency * 1.5, 3000), time);
 
-    gain.gain.setValueAtTime(
-      0.0001,
-      time
-    );
+    gain.gain.setValueAtTime(0.0001, time);
 
-    gain.gain.exponentialRampToValueAtTime(
-      0.09,
-      time + 0.002
-    );
+    gain.gain.exponentialRampToValueAtTime(0.09, time + 0.002);
 
-    gain.gain.exponentialRampToValueAtTime(
-      0.0001,
-      time + 0.12
-    );
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.12);
 
     oscillator.connect(filter);
     filter.connect(gain);
@@ -289,48 +217,24 @@
     oscillator.stop(time + 0.14);
   }
 
-  function createVoice(
-    context,
-    frequency,
-    time
-  ) {
-    const output =
-      context.createGain();
+  function createVoice(context, frequency, time) {
+    const output = context.createGain();
 
-    const brightness =
-      context.createBiquadFilter();
+    const brightness = context.createBiquadFilter();
 
     brightness.type = "lowpass";
 
-    brightness.frequency.setValueAtTime(
-      7200,
-      time
-    );
+    brightness.frequency.setValueAtTime(7200, time);
 
-    brightness.Q.setValueAtTime(
-      0.35,
-      time
-    );
+    brightness.Q.setValueAtTime(0.35, time);
 
-    output.gain.setValueAtTime(
-      0.0001,
-      time
-    );
+    output.gain.setValueAtTime(0.0001, time);
 
-    output.gain.exponentialRampToValueAtTime(
-      0.42,
-      time + 0.006
-    );
+    output.gain.exponentialRampToValueAtTime(0.42, time + 0.006);
 
-    output.gain.exponentialRampToValueAtTime(
-      0.24,
-      time + 0.12
-    );
+    output.gain.exponentialRampToValueAtTime(0.24, time + 0.12);
 
-    output.gain.exponentialRampToValueAtTime(
-      0.14,
-      time + 0.8
-    );
+    output.gain.exponentialRampToValueAtTime(0.14, time + 0.8);
 
     brightness.connect(output);
     output.connect(context.destination);
@@ -344,53 +248,35 @@
       [4, 0.055, 1.002],
       [5, 0.028, 0.997],
       [6, 0.014, 1.003],
-      [7, 0.008, 0.996]
+      [7, 0.008, 0.996],
     ];
 
-    harmonics.forEach(
-      ([multiplier, volume, detune]) => {
-        const oscillator =
-          context.createOscillator();
+    harmonics.forEach(([multiplier, volume, detune]) => {
+      const oscillator = context.createOscillator();
 
-        const harmonicGain =
-          context.createGain();
+      const harmonicGain = context.createGain();
 
-        oscillator.type =
-          multiplier === 1
-            ? "triangle"
-            : "sine";
+      oscillator.type = multiplier === 1 ? "triangle" : "sine";
 
-        oscillator.frequency.setValueAtTime(
-          frequency *
-            multiplier *
-            detune,
-          time
-        );
+      oscillator.frequency.setValueAtTime(
+        frequency * multiplier * detune,
+        time
+      );
 
-        harmonicGain.gain.setValueAtTime(
-          volume,
-          time
-        );
+      harmonicGain.gain.setValueAtTime(volume, time);
 
-        oscillator.connect(
-          harmonicGain
-        );
+      oscillator.connect(harmonicGain);
 
-        harmonicGain.connect(
-          brightness
-        );
+      harmonicGain.connect(brightness);
 
-        oscillator.start(time);
+      oscillator.start(time);
 
-        oscillators.push(
-          oscillator
-        );
-      }
-    );
+      oscillators.push(oscillator);
+    });
 
     return {
       output,
-      oscillators
+      oscillators,
     };
   }
 
@@ -403,95 +289,58 @@
       return true;
     }
 
-    const context =
-      getAudioContext();
+    const context = getAudioContext();
 
     if (!context) {
       return false;
     }
 
-    const time =
-      context.currentTime;
+    const time = context.currentTime;
 
-    const frequency =
-      NOTE_FREQUENCIES[note];
+    const frequency = NOTE_FREQUENCIES[note];
 
-    const voice =
-      createVoice(
-        context,
-        frequency,
-        time
-      );
+    const voice = createVoice(context, frequency, time);
 
-    createHammerAttack(
-      context,
-      voice.output,
-      frequency,
-      time
-    );
+    createHammerAttack(context, voice.output, frequency, time);
 
-    createStringAttack(
-      context,
-      voice.output,
-      frequency,
-      time
-    );
+    createStringAttack(context, voice.output, frequency, time);
 
-    activeVoices.set(
-      note,
-      voice
-    );
+    activeVoices.set(note, voice);
 
     return true;
   }
 
   function stopNote(note) {
-    const voice =
-      activeVoices.get(note);
+    const voice = activeVoices.get(note);
 
     if (!voice) {
       return false;
     }
 
-    const context =
-      getAudioContext();
+    const context = getAudioContext();
 
     if (!context) {
       return false;
     }
 
-    const time =
-      context.currentTime;
+    const time = context.currentTime;
 
-    voice.output.gain.cancelScheduledValues(
-      time
-    );
+    voice.output.gain.cancelScheduledValues(time);
 
     voice.output.gain.setValueAtTime(
-      Math.max(
-        voice.output.gain.value,
-        0.0001
-      ),
+      Math.max(voice.output.gain.value, 0.0001),
       time
     );
 
-    voice.output.gain.exponentialRampToValueAtTime(
-      0.0001,
-      time + 0.7
-    );
+    voice.output.gain.exponentialRampToValueAtTime(0.0001, time + 0.7);
 
-    const stopTime =
-      time + 0.75;
+    const stopTime = time + 0.75;
 
-    voice.oscillators.forEach(
-      oscillator => {
-        try {
-          oscillator.stop(
-            stopTime
-          );
-        } catch (_) {}
-      }
-    );
+    voice.oscillators.forEach(oscillator => {
+      try {
+        oscillator.stop(stopTime);
+      } catch (_) {}
+    });
 
     activeVoices.delete(note);
 
@@ -503,59 +352,37 @@
       return false;
     }
 
-    const context =
-      getAudioContext();
+    const context = getAudioContext();
 
     if (!context) {
       return false;
     }
 
-    const voice =
-      activeVoices.get(note);
+    const voice = activeVoices.get(note);
 
     if (!voice) {
       return false;
     }
 
-    const time =
-      context.currentTime;
+    const time = context.currentTime;
 
-    voice.output.gain.cancelScheduledValues(
-      time
-    );
+    voice.output.gain.cancelScheduledValues(time);
 
-    voice.output.gain.setValueAtTime(
-      0.0001,
-      time
-    );
+    voice.output.gain.setValueAtTime(0.0001, time);
 
-    voice.output.gain.exponentialRampToValueAtTime(
-      0.42,
-      time + 0.006
-    );
+    voice.output.gain.exponentialRampToValueAtTime(0.42, time + 0.006);
 
-    voice.output.gain.exponentialRampToValueAtTime(
-      0.14,
-      time + 0.8
-    );
+    voice.output.gain.exponentialRampToValueAtTime(0.14, time + 0.8);
 
-    voice.output.gain.exponentialRampToValueAtTime(
-      0.0001,
-      time + 2.2
-    );
+    voice.output.gain.exponentialRampToValueAtTime(0.0001, time + 2.2);
 
-    const stopTime =
-      time + 2.25;
+    const stopTime = time + 2.25;
 
-    voice.oscillators.forEach(
-      oscillator => {
-        try {
-          oscillator.stop(
-            stopTime
-          );
-        } catch (_) {}
-      }
-    );
+    voice.oscillators.forEach(oscillator => {
+      try {
+        oscillator.stop(stopTime);
+      } catch (_) {}
+    });
 
     activeVoices.delete(note);
 
@@ -563,16 +390,13 @@
   }
 
   function stopAllNotes() {
-    [...activeVoices.keys()].forEach(
-      note => {
-        stopNote(note);
-      }
-    );
+    [...activeVoices.keys()].forEach(note => {
+      stopNote(note);
+    });
   }
 
   function playNoteFromKey(key) {
-    const note =
-      getNoteFromKey(key);
+    const note = getNoteFromKey(key);
 
     if (!note) {
       return false;
@@ -582,8 +406,7 @@
   }
 
   function stopNoteFromKey(key) {
-    const note =
-      getNoteFromKey(key);
+    const note = getNoteFromKey(key);
 
     if (!note) {
       return false;
@@ -601,35 +424,24 @@
       return null;
     }
 
-    return (
-      KEY_TO_NOTE[
-        key.toLowerCase()
-      ] || null
-    );
+    return KEY_TO_NOTE[key.toLowerCase()] || null;
   }
 
   function getKeyFromNote(note) {
-    return (
-      NOTE_TO_KEY[note] || null
-    );
+    return NOTE_TO_KEY[note] || null;
   }
 
   function isValidNote(note) {
-    return Object.prototype.hasOwnProperty.call(
-      NOTE_FREQUENCIES,
-      note
-    );
+    return Object.prototype.hasOwnProperty.call(NOTE_FREQUENCIES, note);
   }
 
   function getNotes() {
-    return Object.keys(
-      NOTE_FREQUENCIES
-    );
+    return Object.keys(NOTE_FREQUENCIES);
   }
 
   function getKeyboardMap() {
     return {
-      ...KEY_TO_NOTE
+      ...KEY_TO_NOTE,
     };
   }
 
@@ -648,6 +460,6 @@
     playNote,
     playNoteFromKey,
     stopNoteFromKey,
-    stopAllNotes
+    stopAllNotes,
   };
 });

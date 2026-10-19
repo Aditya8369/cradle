@@ -7,19 +7,22 @@ function titleCase(str) {
     .replace(/\b\w/g, char => char.toUpperCase());
 
   const acronyms = {
-    "Ai": "AI",
-    "Api": "API",
-    "Ascii": "ASCII",
-    "Cpu": "CPU",
-    "Qr": "QR",
-    "Css": "CSS",
-    "Json": "JSON",
-    "Url": "URL",
-    "Html": "HTML",
-    "Csv": "CSV"
+    Ai: "AI",
+    Api: "API",
+    Ascii: "ASCII",
+    Cpu: "CPU",
+    Qr: "QR",
+    Css: "CSS",
+    Json: "JSON",
+    Url: "URL",
+    Html: "HTML",
+    Csv: "CSV",
   };
 
-  return title.replace(/\b(Ai|Api|Ascii|Cpu|Qr|Css|Json|Url|Html|Csv)\b/g, match => acronyms[match]);
+  return title.replace(
+    /\b(Ai|Api|Ascii|Cpu|Qr|Css|Json|Url|Html|Csv)\b/g,
+    match => acronyms[match]
+  );
 }
 
 /**
@@ -38,7 +41,9 @@ function discoverProjects(projectsDir, repoRoot) {
   const categories = fs
     .readdirSync(projectsDir, { withFileTypes: true })
     .filter(d => d.isDirectory())
-    .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+    );
 
   for (const cat of categories) {
     const categoryName = path.basename(cat.name);
@@ -47,7 +52,9 @@ function discoverProjects(projectsDir, repoRoot) {
     const projectFolders = fs
       .readdirSync(catPath, { withFileTypes: true })
       .filter(d => d.isDirectory())
-      .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+      );
 
     for (const proj of projectFolders) {
       const projectName = path.basename(proj.name);
@@ -60,7 +67,7 @@ function discoverProjects(projectsDir, repoRoot) {
         category: categoryName,
         title: title,
         relPath: relPath,
-        absPath: absPath
+        absPath: absPath,
       });
     }
   }
@@ -77,5 +84,5 @@ function discoverProjects(projectsDir, repoRoot) {
 
 module.exports = {
   titleCase,
-  discoverProjects
+  discoverProjects,
 };

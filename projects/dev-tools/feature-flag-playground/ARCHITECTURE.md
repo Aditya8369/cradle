@@ -47,12 +47,12 @@ User interaction → script.js (DOM layer)
 
 ## Component Breakdown
 
-| File            | Responsibility                                                                 |
-| ---------------- | ------------------------------------------------------------------------------- |
-| `flagEngine.js`  | CRUD for flags, environment state updates, demo-data seeding, JSON import/export, deterministic user-bucket hashing, flag evaluation |
-| `script.js`      | Renders flag tables per environment, wires tabs/search/form/toggle/rollout events, drives the "Evaluate for a user" panel |
-| `index.html`     | Static structure: header/summary, toolbar, new-flag form, environment tabs, evaluate panel |
-| `style.css`      | Layout and visual styling, built on top of `tokens.css`                       |
+| File            | Responsibility                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `flagEngine.js` | CRUD for flags, environment state updates, demo-data seeding, JSON import/export, deterministic user-bucket hashing, flag evaluation |
+| `script.js`     | Renders flag tables per environment, wires tabs/search/form/toggle/rollout events, drives the "Evaluate for a user" panel            |
+| `index.html`    | Static structure: header/summary, toolbar, new-flag form, environment tabs, evaluate panel                                           |
+| `style.css`     | Layout and visual styling, built on top of `tokens.css`                                                                              |
 
 ## Data Flow / Execution Flow
 
@@ -69,7 +69,7 @@ User interaction → script.js (DOM layer)
    which adds a new flag disabled in all three environments.
 6. The "Evaluate for a user" panel takes a user ID, then for the
    active environment tab calls `FlagEngine.evaluate(flag, env,
-   userId)` for every flag, showing ON/OFF and the computed bucket.
+userId)` for every flag, showing ON/OFF and the computed bucket.
 
 ## Key Features
 

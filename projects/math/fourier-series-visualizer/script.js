@@ -5,45 +5,54 @@
  */
 
 /* ──── DOM Refs ────────────────────────────────────────────────────── */
-const compositeCanvas = document.getElementById('compositeCanvas');
-const harmonicsCanvas = document.getElementById('harmonicsCanvas');
-const ctxComposite = compositeCanvas ? compositeCanvas.getContext('2d') : null;
-const ctxHarmonics = harmonicsCanvas ? harmonicsCanvas.getContext('2d') : null;
+const compositeCanvas = document.getElementById("compositeCanvas");
+const harmonicsCanvas = document.getElementById("harmonicsCanvas");
+const ctxComposite = compositeCanvas ? compositeCanvas.getContext("2d") : null;
+const ctxHarmonics = harmonicsCanvas ? harmonicsCanvas.getContext("2d") : null;
 
-const waveBtns = document.querySelectorAll('.wave-btn');
-const freqSlider = document.getElementById('freqSlider');
-const harmCount = document.getElementById('harmCount');
-const speedSlider = document.getElementById('speedSlider');
-const freqDisplay = document.getElementById('freqDisplay');
-const harmDisplay = document.getElementById('harmDisplay');
-const speedDisplay = document.getElementById('speedDisplay');
-const harmonicListEl = document.getElementById('harmonicList');
-const animateBtn = document.getElementById('animateBtn');
-const animateIcon = document.getElementById('animateIcon');
-const resetBtn = document.getElementById('resetBtn');
-const compositeMeta = document.getElementById('compositeMeta');
-const harmonicsMeta = document.getElementById('harmonicsMeta');
-const statusLeft = document.getElementById('statusLeft');
-const statusRight = document.getElementById('statusRight');
-const themeToggle = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
+const waveBtns = document.querySelectorAll(".wave-btn");
+const freqSlider = document.getElementById("freqSlider");
+const harmCount = document.getElementById("harmCount");
+const speedSlider = document.getElementById("speedSlider");
+const freqDisplay = document.getElementById("freqDisplay");
+const harmDisplay = document.getElementById("harmDisplay");
+const speedDisplay = document.getElementById("speedDisplay");
+const harmonicListEl = document.getElementById("harmonicList");
+const animateBtn = document.getElementById("animateBtn");
+const animateIcon = document.getElementById("animateIcon");
+const resetBtn = document.getElementById("resetBtn");
+const compositeMeta = document.getElementById("compositeMeta");
+const harmonicsMeta = document.getElementById("harmonicsMeta");
+const statusLeft = document.getElementById("statusLeft");
+const statusRight = document.getElementById("statusRight");
+const themeToggle = document.getElementById("theme-toggle");
+const themeIcon = document.getElementById("theme-icon");
 
 /* ──── State ──────────────────────────────────────────────────────── */
 const WAVE_COLORS = [
-  '#ef4444', '#f59e0b', '#10b981', '#06b6d4',
-  '#8b5cf6', '#ec4899', '#14b8a6', '#f97316',
-  '#6366f1', '#84cc16', '#06b6d4', '#d946ef',
+  "#ef4444",
+  "#f59e0b",
+  "#10b981",
+  "#06b6d4",
+  "#8b5cf6",
+  "#ec4899",
+  "#14b8a6",
+  "#f97316",
+  "#6366f1",
+  "#84cc16",
+  "#06b6d4",
+  "#d946ef",
 ];
 
 const state = {
-  waveType: 'square',
+  waveType: "square",
   frequency: 100,
   numHarmonics: 5,
-  speed: 1200,                     // ms per animation cycle
+  speed: 1200, // ms per animation cycle
   animate: false,
   animId: null,
   animStartTime: null,
-  activeHarmonics: new Set(),      // Set of 1-indexed active harmonic numbers
+  activeHarmonics: new Set(), // Set of 1-indexed active harmonic numbers
   dpr: 1,
   firstRender: true,
 };
@@ -51,13 +60,15 @@ const state = {
 /* ──── Canvas Sizing ───────────────────────────────────────────────── */
 function resizeCanvas(canvas) {
   if (!canvas) return;
-  const rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : canvas.getBoundingClientRect();
+  const rect = canvas.parentElement
+    ? canvas.parentElement.getBoundingClientRect()
+    : canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
   state.dpr = dpr;
   canvas.width = rect.width * dpr;
   canvas.height = rect.height * dpr;
-  canvas.style.width = rect.width + 'px';
-  canvas.style.height = rect.height + 'px';
+  canvas.style.width = rect.width + "px";
+  canvas.style.height = rect.height + "px";
   if (ctxComposite) ctxComposite.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (ctxHarmonics) ctxHarmonics.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
@@ -71,9 +82,13 @@ function resizeAllCanvases() {
 function getThemeCanvasColors() {
   const style = getComputedStyle(document.documentElement);
   return {
-    bg: style.getPropertyValue('--canvas-bg').trim() || '#0a0e1a',
-    grid: style.getPropertyValue('--grid-color').trim() || 'rgba(255, 255, 255, 0.04)',
-    axis: style.getPropertyValue('--grid-axis-color').trim() || 'rgba(255, 255, 255, 0.08)',
+    bg: style.getPropertyValue("--canvas-bg").trim() || "#0a0e1a",
+    grid:
+      style.getPropertyValue("--grid-color").trim() ||
+      "rgba(255, 255, 255, 0.04)",
+    axis:
+      style.getPropertyValue("--grid-axis-color").trim() ||
+      "rgba(255, 255, 255, 0.08)",
   };
 }
 
@@ -142,11 +157,29 @@ function drawCompositeFill(ctx, samples, w, h, color) {
   const len = samples.length;
 
   const gradient = ctx.createLinearGradient(0, 0, 0, h);
-  gradient.addColorStop(0, color.replace(')', ', 0.15)').replace('rgb', 'rgba').replace('#6366f1', 'rgba(99, 102, 241'));
-  gradient.addColorStop(0.5, color.replace(')', ', 0.05)').replace('rgb', 'rgba').replace('#6366f1', 'rgba(99, 102, 241'));
-  gradient.addColorStop(1, color.replace(')', ', 0.15)').replace('rgb', 'rgba').replace('#6366f1', 'rgba(99, 102, 241'));
+  gradient.addColorStop(
+    0,
+    color
+      .replace(")", ", 0.15)")
+      .replace("rgb", "rgba")
+      .replace("#6366f1", "rgba(99, 102, 241")
+  );
+  gradient.addColorStop(
+    0.5,
+    color
+      .replace(")", ", 0.05)")
+      .replace("rgb", "rgba")
+      .replace("#6366f1", "rgba(99, 102, 241")
+  );
+  gradient.addColorStop(
+    1,
+    color
+      .replace(")", ", 0.15)")
+      .replace("rgb", "rgba")
+      .replace("#6366f1", "rgba(99, 102, 241")
+  );
 
-  ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
+  ctx.fillStyle = "rgba(99, 102, 241, 0.08)";
   ctx.beginPath();
   ctx.moveTo(0, midY);
 
@@ -172,33 +205,42 @@ function render() {
   if (cw === 0 || ch === 0) return;
 
   // Compute waveform data
-  const sampleRate = cw;  // 1 sample per pixel
-  const duration = 1;     // 1 cycle visible
+  const sampleRate = cw; // 1 sample per pixel
+  const duration = 1; // 1 cycle visible
   const result = computeWaveform(
     state.waveType,
     state.numHarmonics,
     state.frequency,
     sampleRate,
     duration,
-    (n) => state.activeHarmonics.has(n) || state.activeHarmonics.size === 0
+    n => state.activeHarmonics.has(n) || state.activeHarmonics.size === 0
   );
 
   const normalisedSamples = normalise(result.samples);
 
   // Update meta info
   const effectiveHarmonics = result.harmonics ? result.harmonics.length : 0;
-  const displayedHarmonics = state.activeHarmonics.size > 0
-    ? state.activeHarmonics.size
-    : state.numHarmonics;
-  if (compositeMeta) compositeMeta.textContent = `${displayedHarmonics} harmonic${displayedHarmonics !== 1 ? 's' : ''} · ${state.frequency} Hz`;
-  if (harmonicsMeta) harmonicsMeta.textContent = `${effectiveHarmonics} active / ${state.numHarmonics} max`;
+  const displayedHarmonics =
+    state.activeHarmonics.size > 0
+      ? state.activeHarmonics.size
+      : state.numHarmonics;
+  if (compositeMeta)
+    compositeMeta.textContent = `${displayedHarmonics} harmonic${displayedHarmonics !== 1 ? "s" : ""} · ${state.frequency} Hz`;
+  if (harmonicsMeta)
+    harmonicsMeta.textContent = `${effectiveHarmonics} active / ${state.numHarmonics} max`;
 
   // ── Composite Canvas ──
   if (ctxComposite) {
     clearCanvas(ctxComposite, cw, ch);
     drawGrid(ctxComposite, cw, ch);
-    drawCompositeFill(ctxComposite, normalisedSamples, cw, ch, 'var(--theme-accent)');
-    drawWaveform(ctxComposite, normalisedSamples, '#6366f1', cw, ch);
+    drawCompositeFill(
+      ctxComposite,
+      normalisedSamples,
+      cw,
+      ch,
+      "var(--theme-accent)"
+    );
+    drawWaveform(ctxComposite, normalisedSamples, "#6366f1", cw, ch);
   }
 
   // ── Harmonics Canvas ──
@@ -237,7 +279,7 @@ function render() {
     ctxHarmonics.beginPath();
     for (let i = 0; i < hw; i++) {
       const t = i / sampleRate;
-      const val = sampleAt(state.waveType, n, state.frequency, t, (k) => k === n);
+      const val = sampleAt(state.waveType, n, state.frequency, t, k => k === n);
       const maxVal = ampScale;
       const scaled = maxVal > 0 ? val / maxVal : val;
       const x = (i / (hw - 1)) * hw;
@@ -255,9 +297,9 @@ function render() {
 
 /* ──── Legend ──────────────────────────────────────────────────────── */
 function updateLegend(harmonics) {
-  const container = document.getElementById('compositeLegend');
+  const container = document.getElementById("compositeLegend");
   // Keep the first "Composite" item, replace the rest
-  let items = container.querySelectorAll('.legend-item');
+  let items = container.querySelectorAll(".legend-item");
   let compositeLabel = items[0];
 
   // Clear all but first
@@ -268,8 +310,8 @@ function updateLegend(harmonics) {
   for (const h of harmonics) {
     const n = h.n;
     const color = WAVE_COLORS[(n - 1) % WAVE_COLORS.length];
-    const div = document.createElement('span');
-    div.className = 'legend-item';
+    const div = document.createElement("span");
+    div.className = "legend-item";
     div.innerHTML = `<span class="legend-swatch" style="background:${color}"></span> n=${n}`;
     container.appendChild(div);
   }
@@ -278,7 +320,7 @@ function updateLegend(harmonics) {
 /* ──── Harmonic List ──────────────────────────────────────────────── */
 function buildHarmonicList() {
   if (!harmonicListEl) return;
-  harmonicListEl.innerHTML = '';
+  harmonicListEl.innerHTML = "";
   const count = harmCount ? parseInt(harmCount.value, 10) : 1;
 
   for (let n = 1; n <= count; n++) {
@@ -286,15 +328,16 @@ function buildHarmonicList() {
     const amp = Math.abs(coeff.b) || Math.abs(coeff.a) || 0;
     const color = WAVE_COLORS[(n - 1) % WAVE_COLORS.length];
 
-    const label = document.createElement('label');
-    label.className = 'harmonic-item';
+    const label = document.createElement("label");
+    label.className = "harmonic-item";
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = state.activeHarmonics.size === 0 || state.activeHarmonics.has(n);
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked =
+      state.activeHarmonics.size === 0 || state.activeHarmonics.has(n);
     checkbox.dataset.n = n;
 
-    checkbox.addEventListener('change', () => {
+    checkbox.addEventListener("change", () => {
       if (checkbox.checked) {
         state.activeHarmonics.add(n);
       } else {
@@ -303,17 +346,17 @@ function buildHarmonicList() {
       render();
     });
 
-    const swatch = document.createElement('span');
-    swatch.className = 'harmonic-color';
+    const swatch = document.createElement("span");
+    swatch.className = "harmonic-color";
     swatch.style.background = color;
 
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'harmonic-label';
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "harmonic-label";
     nameSpan.textContent = `n = ${n}`;
 
-    const ampSpan = document.createElement('span');
-    ampSpan.className = 'harmonic-amp';
-    ampSpan.textContent = amp > 0 ? `A = ${amp.toFixed(3)}` : 'A = 0';
+    const ampSpan = document.createElement("span");
+    ampSpan.className = "harmonic-amp";
+    ampSpan.textContent = amp > 0 ? `A = ${amp.toFixed(3)}` : "A = 0";
 
     label.appendChild(checkbox);
     label.appendChild(swatch);
@@ -330,25 +373,32 @@ function buildHarmonicList() {
 
 /* ──── Theme ───────────────────────────────────────────────────────── */
 function initTheme() {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = saved !== null ? saved === 'dark' : prefersDark;
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  const saved = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved !== null ? saved === "dark" : prefersDark;
+  document.documentElement.setAttribute(
+    "data-theme",
+    isDark ? "dark" : "light"
+  );
   applyTheme(isDark);
 }
 
 function applyTheme(isDark) {
-  if (themeIcon) themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-  if (themeToggle) themeToggle.setAttribute('aria-pressed', String(isDark));
+  if (themeIcon)
+    themeIcon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  if (themeToggle) themeToggle.setAttribute("aria-pressed", String(isDark));
 }
 
-themeToggle?.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  if (themeIcon) themeIcon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-  if (themeToggle) themeToggle.setAttribute('aria-pressed', String(next === 'dark'));
+themeToggle?.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
+  if (themeIcon)
+    themeIcon.className =
+      next === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+  if (themeToggle)
+    themeToggle.setAttribute("aria-pressed", String(next === "dark"));
 });
 
 /* ──── Animation ──────────────────────────────────────────────────── */
@@ -356,8 +406,10 @@ function startAnimation() {
   if (state.animId) return;
   state.animate = true;
   state.animStartTime = performance.now();
-  if (animateIcon) animateIcon.className = 'fa-solid fa-pause';
-  if (animateBtn) animateBtn.innerHTML = '<i class="fa-solid fa-pause" id="animateIcon"></i> Pause';
+  if (animateIcon) animateIcon.className = "fa-solid fa-pause";
+  if (animateBtn)
+    animateBtn.innerHTML =
+      '<i class="fa-solid fa-pause" id="animateIcon"></i> Pause';
 
   // Reset to first harmonic and build up progressively
   let currentStep = 1;
@@ -412,8 +464,10 @@ function stopAnimation() {
     cancelAnimationFrame(state.animId);
     state.animId = null;
   }
-  if (animateIcon) animateIcon.className = 'fa-solid fa-play';
-  if (animateBtn) animateBtn.innerHTML = '<i class="fa-solid fa-play" id="animateIcon"></i> Animate Build';
+  if (animateIcon) animateIcon.className = "fa-solid fa-play";
+  if (animateBtn)
+    animateBtn.innerHTML =
+      '<i class="fa-solid fa-play" id="animateIcon"></i> Animate Build';
 
   // Restore full set
   if (state.activeHarmonics.size === 0) {
@@ -425,13 +479,14 @@ function stopAnimation() {
 
 function updateHarmonicCheckboxes() {
   const checkboxes = harmonicListEl.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach((cb) => {
+  checkboxes.forEach(cb => {
     const n = parseInt(cb.dataset.n, 10);
-    cb.checked = state.activeHarmonics.size === 0 || state.activeHarmonics.has(n);
+    cb.checked =
+      state.activeHarmonics.size === 0 || state.activeHarmonics.has(n);
   });
 }
 
-animateBtn?.addEventListener('click', () => {
+animateBtn?.addEventListener("click", () => {
   if (state.animate) {
     stopAnimation();
   } else {
@@ -439,7 +494,7 @@ animateBtn?.addEventListener('click', () => {
   }
 });
 
-resetBtn?.addEventListener('click', () => {
+resetBtn?.addEventListener("click", () => {
   if (state.animate) stopAnimation();
   state.activeHarmonics.clear();
   const count = harmCount ? parseInt(harmCount.value, 10) : 1;
@@ -449,27 +504,28 @@ resetBtn?.addEventListener('click', () => {
   state.activeHarmonics.clear();
   render();
   buildHarmonicList();
-  if (statusLeft) statusLeft.textContent = 'Reset to default view';
+  if (statusLeft) statusLeft.textContent = "Reset to default view";
 });
 
 /* ──── Controls Setup ─────────────────────────────────────────────── */
-waveBtns.forEach((btn) => {
-  btn?.addEventListener('click', () => {
-    waveBtns.forEach((b) => b?.classList.remove('active'));
-    btn.classList.add('active');
+waveBtns.forEach(btn => {
+  btn?.addEventListener("click", () => {
+    waveBtns.forEach(b => b?.classList.remove("active"));
+    btn.classList.add("active");
     state.waveType = btn.dataset.wave;
     state.activeHarmonics.clear();
     if (state.animate) stopAnimation();
     render();
     buildHarmonicList();
-    if (statusLeft) statusLeft.textContent = `Switched to ${state.waveType} wave`;
+    if (statusLeft)
+      statusLeft.textContent = `Switched to ${state.waveType} wave`;
   });
 });
 
-freqSlider?.addEventListener('input', () => {
+freqSlider?.addEventListener("input", () => {
   if (!freqSlider) return;
   state.frequency = parseInt(freqSlider.value, 10);
-  if (freqDisplay) freqDisplay.textContent = state.frequency + ' Hz';
+  if (freqDisplay) freqDisplay.textContent = state.frequency + " Hz";
   if (state.animate) {
     // Just update — no reset needed
   }
@@ -477,7 +533,7 @@ freqSlider?.addEventListener('input', () => {
   if (statusLeft) statusLeft.textContent = `Frequency: ${state.frequency} Hz`;
 });
 
-harmCount?.addEventListener('input', () => {
+harmCount?.addEventListener("input", () => {
   if (!harmCount) return;
   const val = parseInt(harmCount.value, 10);
   state.numHarmonics = val;
@@ -488,11 +544,13 @@ harmCount?.addEventListener('input', () => {
   if (statusLeft) statusLeft.textContent = `Harmonics: ${val}`;
 });
 
-speedSlider?.addEventListener('input', () => {
+speedSlider?.addEventListener("input", () => {
   if (!speedSlider) return;
   state.speed = parseInt(speedSlider.value, 10);
-  if (speedDisplay) speedDisplay.textContent = (state.speed / 1000).toFixed(1) + 's';
-  if (statusLeft) statusLeft.textContent = `Animation speed: ${state.speed}ms per cycle`;
+  if (speedDisplay)
+    speedDisplay.textContent = (state.speed / 1000).toFixed(1) + "s";
+  if (statusLeft)
+    statusLeft.textContent = `Animation speed: ${state.speed}ms per cycle`;
 });
 
 /* ──── Initialisation ─────────────────────────────────────────────── */
@@ -510,7 +568,9 @@ function init() {
   render();
 
   // Status
-  if (statusLeft) statusLeft.textContent = 'Ready — adjust controls to explore Fourier series';
+  if (statusLeft)
+    statusLeft.textContent =
+      "Ready — adjust controls to explore Fourier series";
 }
 
 // Resize observer
@@ -518,12 +578,14 @@ const resizeObserver = new ResizeObserver(() => {
   resizeAllCanvases();
   render();
 });
-if (compositeCanvas?.parentElement) resizeObserver.observe(compositeCanvas.parentElement);
-if (harmonicsCanvas?.parentElement) resizeObserver.observe(harmonicsCanvas.parentElement);
+if (compositeCanvas?.parentElement)
+  resizeObserver.observe(compositeCanvas.parentElement);
+if (harmonicsCanvas?.parentElement)
+  resizeObserver.observe(harmonicsCanvas.parentElement);
 
 // Init on DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
 } else {
   init();
 }

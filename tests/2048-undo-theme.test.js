@@ -11,12 +11,12 @@ test("UndoManager pushes state snapshots and restores board/score on undo", () =
       [2, 0, 0, 0],
       [0, 0, 0, 0],
       [0, 0, 0, 0],
-      [0, 0, 0, 0]
+      [0, 0, 0, 0],
     ],
     score: 0,
     won: false,
     over: false,
-    size: 4
+    size: 4,
   };
 
   manager.pushState(initialGameState);
@@ -41,7 +41,7 @@ test("UndoManager enforces max stack capacity limit", () => {
   for (let i = 1; i <= 5; i++) {
     manager.pushState({
       board: [[i]],
-      score: i * 10
+      score: i * 10,
     });
   }
 

@@ -1,40 +1,50 @@
-'use strict';
+"use strict";
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
+  if (typeof define === "function" && define.amd) {
     define([], factory);
-  } else if (typeof module === 'object' && module.exports) {
+  } else if (typeof module === "object" && module.exports) {
     module.exports = factory();
   } else {
     root.GuitarEngine = factory();
   }
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== "undefined" ? self : this, function () {
   const STANDARD_TUNING = [
-    { name: 'E2', frequency: 82.4069 },
-    { name: 'A2', frequency: 110.0 },
-    { name: 'D3', frequency: 146.832 },
-    { name: 'G3', frequency: 195.998 },
-    { name: 'B3', frequency: 246.942 },
-    { name: 'E4', frequency: 329.628 }
+    { name: "E2", frequency: 82.4069 },
+    { name: "A2", frequency: 110.0 },
+    { name: "D3", frequency: 146.832 },
+    { name: "G3", frequency: 195.998 },
+    { name: "B3", frequency: 246.942 },
+    { name: "E4", frequency: 329.628 },
   ];
 
   const NOTE_NAMES = [
-    'C', 'C#', 'D', 'D#', 'E', 'F',
-    'F#', 'G', 'G#', 'A', 'A#', 'B'
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
   ];
 
   const DEFAULTS = {
     duration: 2.2,
     volume: 0.45,
     decay: 2,
-    brightness: 0.35
+    brightness: 0.35,
   };
 
   class GuitarEngine {
     constructor(options = {}) {
       this.options = {
         ...DEFAULTS,
-        ...options
+        ...options,
       };
 
       this.audioContext = null;
@@ -48,13 +58,10 @@
         return this.audioContext;
       }
 
-      const AudioContext =
-        window.AudioContext || window.webkitAudioContext;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
 
       if (!AudioContext) {
-        throw new Error(
-          'Web Audio API is not supported in this browser.'
-        );
+        throw new Error("Web Audio API is not supported in this browser.");
       }
 
       this.audioContext = new AudioContext();
@@ -70,7 +77,7 @@
     async resume() {
       this.initialize();
 
-      if (this.audioContext.state === 'suspended') {
+      if (this.audioContext.state === "suspended") {
         await this.audioContext.resume();
       }
 
@@ -89,7 +96,7 @@
       }
 
       const letter = match[1];
-      const accidental = match[2] || '';
+      const accidental = match[2] || "";
       const octave = Number(match[3]);
 
       let semitone = {
@@ -99,14 +106,14 @@
         F: 5,
         G: 7,
         A: 9,
-        B: 11
+        B: 11,
       }[letter];
 
-      if (accidental === '#') {
+      if (accidental === "#") {
         semitone += 1;
       }
 
-      if (accidental === 'b') {
+      if (accidental === "b") {
         semitone -= 1;
       }
 
@@ -124,13 +131,10 @@
       this.validateString(stringIndex);
 
       if (!Number.isInteger(fret) || fret < 0) {
-        throw new Error(
-          'Fret must be a non-negative integer.'
-        );
+        throw new Error("Fret must be a non-negative integer.");
       }
 
-      const baseFrequency =
-        STANDARD_TUNING[stringIndex].frequency;
+      const baseFrequency = STANDARD_TUNING[stringIndex].frequency;
 
       return baseFrequency * Math.pow(2, fret / 12);
     }
@@ -139,9 +143,7 @@
       this.validateString(stringIndex);
 
       if (!Number.isInteger(fret) || fret < 0) {
-        throw new Error(
-          'Fret must be a non-negative integer.'
-        );
+        throw new Error("Fret must be a non-negative integer.");
       }
 
       const baseNote = STANDARD_TUNING[stringIndex].name;
@@ -156,14 +158,14 @@
       return {
         index: stringIndex,
         name: STANDARD_TUNING[stringIndex].name,
-        frequency: STANDARD_TUNING[stringIndex].frequency
+        frequency: STANDARD_TUNING[stringIndex].frequency,
       };
     }
 
     getTuning() {
       return STANDARD_TUNING.map((string, index) => ({
         index,
-        ...string
+        ...string,
       }));
     }
 
@@ -177,30 +179,24 @@
 
       const settings = {
         ...this.options,
-        ...options
+        ...options,
       };
 
       const now = this.audioContext.currentTime;
 
       const oscillator = this.audioContext.createOscillator();
-      oscillator.type = 'triangle';
+      oscillator.type = "triangle";
       oscillator.frequency.setValueAtTime(frequency, now);
 
       const harmonic = this.audioContext.createOscillator();
-      harmonic.type = 'sine';
+      harmonic.type = "sine";
       harmonic.frequency.setValueAtTime(frequency * 2, now);
 
       const gain = this.audioContext.createGain();
 
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(
-        0.9,
-        now + 0.008
-      );
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + settings.duration
-      );
+      gain.gain.exponentialRampToValueAtTime(0.9, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + settings.duration);
 
       const harmonicGain = this.audioContext.createGain();
 
@@ -216,11 +212,8 @@
 
       const filter = this.audioContext.createBiquadFilter();
 
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(
-        Math.min(5000, frequency * 12),
-        now
-      );
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(Math.min(5000, frequency * 12), now);
       filter.Q.value = 0.7;
 
       const noiseBuffer = this.createPluckNoise();
@@ -231,22 +224,13 @@
       const noiseGain = this.audioContext.createGain();
 
       noiseGain.gain.setValueAtTime(0.18, now);
-      noiseGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.045
-      );
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
 
-      oscillator
-        .connect(gain)
-        .connect(filter);
+      oscillator.connect(gain).connect(filter);
 
-      harmonic
-        .connect(harmonicGain)
-        .connect(filter);
+      harmonic.connect(harmonicGain).connect(filter);
 
-      noise
-        .connect(noiseGain)
-        .connect(filter);
+      noise.connect(noiseGain).connect(filter);
 
       filter.connect(this.masterGain);
 
@@ -257,7 +241,7 @@
         gain,
         harmonicGain,
         noiseGain,
-        filter
+        filter,
       };
 
       this.activeVoices.add(voice);
@@ -266,14 +250,13 @@
       harmonic.start(now);
       noise.start(now);
 
-      const stopTime =
-        now + settings.duration + 0.05;
+      const stopTime = now + settings.duration + 0.05;
 
       oscillator.stop(stopTime);
       harmonic.stop(stopTime);
       noise.stop(now + 0.06);
 
-      oscillator.addEventListener('ended', () => {
+      oscillator.addEventListener("ended", () => {
         this.activeVoices.delete(voice);
       });
 
@@ -281,69 +264,52 @@
         string: stringIndex,
         fret,
         note,
-        frequency
+        frequency,
       };
     }
 
-  async playNote(frequency, options = {}) {
-  if (!Number.isFinite(frequency) || frequency <= 0) {
-    throw new Error(
-      'Frequency must be a positive number.'
-    );
-  }
+    async playNote(frequency, options = {}) {
+      if (!Number.isFinite(frequency) || frequency <= 0) {
+        throw new Error("Frequency must be a positive number.");
+      }
 
-  await this.resume();
-
-  const settings = {
-    ...this.options,
-    ...options
-  };
-
-  const now = this.audioContext.currentTime;
-
-  const oscillator = this.audioContext.createOscillator();
-  oscillator.type = 'triangle';
-  oscillator.frequency.setValueAtTime(frequency, now);
-
-  const gain = this.audioContext.createGain();
-
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(
-    0.8,
-    now + 0.008
-  );
-  gain.gain.exponentialRampToValueAtTime(
-    0.0001,
-    now + settings.duration
-  );
-
-  oscillator
-    .connect(gain)
-    .connect(this.masterGain);
-
-  oscillator.start(now);
-  oscillator.stop(
-    now + settings.duration + 0.05
-  );
-
-  return {
-    frequency
-  };
-}
-
-    async strum(
-      stringIndexes = [0, 1, 2, 3, 4, 5],
-      options = {}
-    ) {
       await this.resume();
 
-      const direction = options.direction || 'down';
+      const settings = {
+        ...this.options,
+        ...options,
+      };
+
+      const now = this.audioContext.currentTime;
+
+      const oscillator = this.audioContext.createOscillator();
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(frequency, now);
+
+      const gain = this.audioContext.createGain();
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.8, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + settings.duration);
+
+      oscillator.connect(gain).connect(this.masterGain);
+
+      oscillator.start(now);
+      oscillator.stop(now + settings.duration + 0.05);
+
+      return {
+        frequency,
+      };
+    }
+
+    async strum(stringIndexes = [0, 1, 2, 3, 4, 5], options = {}) {
+      await this.resume();
+
+      const direction = options.direction || "down";
       const delay = options.delay ?? 0.035;
 
       const strings =
-        direction === 'up'
-          ? [...stringIndexes].reverse()
-          : [...stringIndexes];
+        direction === "up" ? [...stringIndexes].reverse() : [...stringIndexes];
 
       const results = [];
 
@@ -381,8 +347,7 @@
       for (let i = 0; i < data.length; i++) {
         const envelope = 1 - i / data.length;
 
-        data[i] =
-          (Math.random() * 2 - 1) * envelope;
+        data[i] = (Math.random() * 2 - 1) * envelope;
       }
 
       return buffer;
@@ -409,10 +374,7 @@
     setVolume(value) {
       this.initialize();
 
-      const volume = Math.max(
-        0,
-        Math.min(1, Number(value))
-      );
+      const volume = Math.max(0, Math.min(1, Number(value)));
 
       this.options.volume = volume;
 
@@ -429,15 +391,13 @@
         stringIndex < 0 ||
         stringIndex >= STANDARD_TUNING.length
       ) {
-        throw new Error(
-          `Invalid guitar string: ${stringIndex}`
-        );
+        throw new Error(`Invalid guitar string: ${stringIndex}`);
       }
     }
 
     static get STANDARD_TUNING() {
       return STANDARD_TUNING.map(string => ({
-        ...string
+        ...string,
       }));
     }
   }

@@ -108,8 +108,9 @@ function validateInlineJs(content, filename) {
     if (/src\s*=/i.test(attrs) && !code.trim()) continue;
     if (!code.trim()) continue;
 
-    const scriptStartLine =
-      content.slice(0, block.codeStartIndex).split("\n").length;
+    const scriptStartLine = content
+      .slice(0, block.codeStartIndex)
+      .split("\n").length;
 
     try {
       if (
@@ -126,10 +127,7 @@ function validateInlineJs(content, filename) {
     } catch (e) {
       let errLine = 1;
       if (e.stack) {
-        const escapedFilename = filename.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          "\\$&"
-        );
+        const escapedFilename = filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         const matchLine = e.stack.match(
           new RegExp(escapedFilename + ":(\\d+)")
         );
@@ -223,9 +221,7 @@ function validateDemoHtmlFiles(repoRoot = REPO_ROOT) {
 
   for (const filePath of files) {
     const content = fs.readFileSync(filePath, "utf-8");
-    const relPath = path
-      .relative(repoRoot, filePath)
-      .replace(/\\/g, "/");
+    const relPath = path.relative(repoRoot, filePath).replace(/\\/g, "/");
 
     const jsIssues = validateInlineJs(content, relPath);
     const htmlIssues = validateHtmlStructure(content, relPath);
@@ -241,7 +237,9 @@ function main() {
   const issues = validateDemoHtmlFiles();
 
   if (issues.length > 0) {
-    console.error(`\n❌ Found ${issues.length} demo HTML / inline JS issue(s):\n`);
+    console.error(
+      `\n❌ Found ${issues.length} demo HTML / inline JS issue(s):\n`
+    );
     issues.forEach(issue => {
       console.error(`  - [${issue.type}] ${issue.message}`);
     });

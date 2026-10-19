@@ -41,13 +41,13 @@ The project uses a controller-engine pattern. `index.html` and `style.css` defin
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the fretboard DOM, fret buttons, and control interface |
-| `script.js` | Manages input events, fret selection, and triggers audio via the engine |
-| `style.css` | Handles the visual layout of the guitar neck and active state animations |
-| `guitarEngine.js` | Implements the sound synthesis logic, note frequency calculations, and audio routing |
-| `stringOverlay.js` | Renders the SVG strings connecting the neck to the bridge |
+| File               | Responsibility                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `index.html`       | Defines the fretboard DOM, fret buttons, and control interface                       |
+| `script.js`        | Manages input events, fret selection, and triggers audio via the engine              |
+| `style.css`        | Handles the visual layout of the guitar neck and active state animations             |
+| `guitarEngine.js`  | Implements the sound synthesis logic, note frequency calculations, and audio routing |
+| `stringOverlay.js` | Renders the SVG strings connecting the neck to the bridge                            |
 
 ---
 
@@ -85,13 +85,13 @@ The sound is played through the browser's audio output
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Instrument structure and control UI |
-| CSS3 | Guitar neck layout and visual feedback |
-| JavaScript (ES6+) | Event handling and coordination |
-| Web Audio API | Real-time audio synthesis and signal routing |
-| SVG | Visual rendering of the guitar strings |
+| Technology        | Purpose                                      |
+| ----------------- | -------------------------------------------- |
+| HTML5             | Instrument structure and control UI          |
+| CSS3              | Guitar neck layout and visual feedback       |
+| JavaScript (ES6+) | Event handling and coordination              |
+| Web Audio API     | Real-time audio synthesis and signal routing |
+| SVG               | Visual rendering of the guitar strings       |
 
 ---
 
@@ -141,7 +141,6 @@ The sound is played through the browser's audio output
 None (uses native browser APIs).
 
 ---
-
 
 ## Future Improvements
 

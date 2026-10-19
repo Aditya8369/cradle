@@ -39,18 +39,22 @@ function initNetwork() {
   const layers = [2, ...state.hiddenLayers, 1];
   if (state.worker) {
     state.worker.postMessage({
-      type: 'INIT_NETWORK',
+      type: "INIT_NETWORK",
       payload: {
         layers,
         activationName: state.activationName,
-        lr: state.learningRate
-      }
+        lr: state.learningRate,
+      },
     });
   } else {
     // Fallback for first-time init before worker is ready
-    state.net = new NeuralNetwork(layers, state.activationName, state.learningRate);
+    state.net = new NeuralNetwork(
+      layers,
+      state.activationName,
+      state.learningRate
+    );
   }
-  
+
   state.epoch = 0;
   state.lossHistory = [];
   updateStats(0, "—", "—");
@@ -65,13 +69,13 @@ function initData() {
 
   if (state.worker) {
     state.worker.postMessage({
-      type: 'INIT_DATA',
+      type: "INIT_DATA",
       payload: {
         datasetType: state.dataset,
         numPoints: state.numPoints,
         noise: state.noise,
-        customData: state.customData
-      }
+        customData: state.customData,
+      },
     });
   }
 }
@@ -93,7 +97,7 @@ function drawBoundary() {
   const res = 3;
   const imgData = ctx.createImageData(w, h);
 
-   if (state.net) {
+  if (state.net) {
     for (let py = 0; py < h; py += res) {
       for (let px = 0; px < w; px += res) {
         const x = (px / w) * 2 - 1;
@@ -116,8 +120,8 @@ function drawBoundary() {
         }
       }
     }
-  ctx.putImageData(imgData, 0, 0);
-}
+    ctx.putImageData(imgData, 0, 0);
+  }
 
   if (state.showData && state.data.length) {
     state.data.forEach(([x, y, label]) => {
@@ -308,21 +312,23 @@ function announceTrainingStatus(message) {
   // Clear first so re-announcing the same text still triggers the reader.
   el.textContent = "";
   // Small timeout lets the DOM settle before the new announcement.
-  window.setTimeout(() => { el.textContent = message; }, 50);
+  window.setTimeout(() => {
+    el.textContent = message;
+  }, 50);
 }
 
 function trainStep() {
   if (!state.training || !state.worker) return;
 
   state.worker.postMessage({
-    type: 'TRAIN_STEP',
+    type: "TRAIN_STEP",
     payload: {
       speed: state.speed,
-      batchSize: state.batchSize
-    }
+      batchSize: state.batchSize,
+    },
   });
 
-  // Note: renderAll() and requestAnimationFrame are now handled 
+  // Note: renderAll() and requestAnimationFrame are now handled
   // in the worker's response handler to prevent overlapping requests.
 }
 
@@ -384,31 +390,34 @@ function renderLayerUI() {
 
 function setupEvents() {
   // Initialize Web Worker
-  state.worker = new Worker('nnWorker.js');
-  
+  state.worker = new Worker("nnWorker.js");
+
   state.worker.onmessage = e => {
     const { type, payload } = e.data;
-    
+
     switch (type) {
-      case 'NETWORK_INITED':
-        console.log('Worker: Network initialized');
+      case "NETWORK_INITED":
+        console.log("Worker: Network initialized");
         break;
-        
-      case 'DATA_INITED':
+
+      case "DATA_INITED":
         console.log(`Worker: Data initialized with ${payload} points`);
         break;
-        
-      case 'TRAIN_STEP_COMPLETE': {
+
+      case "TRAIN_STEP_COMPLETE": {
         const { loss, accuracy, epochs, weights, biases } = payload;
-        
+
         state.epoch += epochs;
-        if (state.lossHistory.length === 0 || state.epoch % Math.max(1, Math.floor(state.speed / 5)) === 0) {
+        if (
+          state.lossHistory.length === 0 ||
+          state.epoch % Math.max(1, Math.floor(state.speed / 5)) === 0
+        ) {
           state.lossHistory.push(loss);
           if (state.lossHistory.length > 500) state.lossHistory.shift();
         }
-        
+
         updateStats(state.epoch, loss, accuracy);
-        
+
         // Synchronize weights back to main thread for rendering
         if (state.net) {
           state.net.weights = weights;
@@ -416,11 +425,15 @@ function setupEvents() {
         } else {
           // Reconstruct NeuralNetwork object to keep .predict() and .layers available
           const layers = [2, ...state.hiddenLayers, 1];
-          state.net = new NeuralNetwork(layers, state.activationName, state.learningRate);
+          state.net = new NeuralNetwork(
+            layers,
+            state.activationName,
+            state.learningRate
+          );
           state.net.weights = weights;
           state.net.biases = biases;
         }
-        
+
         renderAll();
         if (state.training) {
           state.animId = requestAnimationFrame(trainStep);
@@ -432,7 +445,6 @@ function setupEvents() {
   $("btnTrain").addEventListener("click", startTraining);
   $("btnPause").addEventListener("click", pauseTraining);
   $("btnReset").addEventListener("click", resetAll);
-
 
   $("speedSlider").addEventListener("input", e => {
     state.speed = parseInt(e.target.value);
@@ -460,8 +472,8 @@ function setupEvents() {
     state.learningRate = parseFloat(e.target.value);
     if (state.worker) {
       state.worker.postMessage({
-        type: 'UPDATE_PARAMS',
-        payload: { lr: state.learningRate }
+        type: "UPDATE_PARAMS",
+        payload: { lr: state.learningRate },
       });
     }
     if (state.net) state.net.lr = state.learningRate;

@@ -42,11 +42,11 @@ The project follows a controller-engine pattern. `index.html` and `style.css` de
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the percussion pad DOM and status display |
-| `script.js` | Manages input events, UI state (active pads), and coordinates with the engine |
-| `style.css` | Handles the visual appearance of the pads and their active states |
+| File                  | Responsibility                                                                 |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `index.html`          | Defines the percussion pad DOM and status display                              |
+| `script.js`           | Manages input events, UI state (active pads), and coordinates with the engine  |
+| `style.css`           | Handles the visual appearance of the pads and their active states              |
 | `percussionEngine.js` | Owns the pad definitions and implements the various sound synthesis algorithms |
 
 ---
@@ -85,12 +85,12 @@ User receives auditory and visual (active class) feedback
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Pad structure and semantic UI |
-| CSS3 | Grid layout, pad styling, and responsive design |
-| JavaScript (ES6+) | Event management and coordination logic |
-| Web Audio API | Real-time sound synthesis and audio routing |
+| Technology        | Purpose                                         |
+| ----------------- | ----------------------------------------------- |
+| HTML5             | Pad structure and semantic UI                   |
+| CSS3              | Grid layout, pad styling, and responsive design |
+| JavaScript (ES6+) | Event management and coordination logic         |
+| Web Audio API     | Real-time sound synthesis and audio routing     |
 
 ---
 

@@ -11,11 +11,17 @@ const bootstrapMatch = html.match(
 
 assert.ok(bootstrapMatch, "index.html must contain the early theme bootstrap");
 
-function runBootstrap({ storedTheme = null, systemLight = false, defineLocalStorage = true } = {}) {
+function runBootstrap({
+  storedTheme = null,
+  systemLight = false,
+  defineLocalStorage = true,
+} = {}) {
   const documentElement = {
     classList: {
       added: [],
-      add(name) { this.added.push(name); },
+      add(name) {
+        this.added.push(name);
+      },
     },
   };
   const contextObject = {
@@ -33,25 +39,38 @@ function runBootstrap({ storedTheme = null, systemLight = false, defineLocalStor
   }
 
   contextObject.window.matchMedia = () => ({ matches: systemLight });
-  if (defineLocalStorage) contextObject.localStorage = contextObject.window.localStorage;
+  if (defineLocalStorage)
+    contextObject.localStorage = contextObject.window.localStorage;
   const context = vm.createContext(contextObject);
 
   vm.runInContext(storageSource, context, { filename: "storage.js" });
-  vm.runInContext(bootstrapMatch[0].replace(/<script>|<\/script>/g, ""), context);
+  vm.runInContext(
+    bootstrapMatch[0].replace(/<script>|<\/script>/g, ""),
+    context
+  );
   return { documentElement };
 }
 
 test("landing theme bootstrap reads theme through CradleStorage", () => {
-  const { documentElement } = runBootstrap({ storedTheme: "light", systemLight: false });
+  const { documentElement } = runBootstrap({
+    storedTheme: "light",
+    systemLight: false,
+  });
   assert.deepEqual(documentElement.classList.added, ["light-theme"]);
 });
 
 test("landing theme bootstrap falls back to system preference", () => {
-  const { documentElement } = runBootstrap({ storedTheme: null, systemLight: true });
+  const { documentElement } = runBootstrap({
+    storedTheme: null,
+    systemLight: true,
+  });
   assert.deepEqual(documentElement.classList.added, ["light-theme"]);
 });
 
 test("landing theme bootstrap does not throw when browser storage is unavailable", () => {
-  const { documentElement } = runBootstrap({ systemLight: true, defineLocalStorage: false });
+  const { documentElement } = runBootstrap({
+    systemLight: true,
+    defineLocalStorage: false,
+  });
   assert.deepEqual(documentElement.classList.added, ["light-theme"]);
 });

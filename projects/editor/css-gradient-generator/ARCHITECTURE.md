@@ -41,11 +41,11 @@ The project uses a reactive state-driven approach. The state consists of the `gr
 
 ## Component Breakdown
 
-| File            | Responsibility                                          |
-| --------------- | ------------------------------------------------------- |
-| `index.html`    | Page shell, semantic markup, loads fonts and scripts    |
-| `script.js`     | Gradient CSS generation, stop CRUD, presets, UI events  |
-| `style.css`     | Layout, colors, responsive breakpoints                  |
+| File         | Responsibility                                         |
+| ------------ | ------------------------------------------------------ |
+| `index.html` | Page shell, semantic markup, loads fonts and scripts   |
+| `script.js`  | Gradient CSS generation, stop CRUD, presets, UI events |
+| `style.css`  | Layout, colors, responsive breakpoints                 |
 
 ---
 
@@ -84,13 +84,13 @@ codeBlock.textContent is updated for the user to copy
 
 ## Technologies Used
 
-| Technology             | Purpose                                |
-| ---------------------- | -------------------------------------- |
-| HTML5                  | Page structure and semantic markup     |
-| CSS3 (Grid, Flexbox)   | Layout and responsive design           |
-| Vanilla JavaScript     | Gradient logic, stop management, UI   |
-| Google Fonts (Outfit)  | UI typography                          |
-| Google Fonts (Fira Code)| Monospace code display                |
+| Technology               | Purpose                             |
+| ------------------------ | ----------------------------------- |
+| HTML5                    | Page structure and semantic markup  |
+| CSS3 (Grid, Flexbox)     | Layout and responsive design        |
+| Vanilla JavaScript       | Gradient logic, stop management, UI |
+| Google Fonts (Outfit)    | UI typography                       |
+| Google Fonts (Fira Code) | Monospace code display              |
 
 ---
 

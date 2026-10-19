@@ -4,15 +4,18 @@ const assert = require("node:assert/strict");
 test("Web Share API feature detection: navigator.share is called when supported", async () => {
   let sharedData = null;
   const mockNavigator = {
-    share: async (data) => {
+    share: async data => {
       sharedData = data;
     },
     clipboard: {
-      writeText: async () => {}
-    }
+      writeText: async () => {},
+    },
   };
 
-  if (typeof mockNavigator !== "undefined" && typeof mockNavigator.share === "function") {
+  if (
+    typeof mockNavigator !== "undefined" &&
+    typeof mockNavigator.share === "function"
+  ) {
     await mockNavigator.share({ title: "Test", text: "Sample content" });
   }
 
@@ -26,11 +29,14 @@ test("Web Share API fallback: falls back to clipboard/download when navigator.sh
     clipboard: {
       writeText: async () => {
         fallbackExecuted = true;
-      }
-    }
+      },
+    },
   };
 
-  if (typeof mockNavigator !== "undefined" && typeof mockNavigator.share === "function") {
+  if (
+    typeof mockNavigator !== "undefined" &&
+    typeof mockNavigator.share === "function"
+  ) {
     await mockNavigator.share({ title: "Test", text: "Sample content" });
   } else if (mockNavigator.clipboard) {
     await mockNavigator.clipboard.writeText("Sample content");
@@ -46,11 +52,14 @@ test("Web Share API error handling: catches AbortError gracefully when user canc
       const err = new Error("Share cancelled");
       err.name = "AbortError";
       throw err;
-    }
+    },
   };
 
   try {
-    if (typeof mockNavigator !== "undefined" && typeof mockNavigator.share === "function") {
+    if (
+      typeof mockNavigator !== "undefined" &&
+      typeof mockNavigator.share === "function"
+    ) {
       await mockNavigator.share({ title: "Test", text: "Sample content" });
     }
   } catch (err) {
@@ -70,7 +79,10 @@ test("Web Share API safety: does not throw when navigator object is completely u
 
   let didThrow = false;
   try {
-    if (typeof customGlobal.navigator !== "undefined" && typeof customGlobal.navigator.share === "function") {
+    if (
+      typeof customGlobal.navigator !== "undefined" &&
+      typeof customGlobal.navigator.share === "function"
+    ) {
       await customGlobal.navigator.share({ title: "Test" });
     }
   } catch (e) {

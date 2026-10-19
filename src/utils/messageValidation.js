@@ -34,7 +34,11 @@ export function hasDangerousKeys(value) {
   for (const key of Reflect.ownKeys(value)) {
     if (typeof key === "string" && DANGEROUS_KEYS.has(key)) return true;
     const child = value[key];
-    if (typeof child === "object" && child !== null && hasDangerousKeys(child)) {
+    if (
+      typeof child === "object" &&
+      child !== null &&
+      hasDangerousKeys(child)
+    ) {
       return true;
     }
   }

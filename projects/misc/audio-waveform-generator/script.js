@@ -9,8 +9,6 @@ const { NOTES, NOTE_NAMES } = WaveformEngine;
 
 /* ──── DOM Refs ────────────────────────────────────────────────────── */
 
-
-
 const waveBtns = document.querySelectorAll(".wave-btn");
 const freqSlider = document.getElementById("freqSlider");
 const freqDisplay = document.getElementById("freqDisplay");
@@ -22,7 +20,6 @@ const canvas = document.getElementById("waveform");
 const ctx = canvas ? canvas.getContext("2d") : null;
 const canvasMeta = document.getElementById("canvasMeta");
 const pianoEl = document.getElementById("piano");
-
 
 /* ──── Audio Helpers ──────────────────────────────────────────────── */
 
@@ -111,7 +108,9 @@ function togglePlay() {
 
 function resizeCanvas() {
   if (!canvas) return;
-  const rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : canvas.getBoundingClientRect();
+  const rect = canvas.parentElement
+    ? canvas.parentElement.getBoundingClientRect()
+    : canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
   canvas.width = rect.width * dpr;
   canvas.height = 200 * dpr;
@@ -213,21 +212,22 @@ function clearCanvas() {
 
 /* ──── Wave Type ──────────────────────────────────────────────────── */
 
-if (waveBtns) waveBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    waveBtns.forEach(b => {
-      b.classList.remove("active");
-      b.setAttribute("aria-pressed", "false");
-    });
-    btn.classList.add("active");
-    btn.setAttribute("aria-pressed", "true");
+if (waveBtns)
+  waveBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      waveBtns.forEach(b => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
+      btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
 
-    currentWave = btn.dataset.wave;
-    if (isPlaying) {
-      updateOscillator();
-    }
+      currentWave = btn.dataset.wave;
+      if (isPlaying) {
+        updateOscillator();
+      }
+    });
   });
-});
 
 /* ──── Frequency ──────────────────────────────────────────────────── */
 
@@ -261,37 +261,38 @@ function buildPiano() {
   if (!pianoEl) return;
   pianoEl.innerHTML = "";
 
-  if (Array.isArray(NOTES)) NOTES.forEach(({ note, freq }) => {
-    const key = document.createElement("div");
-    key.className = "piano-key";
-    key.dataset.note = note;
-    key.dataset.freq = freq;
+  if (Array.isArray(NOTES))
+    NOTES.forEach(({ note, freq }) => {
+      const key = document.createElement("div");
+      key.className = "piano-key";
+      key.dataset.note = note;
+      key.dataset.freq = freq;
 
-    key.innerHTML = `
+      key.innerHTML = `
       <span class="note-label">${note}</span>
       <span class="freq-label">${freq} Hz</span>
     `;
 
-    key.addEventListener("mousedown", e => {
-      e.preventDefault();
-      playNote(note, freq, key);
-    });
-
-    key.addEventListener("mouseenter", e => {
-      if (e.buttons & 1) {
-        // Mouse button is held while dragging across keys
+      key.addEventListener("mousedown", e => {
+        e.preventDefault();
         playNote(note, freq, key);
-      }
-    });
+      });
 
-    // Touch support
-    key.addEventListener("touchstart", e => {
-      e.preventDefault();
-      playNote(note, freq, key);
-    });
+      key.addEventListener("mouseenter", e => {
+        if (e.buttons & 1) {
+          // Mouse button is held while dragging across keys
+          playNote(note, freq, key);
+        }
+      });
 
-    pianoEl.appendChild(key);
-  });
+      // Touch support
+      key.addEventListener("touchstart", e => {
+        e.preventDefault();
+        playNote(note, freq, key);
+      });
+
+      pianoEl.appendChild(key);
+    });
 }
 
 function playNote(note, freq, keyEl) {

@@ -214,7 +214,10 @@ test("validateProjectFavicons reports missing or broken favicon references in mi
   fs.mkdirSync(miniEmpty, { recursive: true });
   fs.mkdirSync(miniValid, { recursive: true });
 
-  fs.writeFileSync(path.join(miniMissing, "index.html"), "<!doctype html><html><head></head></html>");
+  fs.writeFileSync(
+    path.join(miniMissing, "index.html"),
+    "<!doctype html><html><head></head></html>"
+  );
   fs.writeFileSync(
     path.join(miniBroken, "index.html"),
     '<!doctype html><html><head><link rel="icon" href="nonexistent.svg" /></head></html>'
@@ -232,17 +235,44 @@ test("validateProjectFavicons reports missing or broken favicon references in mi
   );
 
   const diskProjects = [
-    { name: "missing-fav", relPath: "projects/test/missing-fav/", absPath: miniMissing },
-    { name: "broken-fav", relPath: "projects/test/broken-fav/", absPath: miniBroken },
-    { name: "empty-fav", relPath: "projects/test/empty-fav/", absPath: miniEmpty },
-    { name: "valid-fav", relPath: "projects/test/valid-fav/", absPath: miniValid },
+    {
+      name: "missing-fav",
+      relPath: "projects/test/missing-fav/",
+      absPath: miniMissing,
+    },
+    {
+      name: "broken-fav",
+      relPath: "projects/test/broken-fav/",
+      absPath: miniBroken,
+    },
+    {
+      name: "empty-fav",
+      relPath: "projects/test/empty-fav/",
+      absPath: miniEmpty,
+    },
+    {
+      name: "valid-fav",
+      relPath: "projects/test/valid-fav/",
+      absPath: miniValid,
+    },
   ];
 
   const issues = validateProjectFavicons(diskProjects);
   assert.equal(issues.length, 3);
-  assert.equal(issues.some(i => i.type === "MISSING_FAVICON" && i.project === "missing-fav"), true);
-  assert.equal(issues.some(i => i.type === "BROKEN_FAVICON" && i.project === "broken-fav"), true);
-  assert.equal(issues.some(i => i.type === "INVALID_FAVICON" && i.project === "empty-fav"), true);
+  assert.equal(
+    issues.some(
+      i => i.type === "MISSING_FAVICON" && i.project === "missing-fav"
+    ),
+    true
+  );
+  assert.equal(
+    issues.some(i => i.type === "BROKEN_FAVICON" && i.project === "broken-fav"),
+    true
+  );
+  assert.equal(
+    issues.some(i => i.type === "INVALID_FAVICON" && i.project === "empty-fav"),
+    true
+  );
 });
 
 test("validateMiniProjects verifies all mini projects open without load failures or missing pages", () => {
@@ -264,11 +294,11 @@ test("parseHtmlAssetLinks extracts broken script src references from index.html"
     "<!doctype html>",
     "<html>",
     "  <head>",
-    "    <link rel=\"stylesheet\" href=\"style.css\" />",
+    '    <link rel="stylesheet" href="style.css" />',
     "  </head>",
     "  <body>",
-    "    <script src=\"script.js\"></script>",
-    "    <script src=\"missing-lib.js\"></script>",
+    '    <script src="script.js"></script>',
+    '    <script src="missing-lib.js"></script>',
     "  </body>",
     "</html>",
   ].join("\n");
@@ -277,7 +307,10 @@ test("parseHtmlAssetLinks extracts broken script src references from index.html"
 
   assert.ok(links.includes("style.css"), "should include stylesheet href");
   assert.ok(links.includes("script.js"), "should include primary script src");
-  assert.ok(links.includes("missing-lib.js"), "should include broken script src");
+  assert.ok(
+    links.includes("missing-lib.js"),
+    "should include broken script src"
+  );
 });
 
 test("parseHtmlAssetLinks extracts broken img src and link icon references", () => {
@@ -285,20 +318,24 @@ test("parseHtmlAssetLinks extracts broken img src and link icon references", () 
     "<!doctype html>",
     "<html>",
     "  <head>",
-    "    <link rel=\"icon\" type=\"image/svg+xml\" href=\"nonexistent-icon.svg\" />",
+    '    <link rel="icon" type="image/svg+xml" href="nonexistent-icon.svg" />',
     "  </head>",
     "  <body>",
-    "    <img src=\"assets/ghost-image.png\" alt=\"missing\" />",
+    '    <img src="assets/ghost-image.png" alt="missing" />',
     "  </body>",
     "</html>",
   ].join("\n");
 
   const links = parseHtmlAssetLinks(html);
 
-  assert.ok(links.includes("nonexistent-icon.svg"),
-    "should extract broken favicon icon href");
-  assert.ok(links.includes("assets/ghost-image.png"),
-    "should extract broken img src");
+  assert.ok(
+    links.includes("nonexistent-icon.svg"),
+    "should extract broken favicon icon href"
+  );
+  assert.ok(
+    links.includes("assets/ghost-image.png"),
+    "should extract broken img src"
+  );
 });
 
 test("isExternal returns false for local script and asset paths that should be disk-checked", () => {
@@ -328,7 +365,11 @@ test("validateProjectFavicons raises BROKEN_FAVICON when favicon file is referen
   );
 
   const diskProjects = [
-    { name: "icon-missing", relPath: "projects/test/icon-missing/", absPath: miniDir },
+    {
+      name: "icon-missing",
+      relPath: "projects/test/icon-missing/",
+      absPath: miniDir,
+    },
   ];
 
   const issues = validateProjectFavicons(diskProjects);
@@ -352,7 +393,11 @@ test("validateProjectFavicons raises BROKEN_FAVICON for a missing script-adjacen
   );
 
   const diskProjects = [
-    { name: "icon-missing2", relPath: "projects/test/icon-missing2/", absPath: miniDir },
+    {
+      name: "icon-missing2",
+      relPath: "projects/test/icon-missing2/",
+      absPath: miniDir,
+    },
   ];
 
   const issues = validateProjectFavicons(diskProjects);
@@ -370,8 +415,8 @@ test("broken local asset reference is detected by the isExternal + sanitizePath 
 
   const html = [
     "<!doctype html><html><head>",
-    '  <link rel="stylesheet" href="style.css" />',        // exists
-    '  <script src="script.js"></script>',                 // exists
+    '  <link rel="stylesheet" href="style.css" />', // exists
+    '  <script src="script.js"></script>', // exists
     '  <script src="helpers/missing-helper.js"></script>', // missing
     "</head><body></body></html>",
   ].join("\n");
@@ -392,6 +437,3 @@ test("broken local asset reference is detected by the isExternal + sanitizePath 
 
   assert.deepEqual(brokenAssets, ["helpers/missing-helper.js"]);
 });
-
-
-

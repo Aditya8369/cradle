@@ -151,13 +151,13 @@ Provides the full visual design: board colours, piece glyphs (Unicode chess symb
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page shell, board grid, side panel, controls |
-| CSS3 | Board colours, piece glyphs, highlights, responsive layout |
-| Vanilla JavaScript | Rules engine, AI search, and UI controller |
-| Web Workers | Off-main-thread AI computation |
-| navigator.clipboard | Copy PGN feature |
+| Technology          | Purpose                                                    |
+| ------------------- | ---------------------------------------------------------- |
+| HTML5               | Page shell, board grid, side panel, controls               |
+| CSS3                | Board colours, piece glyphs, highlights, responsive layout |
+| Vanilla JavaScript  | Rules engine, AI search, and UI controller                 |
+| Web Workers         | Off-main-thread AI computation                             |
+| navigator.clipboard | Copy PGN feature                                           |
 
 ---
 

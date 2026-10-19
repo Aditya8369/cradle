@@ -112,7 +112,9 @@ function exportOutput() {
   if (!outputText.value) return;
 
   const format = formatSelect.value;
-  const blob = new Blob([outputText.value], { type: "text/plain;charset=utf-8" });
+  const blob = new Blob([outputText.value], {
+    type: "text/plain;charset=utf-8",
+  });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");

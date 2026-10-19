@@ -12,12 +12,12 @@ export default function MemoryAllocatorVisualizer() {
   const [strategy, setStrategy] = useState("first-fit");
   const [log, setLog] = useState([]);
 
-  const addLog = (message) => {
-    setLog((prev) => [message, ...prev.slice(0, 9)]);
+  const addLog = message => {
+    setLog(prev => [message, ...prev.slice(0, 9)]);
   };
 
   // Allocate memory block
-  const handleAllocate = (e) => {
+  const handleAllocate = e => {
     e.preventDefault();
     const size = parseInt(processSize, 10);
     if (!size || size <= 0 || !processName) return;
@@ -58,7 +58,9 @@ export default function MemoryAllocatorVisualizer() {
     }
 
     if (startIndex === -1 || startIndex + size > TOTAL_MEMORY) {
-      addLog(`❌ Allocation failed for "${processName}" (${size} blocks): Not enough contiguous memory.`);
+      addLog(
+        `❌ Allocation failed for "${processName}" (${size} blocks): Not enough contiguous memory.`
+      );
       return;
     }
 
@@ -68,15 +70,19 @@ export default function MemoryAllocatorVisualizer() {
     }
 
     setMemory(newMemory);
-    addLog(`✅ Allocated ${size} blocks for "${processName}" starting at index ${startIndex}.`);
+    addLog(
+      `✅ Allocated ${size} blocks for "${processName}" starting at index ${startIndex}.`
+    );
     setProcessSize("");
     setProcessName("");
   };
 
   // Deallocate memory block by process name
-  const handleDeallocate = (name) => {
-    const newMemory = memory.map((block) =>
-      block.processId === name ? { allocated: false, processId: null, size: 0 } : block
+  const handleDeallocate = name => {
+    const newMemory = memory.map(block =>
+      block.processId === name
+        ? { allocated: false, processId: null, size: 0 }
+        : block
     );
     setMemory(newMemory);
     addLog(`🗑️ Deallocated process "${name}".`);
@@ -84,7 +90,9 @@ export default function MemoryAllocatorVisualizer() {
 
   // Reset memory
   const handleReset = () => {
-    setMemory(Array(TOTAL_MEMORY).fill({ allocated: false, processId: null, size: 0 }));
+    setMemory(
+      Array(TOTAL_MEMORY).fill({ allocated: false, processId: null, size: 0 })
+    );
     setLog([]);
     addLog("🔄 Memory reset.");
   };
@@ -107,21 +115,38 @@ export default function MemoryAllocatorVisualizer() {
   };
 
   const activeProcesses = Array.from(
-    new Set(memory.filter((b) => b.allocated).map((b) => b.processId))
+    new Set(memory.filter(b => b.allocated).map(b => b.processId))
   );
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto", fontFamily: "sans-serif" }}>
+    <div
+      style={{
+        padding: "2rem",
+        maxWidth: "900px",
+        margin: "0 auto",
+        fontFamily: "sans-serif",
+      }}
+    >
       <h2>Memory Allocator Visualizer</h2>
-      <p style={{ color: "#666" }}>Simulate memory allocation, deallocation, and fragmentation.</p>
+      <p style={{ color: "#666" }}>
+        Simulate memory allocation, deallocation, and fragmentation.
+      </p>
 
       {/* Controls Form */}
-      <form onSubmit={handleAllocate} style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+      <form
+        onSubmit={handleAllocate}
+        style={{
+          display: "flex",
+          gap: "1rem",
+          marginBottom: "1.5rem",
+          flexWrap: "wrap",
+        }}
+      >
         <input
           type="text"
           placeholder="Process Name (e.g. P1)"
           value={processName}
-          onChange={(e) => setProcessName(e.target.value)}
+          onChange={e => setProcessName(e.target.value)}
           required
           style={{ padding: "0.5rem", flex: "1" }}
         />
@@ -129,7 +154,7 @@ export default function MemoryAllocatorVisualizer() {
           type="number"
           placeholder="Size (blocks)"
           value={processSize}
-          onChange={(e) => setProcessSize(e.target.value)}
+          onChange={e => setProcessSize(e.target.value)}
           min="1"
           max={TOTAL_MEMORY}
           required
@@ -137,26 +162,64 @@ export default function MemoryAllocatorVisualizer() {
         />
         <select
           value={strategy}
-          onChange={(e) => setStrategy(e.target.value)}
+          onChange={e => setStrategy(e.target.value)}
           style={{ padding: "0.5rem" }}
         >
           <option value="first-fit">First-Fit</option>
           <option value="best-fit">Best-Fit</option>
         </select>
-        <button type="submit" style={{ padding: "0.5rem 1rem", background: "#2563eb", color: "#fff", border: "none", cursor: "pointer" }}>
+        <button
+          type="submit"
+          style={{
+            padding: "0.5rem 1rem",
+            background: "#2563eb",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
           Allocate
         </button>
-        <button type="button" onClick={handleReset} style={{ padding: "0.5rem 1rem", background: "#dc2626", color: "#fff", border: "none", cursor: "pointer" }}>
+        <button
+          type="button"
+          onClick={handleReset}
+          style={{
+            padding: "0.5rem 1rem",
+            background: "#dc2626",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
           Reset
         </button>
       </form>
 
       {/* Metrics Bar */}
-      <div style={{ display: "flex", gap: "2rem", marginBottom: "1rem", fontSize: "0.9rem", background: "#f1f5f9", padding: "0.75rem", borderRadius: "6px" }}>
-        <div><strong>Total Blocks:</strong> {TOTAL_MEMORY}</div>
-        <div><strong>Allocated:</strong> {memory.filter(b => b.allocated).length}</div>
-        <div><strong>Free:</strong> {memory.filter(b => !b.allocated).length}</div>
-        <div><strong>External Fragmentation (Gaps):</strong> {getFragmentationCount()}</div>
+      <div
+        style={{
+          display: "flex",
+          gap: "2rem",
+          marginBottom: "1rem",
+          fontSize: "0.9rem",
+          background: "#f1f5f9",
+          padding: "0.75rem",
+          borderRadius: "6px",
+        }}
+      >
+        <div>
+          <strong>Total Blocks:</strong> {TOTAL_MEMORY}
+        </div>
+        <div>
+          <strong>Allocated:</strong> {memory.filter(b => b.allocated).length}
+        </div>
+        <div>
+          <strong>Free:</strong> {memory.filter(b => !b.allocated).length}
+        </div>
+        <div>
+          <strong>External Fragmentation (Gaps):</strong>{" "}
+          {getFragmentationCount()}
+        </div>
       </div>
 
       {/* Memory Grid Visualization */}
@@ -199,11 +262,18 @@ export default function MemoryAllocatorVisualizer() {
         <div style={{ marginBottom: "1.5rem" }}>
           <h4>Active Processes</h4>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            {activeProcesses.map((name) => (
+            {activeProcesses.map(name => (
               <button
                 key={name}
                 onClick={() => handleDeallocate(name)}
-                style={{ padding: "0.4rem 0.8rem", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+                style={{
+                  padding: "0.4rem 0.8rem",
+                  background: "#475569",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
               >
                 Free {name} ✕
               </button>
@@ -213,10 +283,23 @@ export default function MemoryAllocatorVisualizer() {
       )}
 
       {/* Event Log */}
-      <div style={{ background: "#0f172a", color: "#38bdf8", padding: "1rem", borderRadius: "8px", fontFamily: "monospace", fontSize: "0.85rem", maxHeight: "150px", overflowY: "auto" }}>
+      <div
+        style={{
+          background: "#0f172a",
+          color: "#38bdf8",
+          padding: "1rem",
+          borderRadius: "8px",
+          fontFamily: "monospace",
+          fontSize: "0.85rem",
+          maxHeight: "150px",
+          overflowY: "auto",
+        }}
+      >
         <strong>Simulation Log:</strong>
         {log.map((entry, index) => (
-          <div key={index} style={{ marginTop: "0.25rem" }}>{entry}</div>
+          <div key={index} style={{ marginTop: "0.25rem" }}>
+            {entry}
+          </div>
         ))}
       </div>
     </div>

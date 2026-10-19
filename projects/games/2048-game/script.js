@@ -8,18 +8,20 @@ const statusElement = document.getElementById("status");
 const restartButton = document.getElementById("restartBtn");
 const gridSizeSelect = document.getElementById("gridSize");
 
-const undoButton = document.getElementById('undoBtn');
-const themeSelect = document.getElementById('themeSelect');
+const undoButton = document.getElementById("undoBtn");
+const themeSelect = document.getElementById("themeSelect");
 
 let currentSize = 4;
 let state = null;
-let undoManager = window.GameUndoManager ? window.GameUndoManager.createUndoManager(10) : null;
+let undoManager = window.GameUndoManager
+  ? window.GameUndoManager.createUndoManager(10)
+  : null;
 
 function initGame() {
   if (gridSizeSelect) {
     currentSize = parseInt(gridSizeSelect.value, 10);
   }
-  
+
   if (undoManager) {
     undoManager.clear();
   }
@@ -124,7 +126,6 @@ function handleKeydown(event) {
   event.preventDefault();
   handleMove(direction);
 }
-
 
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", handleKeydown);

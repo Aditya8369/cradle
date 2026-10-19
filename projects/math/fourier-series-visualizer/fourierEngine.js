@@ -19,23 +19,26 @@
  */
 function fourierCoeff(waveType, n) {
   switch (waveType) {
-    case 'sine':
+    case "sine":
       // Pure sine: only the fundamental (n=1), all others zero
       return n === 1 ? { a: 0, b: 1 } : { a: 0, b: 0 };
 
-    case 'square':
+    case "square":
       // Square wave: odd harmonics only, bₙ = 4/(nπ)
       if (n % 2 === 0) return { a: 0, b: 0 };
       return { a: 0, b: 4 / (n * Math.PI) };
 
-    case 'sawtooth':
+    case "sawtooth":
       // Sawtooth wave: all harmonics, bₙ = 2·(-1)^(n+1) / (nπ)
       return { a: 0, b: (2 * Math.pow(-1, n + 1)) / (n * Math.PI) };
 
-    case 'triangle':
+    case "triangle":
       // Triangle wave: odd harmonics only, bₙ = 8·(-1)^((n-1)/2) / (n²π²)
       if (n % 2 === 0) return { a: 0, b: 0 };
-      return { a: 0, b: (8 * Math.pow(-1, (n - 1) / 2)) / (n * n * Math.PI * Math.PI) };
+      return {
+        a: 0,
+        b: (8 * Math.pow(-1, (n - 1) / 2)) / (n * n * Math.PI * Math.PI),
+      };
 
     default:
       return { a: 0, b: 0 };
@@ -55,7 +58,14 @@ function fourierCoeff(waveType, n) {
  * @param {Function} [activeFilter] - Optional function (n) => bool to skip harmonics
  * @returns {{ time: Float64Array, samples: Float64Array, harmonics: Array<{n: number, samples: Float64Array}> }}
  */
-function computeWaveform(waveType, numHarmonics, frequency, sampleRate, duration, activeFilter) {
+function computeWaveform(
+  waveType,
+  numHarmonics,
+  frequency,
+  sampleRate,
+  duration,
+  activeFilter
+) {
   const numSamples = Math.ceil(sampleRate * duration);
   const time = new Float64Array(numSamples);
   const samples = new Float64Array(numSamples);
@@ -122,10 +132,22 @@ function sampleAt(waveType, numHarmonics, frequency, time, activeFilter) {
  * @param {number} duration
  * @returns {Array<{ step: number, samples: Float64Array }>}
  */
-function buildProgressiveFrames(waveType, maxHarmonics, frequency, sampleRate, duration) {
+function buildProgressiveFrames(
+  waveType,
+  maxHarmonics,
+  frequency,
+  sampleRate,
+  duration
+) {
   const frames = [];
   for (let step = 1; step <= maxHarmonics; step++) {
-    const result = computeWaveform(waveType, step, frequency, sampleRate, duration);
+    const result = computeWaveform(
+      waveType,
+      step,
+      frequency,
+      sampleRate,
+      duration
+    );
     frames.push({ step, samples: result.samples, time: result.time });
   }
   return frames;
@@ -152,7 +174,7 @@ function normalise(samples) {
 
 /* ──── Module Exports ─────────────────────────────────────────────── */
 
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     fourierCoeff,
     computeWaveform,

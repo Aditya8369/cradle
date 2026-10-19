@@ -66,7 +66,9 @@
   function generateClipPathCSS(type, shapeData) {
     if (type === "polygon") {
       const vertices = shapeData.vertices || PRESETS.triangle;
-      const pointsStr = vertices.map((v) => `${Math.round(v.x)}% ${Math.round(v.y)}%`).join(", ");
+      const pointsStr = vertices
+        .map(v => `${Math.round(v.x)}% ${Math.round(v.y)}%`)
+        .join(", ");
       return `clip-path: polygon(${pointsStr});`;
     }
 
@@ -82,8 +84,14 @@
 
     if (type === "blob") {
       const b = shapeData.blob || {
-        tlh: 30, trh: 70, brh: 70, blh: 30,
-        tlv: 30, trv: 30, brv: 70, blv: 70,
+        tlh: 30,
+        trh: 70,
+        brh: 70,
+        blh: 30,
+        tlv: 30,
+        trv: 30,
+        brv: 70,
+        blv: 70,
       };
       const radiusStr = `${b.tlh}% ${100 - b.trh}% ${100 - b.brh}% ${b.blh}% / ${b.tlv}% ${b.trv}% ${100 - b.brv}% ${100 - b.blv}%`;
       return `border-radius: ${radiusStr};`;
@@ -99,7 +107,7 @@
     if (type === "polygon") {
       const vertices = shapeData.vertices || PRESETS.triangle;
       const points = vertices
-        .map((v) => `${(v.x * width) / 100},${(v.y * height) / 100}`)
+        .map(v => `${(v.x * width) / 100},${(v.y * height) / 100}`)
         .join(" ");
       return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">\n  <polygon points="${points}" fill="#818cf8" />\n</svg>`;
     }

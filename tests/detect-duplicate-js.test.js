@@ -4,7 +4,7 @@ const {
   normalizeCode,
   tokenize,
   calculateJaccardSimilarity,
-  analyzeDuplicateModules
+  analyzeDuplicateModules,
 } = require("../scripts/detect-duplicate-js.js");
 
 test("normalizeCode strips comments and whitespace", () => {
@@ -22,7 +22,10 @@ test("normalizeCode strips comments and whitespace", () => {
 });
 
 test("tokenize extracts identifier words", () => {
-  const lines = ['const a = 10;', 'function computeSum(x, y) { return x + y; }'];
+  const lines = [
+    "const a = 10;",
+    "function computeSum(x, y) { return x + y; }",
+  ];
   const tokens = tokenize(lines);
   assert.ok(tokens.includes("const"));
   assert.ok(tokens.includes("computeSum"));

@@ -225,7 +225,8 @@ async function loadProjects() {
 
         renderCategories();
         renderProjects(allProjects);
-        if (loadStatus) loadStatus.textContent = `${allProjects.length} projects loaded.`;
+        if (loadStatus)
+          loadStatus.textContent = `${allProjects.length} projects loaded.`;
 
         fetchAndCacheProjects(db)
           .then(() => {
@@ -244,7 +245,8 @@ async function loadProjects() {
 
     renderCategories();
     renderProjects(allProjects);
-    if (loadStatus) loadStatus.textContent = `${allProjects.length} projects loaded.`;
+    if (loadStatus)
+      loadStatus.textContent = `${allProjects.length} projects loaded.`;
   } catch (error) {
     console.error(error);
     projectsGrid.innerHTML = "<p>Failed to load projects.</p>";

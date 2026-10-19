@@ -8,17 +8,17 @@ This document defines how contributors and CI/CD workflows must handle credentia
 
 Contributors **must not commit or push** the following to the repository:
 
-* API keys
-* Passwords
-* Access tokens
-* Personal access tokens (PATs)
-* Cloud-provider credentials
-* Database credentials
-* Private keys or certificates
-* Session cookies
-* OAuth client secrets
-* `.env` files containing real credentials
-* CI/CD secrets or deployment credentials
+- API keys
+- Passwords
+- Access tokens
+- Personal access tokens (PATs)
+- Cloud-provider credentials
+- Database credentials
+- Private keys or certificates
+- Session cookies
+- OAuth client secrets
+- `.env` files containing real credentials
+- CI/CD secrets or deployment credentials
 
 Use environment variables or the repository's supported secret-management mechanism instead.
 
@@ -54,12 +54,12 @@ Repository and platform tokens must be treated as sensitive credentials.
 
 Contributors should:
 
-* Use personal tokens only when required.
-* Request the smallest required scope.
-* Avoid sharing tokens through issues, pull requests, chat, screenshots, or commits.
-* Never place tokens directly in source code.
-* Revoke tokens immediately if they are exposed.
-* Prefer short-lived or fine-grained tokens where supported.
+- Use personal tokens only when required.
+- Request the smallest required scope.
+- Avoid sharing tokens through issues, pull requests, chat, screenshots, or commits.
+- Never place tokens directly in source code.
+- Revoke tokens immediately if they are exposed.
+- Prefer short-lived or fine-grained tokens where supported.
 
 A token should provide **only the permissions required for the task**.
 
@@ -120,11 +120,11 @@ Contributors must assume that code executed during a pull request may be able to
 
 Therefore:
 
-* Do not expose sensitive secrets to untrusted pull-request workflows.
-* Avoid running privileged workflows automatically on untrusted code.
-* Do not use elevated tokens unnecessarily.
-* Separate validation workflows from privileged deployment or release workflows.
-* Require maintainer approval before executing workflows that have access to sensitive resources.
+- Do not expose sensitive secrets to untrusted pull-request workflows.
+- Avoid running privileged workflows automatically on untrusted code.
+- Do not use elevated tokens unnecessarily.
+- Separate validation workflows from privileged deployment or release workflows.
+- Require maintainer approval before executing workflows that have access to sensitive resources.
 
 Workflows that perform deployments, releases, publishing, or repository writes should run only after the appropriate approval boundary has been satisfied.
 
@@ -134,14 +134,14 @@ Privileged operations must have an explicit approval boundary.
 
 Examples include:
 
-* Production deployments
-* Publishing packages
-* Creating releases
-* Modifying repository settings
-* Rotating credentials
-* Accessing production databases
-* Writing to protected branches
-* Executing scripts with elevated repository permissions
+- Production deployments
+- Publishing packages
+- Creating releases
+- Modifying repository settings
+- Rotating credentials
+- Accessing production databases
+- Writing to protected branches
+- Executing scripts with elevated repository permissions
 
 Where supported, use protected environments and required approvals:
 
@@ -167,14 +167,14 @@ Changes to CI/CD configuration must be reviewed carefully because workflow files
 
 Maintainers should pay particular attention to changes involving:
 
-* `.github/workflows/`
-* `permissions:`
-* `secrets.*`
-* deployment configuration
-* release automation
-* third-party GitHub Actions
-* shell commands executed by workflows
-* authentication configuration
+- `.github/workflows/`
+- `permissions:`
+- `secrets.*`
+- deployment configuration
+- release automation
+- third-party GitHub Actions
+- shell commands executed by workflows
+- authentication configuration
 
 A workflow change should be considered security-sensitive when it increases the code's ability to access secrets or modify repository resources.
 
@@ -184,10 +184,10 @@ Use trusted and maintained third-party actions.
 
 Where practical:
 
-* Pin actions to a specific commit SHA.
-* Avoid unnecessary third-party actions.
-* Review an action before granting it access to secrets or write permissions.
-* Keep actions updated through the repository's normal dependency-management process.
+- Pin actions to a specific commit SHA.
+- Avoid unnecessary third-party actions.
+- Review an action before granting it access to secrets or write permissions.
+- Keep actions updated through the repository's normal dependency-management process.
 
 Do not introduce an action solely to perform a task that can safely be handled by an existing trusted action or native command.
 
@@ -219,26 +219,26 @@ Simply deleting the secret in a later commit is **not sufficient**, because it m
 
 Maintainers should:
 
-* Keep repository permissions as restrictive as practical.
-* Configure protected branches and environments for sensitive operations.
-* Review changes to CI workflows.
-* Regularly audit repository secrets and tokens.
-* Remove unused credentials.
-* Prefer short-lived and narrowly scoped credentials.
-* Ensure production credentials are separated from development credentials.
-* Require approval for privileged deployments and releases.
+- Keep repository permissions as restrictive as practical.
+- Configure protected branches and environments for sensitive operations.
+- Review changes to CI workflows.
+- Regularly audit repository secrets and tokens.
+- Remove unused credentials.
+- Prefer short-lived and narrowly scoped credentials.
+- Ensure production credentials are separated from development credentials.
+- Require approval for privileged deployments and releases.
 
 ## 13. Contributor Checklist
 
 Before opening a pull request, contributors should verify:
 
-* [ ] No real credentials are committed.
-* [ ] Tokens are not present in source code or documentation.
-* [ ] CI workflows do not unnecessarily request write permissions.
-* [ ] Secrets are not printed in CI logs.
-* [ ] Fork-based workflows do not receive unnecessary secrets.
-* [ ] New privileged operations have an appropriate approval boundary.
-* [ ] CI configuration changes have been reviewed for security implications.
+- [ ] No real credentials are committed.
+- [ ] Tokens are not present in source code or documentation.
+- [ ] CI workflows do not unnecessarily request write permissions.
+- [ ] Secrets are not printed in CI logs.
+- [ ] Fork-based workflows do not receive unnecessary secrets.
+- [ ] New privileged operations have an appropriate approval boundary.
+- [ ] CI configuration changes have been reviewed for security implications.
 
 ## 14. Core Principle
 

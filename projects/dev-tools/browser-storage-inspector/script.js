@@ -6,7 +6,7 @@ const storageState = {
   session: [],
   cookies: [],
   indexed: [],
-  typeFilter: "all"
+  typeFilter: "all",
 };
 
 const elements = {
@@ -46,12 +46,17 @@ function initializeInspector() {
     button.addEventListener("click", () => clearStorage(button.dataset.clear));
   });
 
-  if (elements.refreshBtn) elements.refreshBtn.addEventListener("click", refreshAll);
-  if (elements.seedBtn) elements.seedBtn.addEventListener("click", seedDemoData);
-  if (elements.exportJsonBtn) elements.exportJsonBtn.addEventListener("click", exportJSON);
-  if (elements.exportCsvBtn) elements.exportCsvBtn.addEventListener("click", exportCSV);
+  if (elements.refreshBtn)
+    elements.refreshBtn.addEventListener("click", refreshAll);
+  if (elements.seedBtn)
+    elements.seedBtn.addEventListener("click", seedDemoData);
+  if (elements.exportJsonBtn)
+    elements.exportJsonBtn.addEventListener("click", exportJSON);
+  if (elements.exportCsvBtn)
+    elements.exportCsvBtn.addEventListener("click", exportCSV);
 
-  if (elements.searchInput) elements.searchInput.addEventListener("input", renderAll);
+  if (elements.searchInput)
+    elements.searchInput.addEventListener("input", renderAll);
   if (elements.typeFilterSelect) {
     elements.typeFilterSelect.addEventListener("change", e => {
       storageState.typeFilter = e.target.value;
@@ -95,13 +100,22 @@ function renderAll() {
   const query = elements.searchInput ? elements.searchInput.value : "";
   const typeFilter = storageState.typeFilter;
 
-  const filteredLocal = engine ? engine.filterItems(storageState.local, query, typeFilter) : storageState.local;
-  const filteredSession = engine ? engine.filterItems(storageState.session, query, typeFilter) : storageState.session;
-  const filteredCookies = engine ? engine.filterItems(storageState.cookies, query, typeFilter) : storageState.cookies;
+  const filteredLocal = engine
+    ? engine.filterItems(storageState.local, query, typeFilter)
+    : storageState.local;
+  const filteredSession = engine
+    ? engine.filterItems(storageState.session, query, typeFilter)
+    : storageState.session;
+  const filteredCookies = engine
+    ? engine.filterItems(storageState.cookies, query, typeFilter)
+    : storageState.cookies;
 
-  if (elements.counts.local) elements.counts.local.textContent = storageState.local.length;
-  if (elements.counts.session) elements.counts.session.textContent = storageState.session.length;
-  if (elements.counts.cookies) elements.counts.cookies.textContent = storageState.cookies.length;
+  if (elements.counts.local)
+    elements.counts.local.textContent = storageState.local.length;
+  if (elements.counts.session)
+    elements.counts.session.textContent = storageState.session.length;
+  if (elements.counts.cookies)
+    elements.counts.cookies.textContent = storageState.cookies.length;
 
   renderRows(elements.rows.local, filteredLocal, "local");
   renderRows(elements.rows.session, filteredSession, "session");
@@ -131,7 +145,9 @@ function renderRows(container, items, storeType) {
 
     const deleteBtn = tr.querySelector("[data-delete-key]");
     if (deleteBtn) {
-      deleteBtn.addEventListener("click", () => deleteItem(storeType, item.key));
+      deleteBtn.addEventListener("click", () =>
+        deleteItem(storeType, item.key)
+      );
     }
 
     container.appendChild(tr);
@@ -195,11 +211,17 @@ function handleFormSubmit(e) {
 }
 
 function seedDemoData() {
-  localStorage.setItem("cradle_theme", JSON.stringify({ mode: "dark", accent: "#3b82f6" }));
+  localStorage.setItem(
+    "cradle_theme",
+    JSON.stringify({ mode: "dark", accent: "#3b82f6" })
+  );
   localStorage.setItem("cradle_user_id", "usr_94812");
   localStorage.setItem("cradle_visited", "true");
 
-  sessionStorage.setItem("draft_note", "Exploring matrix engine and ASCII exporters in Cradle.");
+  sessionStorage.setItem(
+    "draft_note",
+    "Exploring matrix engine and ASCII exporters in Cradle."
+  );
   sessionStorage.setItem("tab_id", "tab_482");
 
   document.cookie = "demo_session=active_771; path=/";
@@ -221,7 +243,9 @@ function exportJSON() {
     setStatus("JSON export downloaded successfully.");
   } catch (error) {
     console.error("JSON export error:", error);
-    setStatus(`JSON export failed: ${error.message || "Unable to create export."}`);
+    setStatus(
+      `JSON export failed: ${error.message || "Unable to create export."}`
+    );
   }
 }
 
@@ -237,7 +261,9 @@ function exportCSV() {
     setStatus("CSV export downloaded successfully.");
   } catch (error) {
     console.error("CSV export error:", error);
-    setStatus(`CSV export failed: ${error.message || "Unable to create export."}`);
+    setStatus(
+      `CSV export failed: ${error.message || "Unable to create export."}`
+    );
   }
 }
 

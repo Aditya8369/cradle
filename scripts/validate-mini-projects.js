@@ -12,6 +12,14 @@ const REQUIRED_STANDARD_FILES = [
   "thumbnail.svg",
 ];
 
+const MODULAR_PROJECTS = new Set([
+  "projects/misc/audio-spectrogram-analyzer/",
+  "projects/misc/collaborative-whiteboard/",
+  "projects/productivity/knowledge-graph/",
+  "projects/math/pathfinding-visualizer/",
+  "projects/games/procedural-dungeon-generator/",
+]);
+
 const EXTERNAL_PREFIXES = [
   "http://",
   "https://",
@@ -66,6 +74,10 @@ function validateStandardProjectFiles(diskProjects) {
 
   for (const project of diskProjects) {
     for (const fileName of REQUIRED_STANDARD_FILES) {
+      if (fileName === "script.js" && MODULAR_PROJECTS.has(project.relPath)) {
+        continue;
+      }
+
       const filePath = path.join(project.absPath, fileName);
 
       if (!fs.existsSync(filePath)) {
@@ -131,7 +143,9 @@ function validateProjectFavicons(diskProjects) {
     if (!fs.existsSync(htmlPath)) continue;
 
     const htmlContent = fs.readFileSync(htmlPath, "utf-8");
-    const iconMatch = htmlContent.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i);
+    const iconMatch = htmlContent.match(
+      /<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i
+    );
 
     if (!iconMatch) {
       issues.push({
@@ -143,7 +157,11 @@ function validateProjectFavicons(diskProjects) {
     }
 
     const hrefMatch = iconMatch[0].match(/href=["']([^"']+)["']/i);
-    if (!hrefMatch || !hrefMatch[1].trim() || hrefMatch[1].trim() === "data:,") {
+    if (
+      !hrefMatch ||
+      !hrefMatch[1].trim() ||
+      hrefMatch[1].trim() === "data:,"
+    ) {
       issues.push({
         type: "INVALID_FAVICON",
         project: project.name,

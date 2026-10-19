@@ -10,13 +10,13 @@ The project is implemented using vanilla HTML, CSS, and JavaScript. A custom Lon
 
 The primary goals are:
 
-* Provide a simple browser-based text comparison tool.
-* Compare text at line level and word level.
-* Clearly distinguish additions, removals, and modified lines.
-* Provide side-by-side comparison for easier visual inspection.
-* Display basic change statistics.
-* Keep the implementation dependency-free and easy to understand.
-* Support keyboard-based comparison using Ctrl/Cmd + Enter.
+- Provide a simple browser-based text comparison tool.
+- Compare text at line level and word level.
+- Clearly distinguish additions, removals, and modified lines.
+- Provide side-by-side comparison for easier visual inspection.
+- Display basic change statistics.
+- Keep the implementation dependency-free and easy to understand.
+- Support keyboard-based comparison using Ctrl/Cmd + Enter.
 
 ## Folder Structure
 
@@ -75,13 +75,13 @@ All processing happens locally in the browser. No backend server or external API
 
 Defines the application structure and user interface:
 
-* Application header and description.
-* Line Mode and Word Mode controls.
-* Compare, Swap, and Clear buttons.
-* Original and Modified textareas.
-* Statistics display.
-* Side-by-side diff output panes.
-* Empty-state message.
+- Application header and description.
+- Line Mode and Word Mode controls.
+- Compare, Swap, and Clear buttons.
+- Original and Modified textareas.
+- Statistics display.
+- Side-by-side diff output panes.
+- Empty-state message.
 
 ### `script.js`
 
@@ -89,14 +89,14 @@ Acts as the application controller and UI layer.
 
 Responsibilities include:
 
-* Reading text input.
-* Handling button and keyboard events.
-* Managing the selected comparison mode.
-* Calling the diff engine.
-* Pairing changed lines in Word Mode.
-* Generating rendered diff rows.
-* Updating addition, removal, and modification statistics.
-* Updating the DOM.
+- Reading text input.
+- Handling button and keyboard events.
+- Managing the selected comparison mode.
+- Calling the diff engine.
+- Pairing changed lines in Word Mode.
+- Generating rendered diff rows.
+- Updating addition, removal, and modification statistics.
+- Updating the DOM.
 
 ### `diffEngine.js`
 
@@ -104,12 +104,12 @@ Contains the reusable comparison logic.
 
 Responsibilities include:
 
-* Performing LCS-based array comparison.
-* Converting text into lines.
-* Converting text into word/whitespace tokens.
-* Escaping HTML-sensitive characters.
-* Producing inline word-level differences.
-* Exposing the diff functionality through `DiffEngine`.
+- Performing LCS-based array comparison.
+- Converting text into lines.
+- Converting text into word/whitespace tokens.
+- Escaping HTML-sensitive characters.
+- Producing inline word-level differences.
+- Exposing the diff functionality through `DiffEngine`.
 
 ### `style.css`
 
@@ -117,13 +117,13 @@ Controls the visual presentation of the application.
 
 Responsibilities include:
 
-* Layout and responsive behavior.
-* Input and button styling.
-* Side-by-side diff layout.
-* Addition, deletion, and modification highlighting.
-* Line-number styling.
-* Empty-line visualization.
-* Word-level highlighting.
+- Layout and responsive behavior.
+- Input and button styling.
+- Side-by-side diff layout.
+- Addition, deletion, and modification highlighting.
+- Line-number styling.
+- Empty-line visualization.
+- Word-level highlighting.
 
 ### `thumbnail.svg`
 
@@ -148,29 +148,29 @@ Provides the project's thumbnail/preview graphic where required by the repositor
 
 ## Key Features
 
-* Side-by-side original and modified text comparison.
-* Line-based difference detection.
-* Word-level difference detection.
-* LCS-based diff algorithm.
-* Addition highlighting.
-* Removal highlighting.
-* Modification highlighting.
-* Word-level inline highlighting.
-* Line numbers.
-* Addition/removal/modification statistics.
-* Swap input functionality.
-* Clear functionality.
-* Ctrl/Cmd + Enter comparison shortcut.
-* Responsive layout for smaller screens.
-* Dependency-free client-side implementation.
+- Side-by-side original and modified text comparison.
+- Line-based difference detection.
+- Word-level difference detection.
+- LCS-based diff algorithm.
+- Addition highlighting.
+- Removal highlighting.
+- Modification highlighting.
+- Word-level inline highlighting.
+- Line numbers.
+- Addition/removal/modification statistics.
+- Swap input functionality.
+- Clear functionality.
+- Ctrl/Cmd + Enter comparison shortcut.
+- Responsive layout for smaller screens.
+- Dependency-free client-side implementation.
 
 ## Technologies Used
 
-* HTML5
-* CSS3
-* Vanilla JavaScript
-* DOM APIs
-* LCS (Longest Common Subsequence) algorithm
+- HTML5
+- CSS3
+- Vanilla JavaScript
+- DOM APIs
+- LCS (Longest Common Subsequence) algorithm
 
 No framework, package manager, backend service, or external runtime dependency is required.
 
@@ -219,9 +219,9 @@ The project has no external runtime dependencies.
 
 It relies only on:
 
-* Standard browser DOM APIs.
-* Native JavaScript language features.
-* HTML5 and CSS3.
+- Standard browser DOM APIs.
+- Native JavaScript language features.
+- HTML5 and CSS3.
 
 The shared repository `escapeHtml.js` utility is also loaded by the page, while `diffEngine.js` contains its own escaping helper for standalone reuse of the diff engine.
 
@@ -229,25 +229,25 @@ The shared repository `escapeHtml.js` utility is also loaded by the page, while 
 
 Potential improvements include:
 
-* Add unified diff output mode.
-* Add copy-to-clipboard functionality.
-* Add download/export functionality.
-* Add configurable whitespace handling.
-* Add case-sensitive/case-insensitive comparison options.
-* Improve handling of very large text inputs.
-* Add synchronized scrolling between the two diff panes.
-* Add more detailed statistics such as changed words.
-* Add automated unit tests for the diff engine.
-* Improve accessibility with additional keyboard navigation and screen-reader feedback.
+- Add unified diff output mode.
+- Add copy-to-clipboard functionality.
+- Add download/export functionality.
+- Add configurable whitespace handling.
+- Add case-sensitive/case-insensitive comparison options.
+- Improve handling of very large text inputs.
+- Add synchronized scrolling between the two diff panes.
+- Add more detailed statistics such as changed words.
+- Add automated unit tests for the diff engine.
+- Improve accessibility with additional keyboard navigation and screen-reader feedback.
 
 ## Known Limitations
 
-* The LCS implementation uses a dynamic programming matrix, which can consume significant memory for very large inputs.
-* Word Mode pairs changed lines based on their position inside a change block and may not always produce the most semantically optimal pairing.
-* The tool currently focuses on text comparison and does not provide patch generation or merge functionality.
-* Comparison is performed entirely in the browser, so very large documents may affect browser performance.
-* Whitespace is preserved during comparison and may therefore appear as a difference.
-* The current interface does not provide synchronized scrolling between the two result panes.
+- The LCS implementation uses a dynamic programming matrix, which can consume significant memory for very large inputs.
+- Word Mode pairs changed lines based on their position inside a change block and may not always produce the most semantically optimal pairing.
+- The tool currently focuses on text comparison and does not provide patch generation or merge functionality.
+- Comparison is performed entirely in the browser, so very large documents may affect browser performance.
+- Whitespace is preserved during comparison and may therefore appear as a difference.
+- The current interface does not provide synchronized scrolling between the two result panes.
 
 ## Development Notes
 
@@ -286,8 +286,8 @@ https://github.com/Facelessism/cradle/issues/138
 
 ## References
 
-* Cradle repository: https://github.com/Facelessism/cradle
-* Issue #138: https://github.com/Facelessism/cradle/issues/138
-* Longest Common Subsequence algorithm: https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-* MDN Web Docs — DOM APIs: https://developer.mozilla.org/en-US/docs/Web/API
-* MDN Web Docs — `String.prototype.match()`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match
+- Cradle repository: https://github.com/Facelessism/cradle
+- Issue #138: https://github.com/Facelessism/cradle/issues/138
+- Longest Common Subsequence algorithm: https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+- MDN Web Docs — DOM APIs: https://developer.mozilla.org/en-US/docs/Web/API
+- MDN Web Docs — `String.prototype.match()`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match

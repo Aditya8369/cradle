@@ -47,12 +47,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Provides the text area, file upload control, action buttons, summary cards, and cleaned table preview. |
-| `style.css` | Defines the dark file-tools layout, responsive workspace, summary cards, and missing-value table styling. |
-| `script.js` | Wires UI controls to the cleaner engine, reads uploaded files, renders summaries and tables, and downloads cleaned CSV. |
-| `csvCleaner.js` | Parses CSV strings, trims fields, removes empty and duplicate rows, detects missing values, and exports CSV text. |
+| File            | Responsibility                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `index.html`    | Provides the text area, file upload control, action buttons, summary cards, and cleaned table preview.                  |
+| `style.css`     | Defines the dark file-tools layout, responsive workspace, summary cards, and missing-value table styling.               |
+| `script.js`     | Wires UI controls to the cleaner engine, reads uploaded files, renders summaries and tables, and downloads cleaned CSV. |
+| `csvCleaner.js` | Parses CSV strings, trims fields, removes empty and duplicate rows, detects missing values, and exports CSV text.       |
 
 ---
 
@@ -93,14 +93,14 @@ The matching event handler reruns the engine or exports the cleaned dataset
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic page structure and file input. |
-| CSS3 | Responsive layout, summary cards, table preview, and dark theme. |
-| Vanilla JavaScript | CSV parsing, cleaning, DOM updates, file reading, and export. |
-| File API | Reads uploaded CSV files in the browser. |
-| Blob API | Creates downloadable cleaned CSV output. |
-| Node.js `node:test` | Unit tests for parsing, cleanup, and export formatting. |
+| Technology          | Purpose                                                          |
+| ------------------- | ---------------------------------------------------------------- |
+| HTML5               | Semantic page structure and file input.                          |
+| CSS3                | Responsive layout, summary cards, table preview, and dark theme. |
+| Vanilla JavaScript  | CSV parsing, cleaning, DOM updates, file reading, and export.    |
+| File API            | Reads uploaded CSV files in the browser.                         |
+| Blob API            | Creates downloadable cleaned CSV output.                         |
+| Node.js `node:test` | Unit tests for parsing, cleanup, and export formatting.          |
 
 ---
 

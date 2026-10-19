@@ -65,8 +65,7 @@ function validateCsvFile(file) {
    * a reliable MIME type for CSV files. Therefore, accept
    * an empty MIME type when the file has a .csv extension.
    */
-  const isAcceptedMime =
-    !file.type || ACCEPTED_FILE_TYPES.has(file.type);
+  const isAcceptedMime = !file.type || ACCEPTED_FILE_TYPES.has(file.type);
 
   if (!isCsvExtension || !isAcceptedMime) {
     return {
@@ -102,18 +101,15 @@ function updateStats(summary) {
   }
 
   if (statNodes.duplicatesRemoved) {
-    statNodes.duplicatesRemoved.textContent =
-      summary.duplicateRowsRemoved;
+    statNodes.duplicatesRemoved.textContent = summary.duplicateRowsRemoved;
   }
 
   if (statNodes.emptyRowsRemoved) {
-    statNodes.emptyRowsRemoved.textContent =
-      summary.emptyRowsRemoved;
+    statNodes.emptyRowsRemoved.textContent = summary.emptyRowsRemoved;
   }
 
   if (statNodes.missingValues) {
-    statNodes.missingValues.textContent =
-      summary.missingValueCount;
+    statNodes.missingValues.textContent = summary.missingValueCount;
   }
 }
 
@@ -121,17 +117,14 @@ function renderTable(dataset, missingValues = []) {
   if (!tableWrap || !previewMeta) return;
 
   if (!dataset || !dataset.headers || !dataset.headers.length) {
-    tableWrap.innerHTML =
-      `<div class="empty-state">No headers found.</div>`;
+    tableWrap.innerHTML = `<div class="empty-state">No headers found.</div>`;
 
     previewMeta.textContent = "No preview available.";
     return;
   }
 
   const missingKeys = new Set(
-    missingValues.map(
-      item => `${item.rowIndex}:${item.columnIndex}`
-    )
+    missingValues.map(item => `${item.rowIndex}:${item.columnIndex}`)
   );
 
   const visibleRows = dataset.rows.slice(0, 50);
@@ -170,9 +163,7 @@ function renderTable(dataset, missingValues = []) {
       <thead>
         <tr>
           ${dataset.headers
-            .map(
-              header => `<th>${escapeHtml(header)}</th>`
-            )
+            .map(header => `<th>${escapeHtml(header)}</th>`)
             .join("")}
         </tr>
       </thead>
@@ -183,13 +174,9 @@ function renderTable(dataset, missingValues = []) {
     </table>
   `;
 
-  const displayedRows = Math.min(
-    dataset.rows.length,
-    50
-  );
+  const displayedRows = Math.min(dataset.rows.length, 50);
 
-  previewMeta.textContent =
-    `Showing ${displayedRows} of ${dataset.rows.length} cleaned rows.`;
+  previewMeta.textContent = `Showing ${displayedRows} of ${dataset.rows.length} cleaned rows.`;
 }
 
 function cleanCsv() {
@@ -204,18 +191,14 @@ function cleanCsv() {
       cleanedDataset = null;
 
       if (tableWrap) {
-        tableWrap.innerHTML =
-          `<div class="empty-state">Paste or upload CSV data first.</div>`;
+        tableWrap.innerHTML = `<div class="empty-state">Paste or upload CSV data first.</div>`;
       }
 
       if (previewMeta) {
         previewMeta.textContent = "No preview available.";
       }
 
-      setMessage(
-        "Paste or upload CSV data first.",
-        "error"
-      );
+      setMessage("Paste or upload CSV data first.", "error");
 
       return;
     }
@@ -224,9 +207,7 @@ function cleanCsv() {
       typeof CsvCleaner === "undefined" ||
       typeof CsvCleaner.analyzeCsv !== "function"
     ) {
-      throw new Error(
-        "CSV cleaner engine is unavailable."
-      );
+      throw new Error("CSV cleaner engine is unavailable.");
     }
 
     const result = CsvCleaner.analyzeCsv(input);
@@ -235,40 +216,25 @@ function cleanCsv() {
 
     updateStats(result.summary);
 
-    renderTable(
-      result.dataset,
-      result.summary.missingValues
-    );
+    renderTable(result.dataset, result.summary.missingValues);
 
-    if (
-      result.summary.warnings &&
-      result.summary.warnings.length > 0
-    ) {
-      const remainingCount =
-        result.summary.warnings.length - 1;
+    if (result.summary.warnings && result.summary.warnings.length > 0) {
+      const remainingCount = result.summary.warnings.length - 1;
 
       const extraText =
-        remainingCount > 0
-          ? ` (and ${remainingCount} more)`
-          : "";
+        remainingCount > 0 ? ` (and ${remainingCount} more)` : "";
 
       setMessage(
         `CSV cleaned with warnings: ${result.summary.warnings[0]}${extraText}`,
         "success"
       );
     } else {
-      setMessage(
-        "CSV cleaned successfully.",
-        "success"
-      );
+      setMessage("CSV cleaned successfully.", "success");
     }
   } catch (error) {
     cleanedDataset = null;
 
-    setMessage(
-      error?.message || "Unable to clean CSV.",
-      "error"
-    );
+    setMessage(error?.message || "Unable to clean CSV.", "error");
   }
 }
 
@@ -284,9 +250,7 @@ function downloadCleanedCsv() {
       typeof CsvCleaner === "undefined" ||
       typeof CsvCleaner.exportCsv !== "function"
     ) {
-      throw new Error(
-        "CSV export engine is unavailable."
-      );
+      throw new Error("CSV export engine is unavailable.");
     }
 
     const csv = CsvCleaner.exportCsv(cleanedDataset);
@@ -307,27 +271,19 @@ function downloadCleanedCsv() {
 
     URL.revokeObjectURL(url);
 
-    setMessage(
-      "Cleaned CSV downloaded.",
-      "success"
-    );
+    setMessage("Cleaned CSV downloaded.", "success");
   } catch (error) {
-    setMessage(
-      error?.message || "Unable to download cleaned CSV.",
-      "error"
-    );
+    setMessage(error?.message || "Unable to download cleaned CSV.", "error");
   }
 }
 
 if (fileInput) {
   fileInput.addEventListener("change", async () => {
-    const file =
-      fileInput.files && fileInput.files[0];
+    const file = fileInput.files && fileInput.files[0];
 
     if (!file) return;
 
-    const validationResult =
-      validateCsvFile(file);
+    const validationResult = validateCsvFile(file);
 
     /*
      * IMPORTANT:
@@ -338,10 +294,7 @@ if (fileInput) {
     if (!validationResult.valid) {
       fileInput.value = "";
 
-      setMessage(
-        validationResult.message,
-        "error"
-      );
+      setMessage(validationResult.message, "error");
 
       return;
     }
@@ -351,19 +304,13 @@ if (fileInput) {
 
       csvInput.value = text;
 
-      setMessage(
-        `Loaded ${file.name}.`,
-        "success"
-      );
+      setMessage(`Loaded ${file.name}.`, "success");
 
       cleanCsv();
     } catch (error) {
       fileInput.value = "";
 
-      setMessage(
-        "Unable to read the selected CSV file.",
-        "error"
-      );
+      setMessage("Unable to read the selected CSV file.", "error");
     }
   });
 }
@@ -373,22 +320,16 @@ if (cleanBtn) {
 }
 
 if (downloadBtn) {
-  downloadBtn.addEventListener(
-    "click",
-    downloadCleanedCsv
-  );
+  downloadBtn.addEventListener("click", downloadCleanedCsv);
 }
 
 if (loadSampleBtn) {
-  loadSampleBtn.addEventListener(
-    "click",
-    () => {
-      if (!csvInput) return;
+  loadSampleBtn.addEventListener("click", () => {
+    if (!csvInput) return;
 
-      csvInput.value = sampleCsv;
-      cleanCsv();
-    }
-  );
+    csvInput.value = sampleCsv;
+    cleanCsv();
+  });
 }
 
 if (csvInput) {

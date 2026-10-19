@@ -52,7 +52,8 @@ function renderSuggestions(report) {
   }
 
   suggestionList.innerHTML = report.suggestions
-    .map(item => `
+    .map(
+      item => `
       <button class="suggestion" type="button" data-color="${item.color}">
         <span class="swatch" style="background:${item.color}"></span>
         <span>
@@ -60,7 +61,8 @@ function renderSuggestions(report) {
           <small>${item.direction} foreground, ${item.ratio}:1</small>
         </span>
       </button>
-    `)
+    `
+    )
     .join("");
 
   suggestionList.querySelectorAll(".suggestion").forEach(button => {
@@ -113,8 +115,8 @@ function applyPalette(palette) {
 }
 
 function renderPalettes() {
-  paletteList.innerHTML = ContrastEngine.SAMPLE_PALETTES
-    .map((palette, index) => `
+  paletteList.innerHTML = ContrastEngine.SAMPLE_PALETTES.map(
+    (palette, index) => `
       <button class="palette-button" type="button" data-index="${index}">
         <span class="palette-preview" style="background:${palette.background}; color:${palette.foreground}">
           Aa
@@ -124,12 +126,14 @@ function renderPalettes() {
           <small>${palette.foreground} on ${palette.background}</small>
         </span>
       </button>
-    `)
-    .join("");
+    `
+  ).join("");
 
   paletteList.querySelectorAll(".palette-button").forEach(button => {
     button.addEventListener("click", () => {
-      applyPalette(ContrastEngine.SAMPLE_PALETTES[Number(button.dataset.index)]);
+      applyPalette(
+        ContrastEngine.SAMPLE_PALETTES[Number(button.dataset.index)]
+      );
     });
   });
 }
@@ -153,7 +157,8 @@ async function copyCssVariables() {
 [foregroundHex, backgroundHex].forEach(input => {
   input.addEventListener("input", updateReport);
   input.addEventListener("blur", () => {
-    const picker = input === foregroundHex ? foregroundPicker : backgroundPicker;
+    const picker =
+      input === foregroundHex ? foregroundPicker : backgroundPicker;
     syncInputPair(input, picker);
     updateReport();
   });

@@ -59,9 +59,8 @@ test("parseURLComponents handles mailto URLs", () => {
 });
 
 test("parseURLComponents handles internationalized domain names", () => {
-  const { components, error } = URLEngine.parseURLComponents(
-    "https://例え.テスト"
-  );
+  const { components, error } =
+    URLEngine.parseURLComponents("https://例え.テスト");
 
   assert.equal(error, null);
   assert.ok(components.hostname);
@@ -109,9 +108,8 @@ test("parseURLComponents accepts valid IPv4 addresses", () => {
 });
 
 test("parseURLComponents accepts valid IPv6 addresses", () => {
-  const { components, error } = URLEngine.parseURLComponents(
-    "https://[::1]:8080"
-  );
+  const { components, error } =
+    URLEngine.parseURLComponents("https://[::1]:8080");
 
   assert.equal(error, null);
   assert.ok(components.hostname);
@@ -136,14 +134,9 @@ test("parseURLComponents rejects malformed URLs", () => {
   ];
 
   for (const input of malformedURLs) {
-    const { components, error } =
-      URLEngine.parseURLComponents(input);
+    const { components, error } = URLEngine.parseURLComponents(input);
 
-    assert.equal(
-      components,
-      null,
-      `Expected "${input}" to be rejected`
-    );
+    assert.equal(components, null, `Expected "${input}" to be rejected`);
 
     assert.equal(
       error,
@@ -162,8 +155,7 @@ test("parseURLComponents rejects unsupported protocols", () => {
   ];
 
   for (const input of unsupportedURLs) {
-    const { components, error } =
-      URLEngine.parseURLComponents(input);
+    const { components, error } = URLEngine.parseURLComponents(input);
 
     assert.equal(
       components,
@@ -171,17 +163,13 @@ test("parseURLComponents rejects unsupported protocols", () => {
       `Expected unsupported protocol "${input}" to be rejected`
     );
 
-    assert.equal(
-      error,
-      "Please enter a valid URL."
-    );
+    assert.equal(error, "Please enter a valid URL.");
   }
 });
 
 test("parseURLComponents rejects empty and whitespace-only input", () => {
   for (const input of ["", "   ", "\t", "\n"]) {
-    const { components, error } =
-      URLEngine.parseURLComponents(input);
+    const { components, error } = URLEngine.parseURLComponents(input);
 
     assert.equal(components, null);
     assert.equal(error, "Please enter a valid URL.");
@@ -192,8 +180,7 @@ test("parseURLComponents rejects non-string input", () => {
   const inputs = [null, undefined, 123, {}, [], true];
 
   for (const input of inputs) {
-    const { components, error } =
-      URLEngine.parseURLComponents(input);
+    const { components, error } = URLEngine.parseURLComponents(input);
 
     assert.equal(components, null);
     assert.equal(error, "Please enter a valid URL.");
@@ -206,10 +193,7 @@ test("buildQueryString formats key-value pairs into a valid query string", () =>
     { key: "limit", value: "20" },
   ];
 
-  assert.equal(
-    URLEngine.buildQueryString(params),
-    "?page=1&limit=20"
-  );
+  assert.equal(URLEngine.buildQueryString(params), "?page=1&limit=20");
 });
 
 test("buildQueryString handles empty values", () => {
@@ -218,57 +202,34 @@ test("buildQueryString handles empty values", () => {
     { key: "page", value: "1" },
   ];
 
-  assert.equal(
-    URLEngine.buildQueryString(params),
-    "?search=&page=1"
-  );
+  assert.equal(URLEngine.buildQueryString(params), "?search=&page=1");
 });
 
 test("encodeURLComponentSafe and decodeURLComponentSafe round-trip reserved symbols", () => {
   const original = "hello world & key=value";
 
-  const encoded =
-    URLEngine.encodeURLComponentSafe(original);
+  const encoded = URLEngine.encodeURLComponentSafe(original);
 
-  const decoded =
-    URLEngine.decodeURLComponentSafe(encoded);
+  const decoded = URLEngine.decodeURLComponentSafe(encoded);
 
   assert.equal(decoded, original);
 });
 
 test("detectFileType classifies extensions", () => {
-  assert.equal(
-    URLEngine.detectFileType("png").trim(),
-    "Image"
-  );
+  assert.equal(URLEngine.detectFileType("png").trim(), "Image");
 
-  assert.equal(
-    URLEngine.detectFileType(".PNG").trim(),
-    "Image"
-  );
+  assert.equal(URLEngine.detectFileType(".PNG").trim(), "Image");
 
-  assert.equal(
-    URLEngine.detectFileType("mp4").trim(),
-    "Video"
-  );
+  assert.equal(URLEngine.detectFileType("mp4").trim(), "Video");
 
-  assert.equal(
-    URLEngine.detectFileType("pdf").trim(),
-    "Document"
-  );
+  assert.equal(URLEngine.detectFileType("pdf").trim(), "Document");
 
-  assert.equal(
-    URLEngine.detectFileType("xyz"),
-    "Unknown"
-  );
+  assert.equal(URLEngine.detectFileType("xyz"), "Unknown");
 });
 
 test("detectURLType classifies representative URLs", () => {
   assert.equal(
-    URLEngine.detectURLType(
-      new URL("https://example.com/photo.png"),
-      "png"
-    ),
+    URLEngine.detectURLType(new URL("https://example.com/photo.png"), "png"),
     "Image URL"
   );
 
@@ -289,53 +250,35 @@ test("detectURLType classifies representative URLs", () => {
   );
 
   assert.equal(
-    URLEngine.detectURLType(
-      new URL("https://youtu.be/dQw4w9WgXcQ"),
-      "None"
-    ),
+    URLEngine.detectURLType(new URL("https://youtu.be/dQw4w9WgXcQ"), "None"),
     "YouTube URL"
   );
 
   assert.equal(
-    URLEngine.detectURLType(
-      new URL("ftp://files.example.com/a.txt"),
-      "txt"
-    ),
+    URLEngine.detectURLType(new URL("ftp://files.example.com/a.txt"), "txt"),
     "FTP URL"
   );
 
   assert.equal(
-    URLEngine.detectURLType(
-      new URL("https://example.com/about"),
-      "None"
-    ),
+    URLEngine.detectURLType(new URL("https://example.com/about"), "None"),
     "Website URL"
   );
 });
 
 test("escapeHTML neutralises markup", () => {
   assert.equal(
-    URLEngine.escapeHTML(
-      "<img src=x onerror=alert(1)>"
-    ),
+    URLEngine.escapeHTML("<img src=x onerror=alert(1)>"),
     "&lt;img src=x onerror=alert(1)&gt;"
   );
 
-  assert.equal(
-    URLEngine.escapeHTML(`"&'`),
-    "&quot;&amp;&#039;"
-  );
+  assert.equal(URLEngine.escapeHTML(`"&'`), "&quot;&amp;&#039;");
 });
 
 test("escapeHTML protects both URL component labels and values", () => {
   const key = "<script>alert(1)</script>";
   const value = "<b onmouseover=steal()>hi</b>";
 
-  assert.ok(
-    !URLEngine.escapeHTML(key).includes("<")
-  );
+  assert.ok(!URLEngine.escapeHTML(key).includes("<"));
 
-  assert.ok(
-    !URLEngine.escapeHTML(value).includes("<")
-  );
+  assert.ok(!URLEngine.escapeHTML(value).includes("<"));
 });

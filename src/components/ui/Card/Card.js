@@ -254,9 +254,20 @@
 
   /* ── HTML sanitizer — strips dangerous patterns from user-supplied HTML ── */
   const _sanitize =
-    (typeof window !== "undefined" && window.CradleSanitize && window.CradleSanitize.sanitizeHtml) ||
-    (typeof require === "function" && (function () { try { return require("../sanitizeHtml.js").sanitizeHtml; } catch { return null; } })()) ||
-    function (html) { return String(html ?? ""); };
+    (typeof window !== "undefined" &&
+      window.CradleSanitize &&
+      window.CradleSanitize.sanitizeHtml) ||
+    (typeof require === "function" &&
+      (function () {
+        try {
+          return require("../sanitizeHtml.js").sanitizeHtml;
+        } catch {
+          return null;
+        }
+      })()) ||
+    function (html) {
+      return String(html ?? "");
+    };
 
   /* ── Sub-component builders ───────────────────────────── */
 

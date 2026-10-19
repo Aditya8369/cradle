@@ -26,6 +26,10 @@ test("findWorkerUsages resolves same-origin literal worker references", () => {
   `;
 
   const landingRef = findWorkerUsages(landing, "script.js");
+  const appUtilityRef = findWorkerUsages(
+    'new Worker("./scripts/worker.js", { type: "module" });',
+    "src/utils/filterWorker.js"
+  );
   const chessRef = findWorkerUsages(chess, "projects/games/chess/script.js");
   const urlsFromChess = findWorkerUsages(
     chess,
@@ -33,6 +37,8 @@ test("findWorkerUsages resolves same-origin literal worker references", () => {
   );
 
   assert.deepEqual(landingRef.urls, ["scripts/worker.js"]);
+  assert.deepEqual(appUtilityRef.urls, ["scripts/worker.js"]);
+  assert.deepEqual(appUtilityRef.issues, []);
   assert.deepEqual(chessRef.urls, [
     "projects/games/chess/ai-worker.js",
     "projects/games/chess/chessLogic.js",

@@ -40,12 +40,12 @@ index.html --> apiEngine.js (pure logic) --> script.js (DOM + fetch) --> rendere
 
 ## Component Breakdown
 
-| File           | Responsibility                                                        |
-| -------------- | ----------------------------------------------------------------------- |
+| File           | Responsibility                                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apiEngine.js` | Header text parsing, response header formatting, byte/duration formatting, JSON pretty-printing, status tone mapping, request option building |
-| `script.js`    | Reads form inputs, calls `fetch`, times the request, renders headers/body, copy-to-clipboard |
-| `index.html`   | Request form (method, URL, headers, body) and result panels             |
-| `style.css`    | Layout and responsive styling using `--cradle-*` design tokens          |
+| `script.js`    | Reads form inputs, calls `fetch`, times the request, renders headers/body, copy-to-clipboard                                                  |
+| `index.html`   | Request form (method, URL, headers, body) and result panels                                                                                   |
+| `style.css`    | Layout and responsive styling using `--cradle-*` design tokens                                                                                |
 
 ## Data Flow / Execution Flow
 

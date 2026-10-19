@@ -59,13 +59,13 @@ projects/dev-tools/regex-visualizer/
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell: template buttons, pattern input, flag checkboxes, explanation and tester panels |
-| `regexEngine.js` | Pure engine: `sanitizeFlags`, `compileRegex`, `parsePatternTokens`, `executeReplace` |
-| `script.js` | DOM wiring: `runRegexProcessor`, `processMatches`, `generateExplainer`, overlay highlighting |
-| `style.css` | Dark theme, workspace grid, match and capture-group highlight colors |
-| `tests/regex-visualizer.test.js` | Unit test suite covering compilation, flags, token breakdown, and replacements |
+| File                             | Responsibility                                                                               |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
+| `index.html`                     | Page shell: template buttons, pattern input, flag checkboxes, explanation and tester panels  |
+| `regexEngine.js`                 | Pure engine: `sanitizeFlags`, `compileRegex`, `parsePatternTokens`, `executeReplace`         |
+| `script.js`                      | DOM wiring: `runRegexProcessor`, `processMatches`, `generateExplainer`, overlay highlighting |
+| `style.css`                      | Dark theme, workspace grid, match and capture-group highlight colors                         |
+| `tests/regex-visualizer.test.js` | Unit test suite covering compilation, flags, token breakdown, and replacements               |
 
 ---
 
@@ -105,14 +105,14 @@ User edits pattern / flags / text → the pipeline runs again
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Flexbox, Grid, Custom Properties) | Workspace layout and highlight overlay |
-| Vanilla JavaScript (ES6+) | Engine and DOM logic |
-| RegExp API | Pattern compilation and matching |
-| UMD/AMD wrapper in `regexEngine.js` | Browser global + Node.js module for testing |
-| Outfit & Fira Code (Google Fonts) | UI typography and monospace code display |
+| Technology                              | Purpose                                     |
+| --------------------------------------- | ------------------------------------------- |
+| HTML5                                   | Page structure and semantic markup          |
+| CSS3 (Flexbox, Grid, Custom Properties) | Workspace layout and highlight overlay      |
+| Vanilla JavaScript (ES6+)               | Engine and DOM logic                        |
+| RegExp API                              | Pattern compilation and matching            |
+| UMD/AMD wrapper in `regexEngine.js`     | Browser global + Node.js module for testing |
+| Outfit & Fira Code (Google Fonts)       | UI typography and monospace code display    |
 
 ---
 
@@ -198,4 +198,7 @@ None at runtime beyond the native RegExp and DOM APIs. The only external resourc
 - [MDN Web Docs — Regular Expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions)
 - [MDN Web Docs — RegExp](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp)
 - [regex101](https://regex101.com/) — pattern tester inspiration
+
+```
+
 ```

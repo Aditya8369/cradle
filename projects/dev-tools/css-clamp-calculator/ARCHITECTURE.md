@@ -47,12 +47,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Provides form inputs, preset selector, output cards, preview area, and shared BackToHome loading. |
-| `style.css` | Defines the dark dev-tools layout, form controls, output panels, responsive behavior, and live preview. |
-| `script.js` | Connects input events to the engine, applies presets, copies generated CSS, converts units, and updates preview styles. |
-| `clampCalculator.js` | Validates numeric ranges, calculates preferred values, generates `clamp()` CSS, and handles px/rem conversion. |
+| File                 | Responsibility                                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `index.html`         | Provides form inputs, preset selector, output cards, preview area, and shared BackToHome loading.                       |
+| `style.css`          | Defines the dark dev-tools layout, form controls, output panels, responsive behavior, and live preview.                 |
+| `script.js`          | Connects input events to the engine, applies presets, copies generated CSS, converts units, and updates preview styles. |
+| `clampCalculator.js` | Validates numeric ranges, calculates preferred values, generates `clamp()` CSS, and handles px/rem conversion.          |
 
 ---
 
@@ -91,13 +91,13 @@ The matching event handler reruns the engine and updates the DOM
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic page structure and form controls. |
-| CSS3 | Responsive layout, custom properties, preview styling, and `clamp()` usage. |
-| Vanilla JavaScript | Formula generation, DOM updates, presets, clipboard, and unit conversion. |
-| Clipboard API | Copies generated CSS rules. |
-| Node.js `node:test` | Unit tests for formula generation, conversion, and invalid input handling. |
+| Technology          | Purpose                                                                     |
+| ------------------- | --------------------------------------------------------------------------- |
+| HTML5               | Semantic page structure and form controls.                                  |
+| CSS3                | Responsive layout, custom properties, preview styling, and `clamp()` usage. |
+| Vanilla JavaScript  | Formula generation, DOM updates, presets, clipboard, and unit conversion.   |
+| Clipboard API       | Copies generated CSS rules.                                                 |
+| Node.js `node:test` | Unit tests for formula generation, conversion, and invalid input handling.  |
 
 ---
 

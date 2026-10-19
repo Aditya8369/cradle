@@ -33,17 +33,17 @@ json-tree-viewer/
 
 ## Key Features
 
-| Feature | Description |
-|---|---|
-| **Collapsible Tree** | Click nodes to expand/collapse, toggle individual or all |
+| Feature                 | Description                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| **Collapsible Tree**    | Click nodes to expand/collapse, toggle individual or all                                  |
 | **Syntax Highlighting** | Color-coded: keys (cyan), strings (green), numbers (amber), booleans (purple), null (red) |
-| **Real-time Parsing** | 300ms debounced input parsing |
-| **Search** | Find keys and values, highlights matches, expands to first match |
-| **Path Copying** | Click any node to select its JSON path, copy with button |
-| **Format / Minify** | Pretty-print or compress JSON input |
-| **Sample Data** | One-click load of realistic sample JSON |
-| **Stats Bar** | Type, key count, depth, size, selected path |
-| **Keyboard Shortcuts** | Ctrl+F (search), Escape (clear search) |
+| **Real-time Parsing**   | 300ms debounced input parsing                                                             |
+| **Search**              | Find keys and values, highlights matches, expands to first match                          |
+| **Path Copying**        | Click any node to select its JSON path, copy with button                                  |
+| **Format / Minify**     | Pretty-print or compress JSON input                                                       |
+| **Sample Data**         | One-click load of realistic sample JSON                                                   |
+| **Stats Bar**           | Type, key count, depth, size, selected path                                               |
+| **Keyboard Shortcuts**  | Ctrl+F (search), Escape (clear search)                                                    |
 
 ---
 

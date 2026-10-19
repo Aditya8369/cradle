@@ -11,7 +11,7 @@
       accent: "#00ff00",
       cursor: "#33ff33",
       dim: "#1f7a1f",
-      error: "#ff5555"
+      error: "#ff5555",
     },
     blue: {
       id: "blue",
@@ -21,7 +21,7 @@
       accent: "#528bff",
       cursor: "#61afef",
       dim: "#2c3a55",
-      error: "#e06c75"
+      error: "#e06c75",
     },
     amber: {
       id: "amber",
@@ -31,7 +31,7 @@
       accent: "#ffcc66",
       cursor: "#ffb000",
       dim: "#7a5200",
-      error: "#ff6b4a"
+      error: "#ff6b4a",
     },
     light: {
       id: "light",
@@ -41,8 +41,8 @@
       accent: "#0057d8",
       cursor: "#1e1e1e",
       dim: "#8a8a8a",
-      error: "#c02020"
-    }
+      error: "#c02020",
+    },
   };
 
   const DEFAULT_THEME_ID = "classic-green";
@@ -83,7 +83,7 @@
       "--term-accent": t.accent,
       "--term-cursor": t.cursor,
       "--term-dim": t.dim,
-      "--term-error": t.error
+      "--term-error": t.error,
     };
   }
 

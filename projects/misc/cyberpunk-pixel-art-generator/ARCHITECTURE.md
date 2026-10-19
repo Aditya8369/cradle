@@ -40,11 +40,11 @@ The application uses a triple-canvas architecture to separate concerns and optim
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the layout including the toolbars, layer list, and the three-canvas stack |
-| `script.js` | Implements drawing algorithms (Bresenham, Flood Fill), layer management, and effects |
-| `style.css` | Implements the "neon" aesthetic using CSS variables, glow effects, and a dark theme |
+| File         | Responsibility                                                                       |
+| ------------ | ------------------------------------------------------------------------------------ |
+| `index.html` | Defines the layout including the toolbars, layer list, and the three-canvas stack    |
+| `script.js`  | Implements drawing algorithms (Bresenham, Flood Fill), layer management, and effects |
+| `style.css`  | Implements the "neon" aesthetic using CSS variables, glow effects, and a dark theme  |
 
 ---
 
@@ -74,7 +74,7 @@ saveState() pushes the current layer data to the undoStack
 
 - **Layer-Based Editing**: Supports multiple layers with visibility toggles and merging capabilities.
 - **Specialized Drawing Tools**: Includes an iterative flood-fill algorithm and a Bresenham-based line tool.
-- **Thematic Effects**: 
+- **Thematic Effects**:
   - **Neon Glow**: Spreads color to neighboring pixels with adjusted brightness.
   - **Scanlines**: Darkens every second row to simulate a CRT monitor.
   - **Glitch**: Randomly offsets horizontal segments of the image.
@@ -86,12 +86,12 @@ saveState() pushes the current layer data to the undoStack
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Layout and canvas elements |
-| CSS3 | Neon theme, grid layout, and responsive design |
+| Technology        | Purpose                                                 |
+| ----------------- | ------------------------------------------------------- |
+| HTML5             | Layout and canvas elements                              |
+| CSS3              | Neon theme, grid layout, and responsive design          |
 | JavaScript (ES6+) | Editor logic, algorithmic drawing, and state management |
-| Canvas 2D API | Pixel-level rendering and compositing |
+| Canvas 2D API     | Pixel-level rendering and compositing                   |
 
 ---
 

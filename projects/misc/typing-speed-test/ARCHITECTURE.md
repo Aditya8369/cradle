@@ -51,11 +51,11 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|------|---------------|
-| `index.html` | Stats bar (WPM, accuracy, time, errors), difficulty/time selectors, text display area, typing input, results card, history list |
-| `script.js` | Text banks for 4 difficulties, countdown timer, WPM/accuracy calculation, character-by-character comparison, grade system, history persistence, input handling |
-| `style.css` | Character highlighting (correct/incorrect/cursor), blinking cursor animation, stats bar, results grid, grade badges, responsive layout |
+| File         | Responsibility                                                                                                                                                 |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.html` | Stats bar (WPM, accuracy, time, errors), difficulty/time selectors, text display area, typing input, results card, history list                                |
+| `script.js`  | Text banks for 4 difficulties, countdown timer, WPM/accuracy calculation, character-by-character comparison, grade system, history persistence, input handling |
+| `style.css`  | Character highlighting (correct/incorrect/cursor), blinking cursor animation, stats bar, results grid, grade badges, responsive layout                         |
 
 ---
 
@@ -105,16 +105,16 @@ Results section shown; history entry saved to localStorage
 
 ## Technologies Used
 
-| Technology | Purpose |
-|------------|---------|
-| HTML5 | Page structure, semantic markup |
-| CSS3 (Custom Properties, Grid, Animations) | Layout, character highlighting, responsive design |
-| Vanilla JavaScript (ES6+) | Timer, WPM calculation, input handling, grade system |
-| localStorage API | Test history persistence |
-| Cradle `tokens.css` | Shared design token system |
-| Cradle `BackToHome.js` | Back-to-home navigation |
-| Font Awesome 6.x (CDN) | Icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | UI and monospace typography |
+| Technology                                          | Purpose                                              |
+| --------------------------------------------------- | ---------------------------------------------------- |
+| HTML5                                               | Page structure, semantic markup                      |
+| CSS3 (Custom Properties, Grid, Animations)          | Layout, character highlighting, responsive design    |
+| Vanilla JavaScript (ES6+)                           | Timer, WPM calculation, input handling, grade system |
+| localStorage API                                    | Test history persistence                             |
+| Cradle `tokens.css`                                 | Shared design token system                           |
+| Cradle `BackToHome.js`                              | Back-to-home navigation                              |
+| Font Awesome 6.x (CDN)                              | Icons                                                |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | UI and monospace typography                          |
 
 ---
 
@@ -170,12 +170,12 @@ Results section shown; history entry saved to localStorage
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|------------|---------|------------|---------|
-| Cradle `tokens.css` | — | Local `<link>` | Design tokens |
-| Cradle `BackToHome.js` | — | Local `<script>` | Navigation |
-| Font Awesome | 6.5.1 | CDN | Icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | — | Google Fonts CDN | Typography |
+| Dependency                                          | Version | How loaded       | Purpose       |
+| --------------------------------------------------- | ------- | ---------------- | ------------- |
+| Cradle `tokens.css`                                 | —       | Local `<link>`   | Design tokens |
+| Cradle `BackToHome.js`                              | —       | Local `<script>` | Navigation    |
+| Font Awesome                                        | 6.5.1   | CDN              | Icons         |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | —       | Google Fonts CDN | Typography    |
 
 ---
 

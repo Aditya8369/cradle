@@ -15,7 +15,7 @@
   --cradle-radius-standard: 12px;
   --cradle-radius-full: 9999px;
   --cradle-blur-glassmorphic: 16px;
-  
+
   /* Transitional Kinetics */
   --cradle-transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

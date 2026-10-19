@@ -18,9 +18,7 @@ const {
 // ---------------------------------------------------------------------------
 
 test("getProjectDirectories finds mini projects two levels under projects", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-architecture-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-architecture-"));
   const alpha = path.join(root, "games", "alpha-game");
   const beta = path.join(root, "math", "beta-tool");
 
@@ -40,9 +38,7 @@ test("getProjectDirectories finds mini projects two levels under projects", () =
 // ---------------------------------------------------------------------------
 
 test("findMissingArchitectureDocs flags missing and empty architecture files", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-architecture-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-architecture-"));
   const valid = path.join(root, "valid-mini");
   const missing = path.join(root, "missing-mini");
   const empty = path.join(root, "empty-mini");
@@ -86,10 +82,7 @@ test("getRequiredSections returns all ## headings from the template", () => {
   assert.ok(sections.length > 0, "should find at least one section");
 
   // Spot-check a few headings that must exist in the template
-  assert.ok(
-    sections.includes("## Overview"),
-    'should include "## Overview"'
-  );
+  assert.ok(sections.includes("## Overview"), 'should include "## Overview"');
   assert.ok(
     sections.includes("## Dependencies"),
     'should include "## Dependencies"'
@@ -172,9 +165,7 @@ test("hasTemplateNoticeBlock returns false when the notice block has been remove
 // ---------------------------------------------------------------------------
 
 test("validateArchitectureStructure passes when all required sections are present", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-struct-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-struct-"));
   const projectDir = path.join(root, "good-mini");
   fs.mkdirSync(projectDir, { recursive: true });
 
@@ -196,9 +187,7 @@ test("validateArchitectureStructure passes when all required sections are presen
 });
 
 test("validateArchitectureStructure reports missing sections", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-struct-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-struct-"));
   const projectDir = path.join(root, "incomplete-mini");
   fs.mkdirSync(projectDir, { recursive: true });
 
@@ -230,9 +219,7 @@ test("validateArchitectureStructure reports missing sections", () => {
 });
 
 test("validateArchitectureStructure reports un-removed template notice block", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-struct-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-struct-"));
   const projectDir = path.join(root, "notice-mini");
   fs.mkdirSync(projectDir, { recursive: true });
 
@@ -256,9 +243,7 @@ test("validateArchitectureStructure reports un-removed template notice block", (
 });
 
 test("validateArchitectureStructure skips projects without ARCHITECTURE.md", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-struct-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-struct-"));
   const projectDir = path.join(root, "no-arch-mini");
   fs.mkdirSync(projectDir, { recursive: true });
   // No ARCHITECTURE.md created — should be silently skipped
@@ -268,9 +253,7 @@ test("validateArchitectureStructure skips projects without ARCHITECTURE.md", () 
 });
 
 test("validateArchitectureStructure skips empty ARCHITECTURE.md files", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-struct-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-struct-"));
   const projectDir = path.join(root, "empty-mini");
   fs.mkdirSync(projectDir, { recursive: true });
   fs.writeFileSync(path.join(projectDir, "ARCHITECTURE.md"), "   \n");
@@ -299,7 +282,10 @@ test("validateArchitectureStructure returns an array when run against real proje
   const issues = validate(presentDirs, requiredSections);
 
   // Result must always be an array
-  assert.ok(Array.isArray(issues), "validateArchitectureStructure must return an array");
+  assert.ok(
+    Array.isArray(issues),
+    "validateArchitectureStructure must return an array"
+  );
 
   // Every issue must have the expected shape
   for (const issue of issues) {
@@ -317,7 +303,11 @@ test("validateArchitectureStructure returns an array when run against real proje
     );
     // Every missing section must start with "## "
     for (const section of issue.missingSections) {
-      assert.match(section, /^## /, `missing section "${section}" must start with "## "`);
+      assert.match(
+        section,
+        /^## /,
+        `missing section "${section}" must start with "## "`
+      );
     }
   }
 });
@@ -335,7 +325,9 @@ function listAllProjectDirectories() {
   const projectsRoot = path.resolve(__dirname, "..", "projects");
   const result = [];
 
-  for (const category of fs.readdirSync(projectsRoot, { withFileTypes: true })) {
+  for (const category of fs.readdirSync(projectsRoot, {
+    withFileTypes: true,
+  })) {
     if (!category.isDirectory()) continue;
     const categoryPath = path.join(projectsRoot, category.name);
     for (const mini of fs.readdirSync(categoryPath, { withFileTypes: true })) {
@@ -353,7 +345,9 @@ test("Issue #305: no mini project has both a README.md and an ARCHITECTURE.md", 
 
   for (const projectDir of listAllProjectDirectories()) {
     const hasReadme = fs.existsSync(path.join(projectDir, "README.md"));
-    const hasArchitecture = fs.existsSync(path.join(projectDir, "ARCHITECTURE.md"));
+    const hasArchitecture = fs.existsSync(
+      path.join(projectDir, "ARCHITECTURE.md")
+    );
 
     if (hasReadme && hasArchitecture) {
       offenders.push(path.relative(repoRoot, projectDir).replace(/\\/g, "/"));
@@ -374,9 +368,7 @@ test("Issue #305: no mini project has both a README.md and an ARCHITECTURE.md", 
 // ---------------------------------------------------------------------------
 
 test("validateArchitectureStructure flags nonexistent file references", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-file-refs-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-file-refs-"));
   const projectDir = path.join(root, "broken-refs-mini");
   fs.mkdirSync(projectDir, { recursive: true });
 
@@ -386,7 +378,7 @@ test("validateArchitectureStructure flags nonexistent file references", () => {
     "",
     "## Overview",
     "We use [index.html](index.html) and [missing.js](missing.js).",
-    "Check <a href=\"nonexistent.css\">style</a>.",
+    'Check <a href="nonexistent.css">style</a>.',
     "Ignore [Google](https://google.com) and [Anchor](#overview).",
   ].join("\n");
 
@@ -417,7 +409,7 @@ test("validateArchitectureStructure passes when all local file references exist 
     "",
     "## Overview",
     "Source: [script.js](script.js), stylesheet: [style.css](style.css).",
-    "HTML entry: <a href=\"index.html\">index.html</a>.",
+    'HTML entry: <a href="index.html">index.html</a>.',
     "External links are ignored: [MDN](https://developer.mozilla.org) and [#top](#top).",
   ].join("\n");
 
@@ -443,9 +435,9 @@ test("validateArchitectureStructure flags broken img src and script src HTML att
     "# Project Architecture",
     "",
     "## Overview",
-    "Embed: <img src=\"missing-icon.png\" alt=\"icon\" />.",
-    "Script: <script src=\"missing-lib.js\"></script>.",
-    "Valid: <img src=\"logo.svg\" alt=\"logo\" />.",
+    'Embed: <img src="missing-icon.png" alt="icon" />.',
+    'Script: <script src="missing-lib.js"></script>.',
+    'Valid: <img src="logo.svg" alt="logo" />.',
   ].join("\n");
 
   // Only logo.svg exists — missing-icon.png and missing-lib.js do not.
@@ -464,9 +456,7 @@ test("validateArchitectureStructure flags broken img src and script src HTML att
 });
 
 test("validateArchitectureStructure reports broken references only for the affected project", () => {
-  const root = fs.mkdtempSync(
-    path.join(os.tmpdir(), "cradle-arch-multi-")
-  );
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-arch-multi-"));
   const cleanDir = path.join(root, "clean-mini");
   const brokenDir = path.join(root, "broken-mini");
   fs.mkdirSync(cleanDir, { recursive: true });
@@ -489,7 +479,7 @@ test("validateArchitectureStructure reports broken references only for the affec
     "# Project Architecture",
     "",
     "## Overview",
-    "Uses [script.js](script.js) and <img src=\"thumbnail.png\" />.",
+    'Uses [script.js](script.js) and <img src="thumbnail.png" />.',
   ].join("\n");
   fs.writeFileSync(path.join(brokenDir, "ARCHITECTURE.md"), brokenContent);
   // Neither script.js nor thumbnail.png is created in brokenDir.
@@ -499,7 +489,11 @@ test("validateArchitectureStructure reports broken references only for the affec
     requiredSections
   );
 
-  assert.equal(issues.length, 1, "only the broken project should produce an issue");
+  assert.equal(
+    issues.length,
+    1,
+    "only the broken project should produce an issue"
+  );
   assert.equal(issues[0].projectDir, brokenDir);
   assert.equal(issues[0].brokenReferences.length, 2);
   assert.equal(issues[0].brokenReferences[0].target, "script.js");
@@ -518,11 +512,11 @@ test("validateArchitectureStructure ignores external URLs while flagging missing
     "# Project Architecture",
     "",
     "## Overview",
-    "CDN: <script src=\"https://cdn.example.com/lib.js\"></script>",
-    "Mail: <a href=\"mailto:dev@example.com\">Contact</a>",
-    "Data URI: <img src=\"data:image/png;base64,abc\" />",
-    "Protocol-relative: <script src=\"//unpkg.com/pkg\"></script>",
-    "Local missing: <script src=\"app.js\"></script>",
+    'CDN: <script src="https://cdn.example.com/lib.js"></script>',
+    'Mail: <a href="mailto:dev@example.com">Contact</a>',
+    'Data URI: <img src="data:image/png;base64,abc" />',
+    'Protocol-relative: <script src="//unpkg.com/pkg"></script>',
+    'Local missing: <script src="app.js"></script>',
   ].join("\n");
 
   fs.writeFileSync(path.join(projectDir, "ARCHITECTURE.md"), content);
@@ -531,7 +525,10 @@ test("validateArchitectureStructure ignores external URLs while flagging missing
   const issues = validateArchitectureStructure([projectDir], requiredSections);
 
   assert.equal(issues.length, 1);
-  assert.equal(issues[0].brokenReferences.length, 1,
-    "only the local missing asset should be flagged, not external URLs");
+  assert.equal(
+    issues[0].brokenReferences.length,
+    1,
+    "only the local missing asset should be flagged, not external URLs"
+  );
   assert.equal(issues[0].brokenReferences[0].target, "app.js");
-});
+});

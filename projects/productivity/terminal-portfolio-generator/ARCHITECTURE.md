@@ -37,14 +37,14 @@ The project is a client-side application built with vanilla web technologies. Us
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell, form inputs, and terminal pane layout |
-| `script.js` | UI interactions, event listeners, and live terminal updates |
-| `style.css` | App layout, themes styling, and typography |
+| File                 | Responsibility                                                      |
+| -------------------- | ------------------------------------------------------------------- |
+| `index.html`         | Page shell, form inputs, and terminal pane layout                   |
+| `script.js`          | UI interactions, event listeners, and live terminal updates         |
+| `style.css`          | App layout, themes styling, and typography                          |
 | `portfolioEngine.js` | Data model validation, command parsing, and terminal response logic |
-| `exportHtml.js` | Generates a fully standalone HTML document for export |
-| `theme.js` | Defines color themes and converts them to CSS custom properties |
+| `exportHtml.js`      | Generates a fully standalone HTML document for export               |
+| `theme.js`           | Defines color themes and converts them to CSS custom properties     |
 
 ---
 
@@ -80,10 +80,10 @@ User clicks Export → `exportHtml.js` combines output and theme into a blob →
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Custom Properties) | Layout, styling, and dynamic themes |
+| Technology                | Purpose                                     |
+| ------------------------- | ------------------------------------------- |
+| HTML5                     | Page structure and semantic markup          |
+| CSS3 (Custom Properties)  | Layout, styling, and dynamic themes         |
 | Vanilla JavaScript (ES6+) | Core logic, event handling, and HTML export |
 
 ---
@@ -91,15 +91,18 @@ User clicks Export → `exportHtml.js` combines output and theme into a blob →
 ## File Responsibilities
 
 ### `index.html`
+
 - Defines the split-pane layout with the `.pane` elements.
 - Holds the configuration form and the `<template>` blocks used for dynamically adding projects, experience, and education.
 
 ### `script.js`
+
 - `rebuildAndRender()` — reads form input, builds the command registry, and renders the initial terminal blocks.
 - `handleTerminalCommand()` — parses raw input, runs the command against the engine, and appends the result to the DOM.
 - `handleExport()` — triggers the download of the assembled HTML blob.
 
 ### `portfolioEngine.js`
+
 - `buildCommandOutput()` — maps the portfolio object to a registry of available commands and their pre-rendered text lines.
 - `runCommand()` — uses Levenshtein distance (`findClosestCommand()`) to match mistyped commands and suggest corrections.
 
@@ -114,10 +117,10 @@ User clicks Export → `exportHtml.js` combines output and theme into a blob →
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-| --- | --- | --- | --- |
-| IBM Plex Mono | — | Google Fonts CDN (`<link>` tags) | Terminal UI typography |
-| JetBrains Mono | — | Google Fonts CDN (`<link>` tags) | Terminal and editor typography |
+| Dependency     | Version | How loaded                       | Purpose                        |
+| -------------- | ------- | -------------------------------- | ------------------------------ |
+| IBM Plex Mono  | —       | Google Fonts CDN (`<link>` tags) | Terminal UI typography         |
+| JetBrains Mono | —       | Google Fonts CDN (`<link>` tags) | Terminal and editor typography |
 
 This project otherwise uses only native browser APIs and the shared Cradle `escapeHtml.js` component — no external libraries are required.
 

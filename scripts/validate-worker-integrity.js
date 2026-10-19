@@ -91,13 +91,17 @@ function isExternal(url) {
   return EXTERNAL_PREFIXES.some(prefix => lower.startsWith(prefix));
 }
 
-function toRepoRelative(rawUrl, sourceFileAbs) {
+function toRepoRelative(
+  rawUrl,
+  sourceFileAbs,
+  baseDir = path.dirname(sourceFileAbs)
+) {
   let resolvedAbs;
   if (isExternal(rawUrl)) return null;
   if (rawUrl.startsWith("/")) {
     resolvedAbs = path.join(REPO_ROOT, rawUrl);
   } else {
-    resolvedAbs = path.resolve(path.dirname(sourceFileAbs), rawUrl);
+    resolvedAbs = path.resolve(baseDir, rawUrl);
   }
   const rel = path.relative(REPO_ROOT, resolvedAbs);
   if (rel.startsWith("..") || path.isAbsolute(rel)) return null;
@@ -136,7 +140,12 @@ function findWorkerUsages(content, sourceRel) {
           });
           continue;
         }
-        const rel = toRepoRelative(arg.url, path.join(REPO_ROOT, sourceRel));
+        const sourceFileAbs = path.join(REPO_ROOT, sourceRel);
+        const baseDir =
+          label === "new Worker" && sourceRel.startsWith("src/")
+            ? REPO_ROOT
+            : path.dirname(sourceFileAbs);
+        const rel = toRepoRelative(arg.url, sourceFileAbs, baseDir);
         if (rel === null) {
           issues.push({
             type: "OUTSIDE_REPO_WORKER",

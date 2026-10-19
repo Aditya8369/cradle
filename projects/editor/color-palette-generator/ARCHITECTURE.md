@@ -43,11 +43,11 @@ formatting, and event handling. There is no build step; the browser loads files 
 
 ## Component Breakdown
 
-| File            | Responsibility                                                     |
-| --------------- | ------------------------------------------------------------------ |
-| `index.html`    | Page shell, semantic structure, loads scripts and fonts            |
-| `script.js`     | Color math utilities, palette engine, contrast checker, export, UI |
-| `style.css`     | Layout, colours, animations, responsive design                     |
+| File         | Responsibility                                                     |
+| ------------ | ------------------------------------------------------------------ |
+| `index.html` | Page shell, semantic structure, loads scripts and fonts            |
+| `script.js`  | Color math utilities, palette engine, contrast checker, export, UI |
+| `style.css`  | Layout, colours, animations, responsive design                     |
 
 ---
 
@@ -91,13 +91,13 @@ UI updated with AA/AAA pass/fail badges
 
 ## Technologies Used
 
-| Technology             | Purpose                              |
-| ---------------------- | ------------------------------------ |
-| HTML5                  | Page structure and semantic markup   |
-| CSS3 (Grid, Flexbox)   | Layout and responsive design         |
-| Vanilla JavaScript     | Color math, palette logic, UI events |
-| Google Fonts (Outfit)  | UI typography                        |
-| Google Fonts (Fira Code) | Monospace code and hex displays    |
+| Technology               | Purpose                              |
+| ------------------------ | ------------------------------------ |
+| HTML5                    | Page structure and semantic markup   |
+| CSS3 (Grid, Flexbox)     | Layout and responsive design         |
+| Vanilla JavaScript       | Color math, palette logic, UI events |
+| Google Fonts (Outfit)    | UI typography                        |
+| Google Fonts (Fira Code) | Monospace code and hex displays      |
 
 ---
 

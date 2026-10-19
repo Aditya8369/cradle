@@ -266,10 +266,9 @@ textarea:focus {
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(160px, 0.45fr) minmax(
-      140px,
-      0.35fr
-    ) auto;
+  grid-template-columns:
+    minmax(240px, 1fr) minmax(160px, 0.45fr) minmax(140px, 0.35fr)
+    auto;
   gap: 12px;
   align-items: end;
 }

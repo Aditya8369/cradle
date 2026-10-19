@@ -28,7 +28,7 @@ test("StorageEngine filters items by query and type", () => {
   const items = [
     { key: "auth_token", value: "a.b.c", type: "jwt" },
     { key: "theme", value: '{"mode":"dark"}', type: "json" },
-    { key: "username", value: "alice", type: "string" }
+    { key: "username", value: "alice", type: "string" },
   ];
   const filteredType = engine.filterItems(items, "", "jwt");
   assert.strictEqual(filteredType.length, 1);
@@ -41,7 +41,7 @@ test("StorageEngine filters items by query and type", () => {
 test("StorageExporter formats JSON and CSV exports", () => {
   const items = [
     { key: "theme", value: "dark", bytes: 18, type: "string" },
-    { key: "count", value: "42", bytes: 14, type: "number" }
+    { key: "count", value: "42", bytes: 14, type: "number" },
   ];
   const jsonStr = exporter.exportToJSON(items, "localStorage");
   const parsed = JSON.parse(jsonStr);
@@ -55,7 +55,7 @@ test("StorageExporter formats JSON and CSV exports", () => {
 test("StorageExporter validates JSON payload during import", () => {
   const validPayload = JSON.stringify({
     version: "1.0",
-    data: { key1: "val1" }
+    data: { key1: "val1" },
   });
   const resValid = exporter.validateImportJSON(validPayload);
   assert.strictEqual(resValid.valid, true);

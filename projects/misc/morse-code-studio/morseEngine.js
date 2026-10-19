@@ -66,19 +66,16 @@
     "=": "-...-",
     "+": ".-.-.",
     "-": "-....-",
-    "_": "..--.-",
+    _: "..--.-",
     '"': ".-..-.",
-    "$": "...-..-",
+    $: "...-..-",
     "@": ".--.-.",
-    " ": "/"
+    " ": "/",
   });
 
   const REVERSE_MORSE_MAP = Object.freeze(
     Object.fromEntries(
-      Object.entries(MORSE_MAP).map(([character, code]) => [
-        code,
-        character
-      ])
+      Object.entries(MORSE_MAP).map(([character, code]) => [code, character])
     )
   );
 
@@ -116,11 +113,7 @@
       .trim();
   }
 
-  function generateAudioSequence(
-    morseString = "",
-    wpm = 20,
-    frequency = 650
-  ) {
+  function generateAudioSequence(morseString = "", wpm = 20, frequency = 650) {
     if (typeof morseString !== "string" || !morseString.trim()) {
       return [];
     }
@@ -138,7 +131,7 @@
       if (token === "/") {
         sequence.push({
           type: "pause",
-          durationMs: wordPauseMs
+          durationMs: wordPauseMs,
         });
         return;
       }
@@ -151,13 +144,13 @@
         sequence.push({
           type: "tone",
           durationMs: symbol === "." ? ditMs : dahMs,
-          frequency
+          frequency,
         });
 
         if (index < token.length - 1) {
           sequence.push({
             type: "pause",
-            durationMs: symbolPauseMs
+            durationMs: symbolPauseMs,
           });
         }
       }
@@ -167,7 +160,7 @@
       if (nextToken && nextToken !== "/") {
         sequence.push({
           type: "pause",
-          durationMs: letterPauseMs
+          durationMs: letterPauseMs,
         });
       }
     });
@@ -181,6 +174,6 @@
     getDitDurationMs,
     textToMorse,
     morseToText,
-    generateAudioSequence
+    generateAudioSequence,
   });
 });

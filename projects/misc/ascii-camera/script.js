@@ -11,7 +11,7 @@
     " #   CAMERA   # ",
     "  #          #  ",
     "   ##      ##   ",
-    "      ####      "
+    "      ####      ",
   ].join("\n");
 
   const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -20,7 +20,7 @@
     "image/jpeg",
     "image/png",
     "image/webp",
-    "image/gif"
+    "image/gif",
   ]);
 
   const els = {
@@ -54,15 +54,15 @@
     exportMeta: document.getElementById("exportMeta"),
     sourceHelp: document.getElementById("sourceHelp"),
     renderStats: document.getElementById("renderStats"),
-    emptyPreview: document.getElementById("emptyPreview")
+    emptyPreview: document.getElementById("emptyPreview"),
   };
 
   const sourceCtx = els.sourceCanvas.getContext("2d", {
-    willReadFrequently: true
+    willReadFrequently: true,
   });
 
   const analysisCtx = els.analysisCanvas.getContext("2d", {
-    willReadFrequently: true
+    willReadFrequently: true,
   });
 
   const state = {
@@ -74,7 +74,7 @@
     asciiText: "",
     lines: [],
     sourceName: "",
-    objectUrl: ""
+    objectUrl: "",
   };
 
   function numberValue(el) {
@@ -142,32 +142,23 @@
       els.renderStats.textContent = "Waiting for a source.";
     }
 
-    setStatus(
-      "Idle",
-      "Ready to render",
-      "Upload an image or start camera."
-    );
+    setStatus("Idle", "Ready to render", "Upload an image or start camera.");
   }
 
   async function startCamera() {
     try {
       stopCamera();
 
-      if (
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia
-      ) {
-        throw new Error(
-          "Camera access is not supported by this browser."
-        );
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera access is not supported by this browser.");
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 640 },
           height: { ideal: 480 },
-          facingMode: "user"
-        }
+          facingMode: "user",
+        },
       });
 
       state.stream = stream;
@@ -224,11 +215,7 @@
         message = `${err.message} You can upload an image instead.`;
       }
 
-      setStatus(
-        "Camera Unavailable",
-        "Using fallback mode",
-        message
-      );
+      setStatus("Camera Unavailable", "Using fallback mode", message);
 
       els.emptyPreview.innerHTML = `
         <strong>Camera unavailable</strong>
@@ -239,7 +226,7 @@
 
   function stopCamera() {
     if (state.stream) {
-      state.stream.getTracks().forEach((track) => track.stop());
+      state.stream.getTracks().forEach(track => track.stop());
       state.stream = null;
     }
 
@@ -281,75 +268,44 @@
         return;
       }
     } else if (state.mode === "image" && state.sourceImage) {
-      sourceWidth =
-        state.sourceImage.naturalWidth ||
-        state.sourceImage.width;
+      sourceWidth = state.sourceImage.naturalWidth || state.sourceImage.width;
 
       sourceHeight =
-        state.sourceImage.naturalHeight ||
-        state.sourceImage.height;
+        state.sourceImage.naturalHeight || state.sourceImage.height;
     } else {
       return;
     }
 
     const cols = numberValue(els.columnRange);
     const aspect = sourceHeight / sourceWidth;
-    const rows = Math.max(
-      12,
-      Math.round(cols * aspect * 0.5)
-    );
+    const rows = Math.max(12, Math.round(cols * aspect * 0.5));
 
     els.analysisCanvas.width = cols;
     els.analysisCanvas.height = rows;
 
     if (state.mode === "camera") {
-      analysisCtx.drawImage(
-        els.video,
-        0,
-        0,
-        cols,
-        rows
-      );
+      analysisCtx.drawImage(els.video, 0, 0, cols, rows);
     } else {
-      analysisCtx.drawImage(
-        state.sourceImage,
-        0,
-        0,
-        cols,
-        rows
-      );
+      analysisCtx.drawImage(state.sourceImage, 0, 0, cols, rows);
     }
 
-    const imageData = analysisCtx.getImageData(
-      0,
-      0,
-      cols,
-      rows
-    );
+    const imageData = analysisCtx.getImageData(0, 0, cols, rows);
 
     const rendered = engine
       ? engine.renderImageDataToASCII(imageData, {
-          paletteKey: els.densitySelect
-            ? els.densitySelect.value
-            : "standard",
+          paletteKey: els.densitySelect ? els.densitySelect.value : "standard",
 
-          invert: els.invertToggle
-            ? els.invertToggle.checked
-            : false,
+          invert: els.invertToggle ? els.invertToggle.checked : false,
 
-          contrast:
-            numberValue(els.contrastRange) / 100,
+          contrast: numberValue(els.contrastRange) / 100,
 
-          brightness:
-            numberValue(els.brightnessRange),
+          brightness: numberValue(els.brightnessRange),
 
-          edgeDetection: els.edgeToggle
-            ? els.edgeToggle.checked
-            : false
+          edgeDetection: els.edgeToggle ? els.edgeToggle.checked : false,
         })
       : {
           lines: [],
-          rawText: ""
+          rawText: "",
         };
 
     state.lines = rendered.lines;
@@ -358,75 +314,118 @@
     els.asciiOutput.textContent = state.asciiText;
 
     if (els.renderStats) {
-      els.renderStats.textContent =
-        `Rendered ${cols}×${rows} grid (${rendered.lines.length} lines).`;
+      els.renderStats.textContent = `Rendered ${cols}×${rows} grid (${rendered.lines.length} lines).`;
     }
   }
 
   function loadUploadedImage(file) {
-  if (!file) {
-    return;
-  }
-
-  const rejectUpload = (status, detail, message) => {
-    setStatus(status, detail, message);
-
-    if (els.imageUpload) {
-      els.imageUpload.value = "";
+    if (!file) {
+      return;
     }
 
-    alert(message);
-  };
+    const rejectUpload = (status, detail, message) => {
+      setStatus(status, detail, message);
 
-  // Maximum file size: 5 MB
-  if (file.size > MAX_IMAGE_SIZE) {
-    const actualSize = formatFileSize(file.size);
+      if (els.imageUpload) {
+        els.imageUpload.value = "";
+      }
 
-    rejectUpload(
-      "Image Rejected",
-      "File too large",
-      `Image upload rejected.\n\nSelected file: ${actualSize}\nMaximum allowed: 5 MB`
-    );
+      alert(message);
+    };
 
-    return;
-  }
+    // Maximum file size: 5 MB
+    if (file.size > MAX_IMAGE_SIZE) {
+      const actualSize = formatFileSize(file.size);
 
-  // Check MIME type
-  if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
-    rejectUpload(
-      "Image Rejected",
-      "Invalid file type",
-      "This file type is not supported.\n\nPlease upload a JPEG, PNG, WebP, or GIF image."
-    );
+      rejectUpload(
+        "Image Rejected",
+        "File too large",
+        `Image upload rejected.\n\nSelected file: ${actualSize}\nMaximum allowed: 5 MB`
+      );
 
-    return;
-  }
+      return;
+    }
 
-  stopCamera();
+    // Check MIME type
+    if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+      rejectUpload(
+        "Image Rejected",
+        "Invalid file type",
+        "This file type is not supported.\n\nPlease upload a JPEG, PNG, WebP, or GIF image."
+      );
 
-  if (state.objectUrl) {
-    URL.revokeObjectURL(state.objectUrl);
-    state.objectUrl = "";
-  }
+      return;
+    }
 
-  state.objectUrl = URL.createObjectURL(file);
+    stopCamera();
 
-  const img = new Image();
-
-  img.onload = () => {
-    const width = img.naturalWidth;
-    const height = img.naturalHeight;
-
-    // Maximum image dimensions
-    const MAX_IMAGE_WIDTH = 4096;
-    const MAX_IMAGE_HEIGHT = 4096;
-
-    if (
-      width > MAX_IMAGE_WIDTH ||
-      height > MAX_IMAGE_HEIGHT
-    ) {
+    if (state.objectUrl) {
       URL.revokeObjectURL(state.objectUrl);
       state.objectUrl = "";
+    }
+
+    state.objectUrl = URL.createObjectURL(file);
+
+    const img = new Image();
+
+    img.onload = () => {
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+
+      // Maximum image dimensions
+      const MAX_IMAGE_WIDTH = 4096;
+      const MAX_IMAGE_HEIGHT = 4096;
+
+      if (width > MAX_IMAGE_WIDTH || height > MAX_IMAGE_HEIGHT) {
+        URL.revokeObjectURL(state.objectUrl);
+        state.objectUrl = "";
+
+        state.sourceImage = null;
+        state.mode = "empty";
+
+        els.sourceCanvas.style.display = "none";
+        els.video.style.display = "none";
+        els.emptyPreview.style.display = "flex";
+
+        rejectUpload(
+          "Image Rejected",
+          "Resolution too high",
+          `This image has a resolution of ${width} × ${height}px.\n\nMaximum allowed resolution: ${MAX_IMAGE_WIDTH} × ${MAX_IMAGE_HEIGHT}px.\n\nPlease choose a smaller image.`
+        );
+
+        return;
+      }
+
+      // Image passed all validation checks
+      state.sourceImage = img;
+      state.mode = "image";
+      state.sourceName = file.name;
+
+      els.sourceCanvas.width = width;
+      els.sourceCanvas.height = height;
+
+      sourceCtx.clearRect(0, 0, width, height);
+
+      sourceCtx.drawImage(img, 0, 0);
+
+      els.sourceCanvas.style.display = "block";
+      els.video.style.display = "none";
+      els.emptyPreview.style.display = "none";
+
+      setStatus(
+        "Image Loaded",
+        `${file.name} • ${formatFileSize(file.size)}`,
+        `Processing ${width} × ${height}px image.`
+      );
+
+      processCurrentFrame();
+    };
+
+    img.onerror = () => {
+      if (state.objectUrl) {
+        URL.revokeObjectURL(state.objectUrl);
+        state.objectUrl = "";
+      }
 
       state.sourceImage = null;
       state.mode = "empty";
@@ -437,65 +436,13 @@
 
       rejectUpload(
         "Image Rejected",
-        "Resolution too high",
-        `This image has a resolution of ${width} × ${height}px.\n\nMaximum allowed resolution: ${MAX_IMAGE_WIDTH} × ${MAX_IMAGE_HEIGHT}px.\n\nPlease choose a smaller image.`
+        "Unable to load image",
+        "The selected image could not be loaded. Please choose another image."
       );
+    };
 
-      return;
-    }
-
-    // Image passed all validation checks
-    state.sourceImage = img;
-    state.mode = "image";
-    state.sourceName = file.name;
-
-    els.sourceCanvas.width = width;
-    els.sourceCanvas.height = height;
-
-    sourceCtx.clearRect(
-      0,
-      0,
-      width,
-      height
-    );
-
-    sourceCtx.drawImage(img, 0, 0);
-
-    els.sourceCanvas.style.display = "block";
-    els.video.style.display = "none";
-    els.emptyPreview.style.display = "none";
-
-    setStatus(
-      "Image Loaded",
-      `${file.name} • ${formatFileSize(file.size)}`,
-      `Processing ${width} × ${height}px image.`
-    );
-
-    processCurrentFrame();
-  };
-
-  img.onerror = () => {
-    if (state.objectUrl) {
-      URL.revokeObjectURL(state.objectUrl);
-      state.objectUrl = "";
-    }
-
-    state.sourceImage = null;
-    state.mode = "empty";
-
-    els.sourceCanvas.style.display = "none";
-    els.video.style.display = "none";
-    els.emptyPreview.style.display = "flex";
-
-    rejectUpload(
-      "Image Rejected",
-      "Unable to load image",
-      "The selected image could not be loaded. Please choose another image."
-    );
-  };
-
-  img.src = state.objectUrl;
-}
+    img.src = state.objectUrl;
+  }
 
   function loadSample() {
     stopCamera();
@@ -510,45 +457,29 @@
     els.emptyPreview.style.display = "none";
 
     if (els.renderStats) {
-      els.renderStats.textContent =
-        "Sample ASCII rendered.";
+      els.renderStats.textContent = "Sample ASCII rendered.";
     }
 
-    setStatus(
-      "Sample Loaded",
-      "Sample Art",
-      "Sample logo rendered."
-    );
+    setStatus("Sample Loaded", "Sample Art", "Sample logo rendered.");
   }
 
   function setupEvents() {
     if (els.cameraBtn) {
-      els.cameraBtn.addEventListener(
-        "click",
-        startCamera
-      );
+      els.cameraBtn.addEventListener("click", startCamera);
     }
 
     if (els.stopCameraBtn) {
-      els.stopCameraBtn.addEventListener(
-        "click",
-        setEmptyState
-      );
+      els.stopCameraBtn.addEventListener("click", setEmptyState);
     }
 
     if (els.imageUpload) {
-      els.imageUpload.addEventListener(
-        "change",
-        (event) => {
-          const file =
-            event.target.files &&
-            event.target.files[0];
+      els.imageUpload.addEventListener("change", event => {
+        const file = event.target.files && event.target.files[0];
 
-          if (file) {
-            loadUploadedImage(file);
-          }
+        if (file) {
+          loadUploadedImage(file);
         }
-      );
+      });
     }
 
     const controls = [
@@ -557,10 +488,10 @@
       els.contrastRange,
       els.brightnessRange,
       els.invertToggle,
-      els.edgeToggle
+      els.edgeToggle,
     ];
 
-    controls.forEach((control) => {
+    controls.forEach(control => {
       if (!control) {
         return;
       }
@@ -575,118 +506,75 @@
     });
 
     if (els.copyBtn) {
-      els.copyBtn.addEventListener(
-        "click",
-        () => {
-          if (!state.asciiText) {
-            return;
-          }
-
-          if (
-            !navigator.clipboard ||
-            !navigator.clipboard.writeText
-          ) {
-            alert(
-              "Copying is not supported by this browser."
-            );
-            return;
-          }
-
-          navigator.clipboard
-            .writeText(state.asciiText)
-            .then(() => {
-              els.copyBtn.textContent = "Copied!";
-
-              setTimeout(() => {
-                els.copyBtn.textContent = "Copy Text";
-              }, 2000);
-            })
-            .catch(() => {
-              alert(
-                "Unable to copy the ASCII art. Please try again."
-              );
-            });
+      els.copyBtn.addEventListener("click", () => {
+        if (!state.asciiText) {
+          return;
         }
-      );
+
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+          alert("Copying is not supported by this browser.");
+          return;
+        }
+
+        navigator.clipboard
+          .writeText(state.asciiText)
+          .then(() => {
+            els.copyBtn.textContent = "Copied!";
+
+            setTimeout(() => {
+              els.copyBtn.textContent = "Copy Text";
+            }, 2000);
+          })
+          .catch(() => {
+            alert("Unable to copy the ASCII art. Please try again.");
+          });
+      });
     }
 
     if (els.downloadTxtBtn) {
-      els.downloadTxtBtn.addEventListener(
-        "click",
-        () => {
-          if (!state.asciiText || !exporter) {
-            return;
-          }
-
-          const payload = exporter.toPlainText(
-            state.lines
-          );
-
-          exporter.downloadFile(
-            "ascii-art.txt",
-            payload,
-            "text/plain"
-          );
+      els.downloadTxtBtn.addEventListener("click", () => {
+        if (!state.asciiText || !exporter) {
+          return;
         }
-      );
+
+        const payload = exporter.toPlainText(state.lines);
+
+        exporter.downloadFile("ascii-art.txt", payload, "text/plain");
+      });
     }
 
     if (els.downloadHtmlBtn) {
-      els.downloadHtmlBtn.addEventListener(
-        "click",
-        () => {
-          if (!state.lines.length || !exporter) {
-            return;
-          }
-
-          const html = exporter.toHTML(
-            state.lines
-          );
-
-          exporter.downloadFile(
-            "ascii-art.html",
-            html,
-            "text/html"
-          );
+      els.downloadHtmlBtn.addEventListener("click", () => {
+        if (!state.lines.length || !exporter) {
+          return;
         }
-      );
+
+        const html = exporter.toHTML(state.lines);
+
+        exporter.downloadFile("ascii-art.html", html, "text/html");
+      });
     }
 
     if (els.downloadSvgBtn) {
-      els.downloadSvgBtn.addEventListener(
-        "click",
-        () => {
-          if (!state.lines.length || !exporter) {
-            return;
-          }
-
-          const svg = exporter.toSVG(
-            state.lines
-          );
-
-          exporter.downloadFile(
-            "ascii-art.svg",
-            svg,
-            "image/svg+xml"
-          );
+      els.downloadSvgBtn.addEventListener("click", () => {
+        if (!state.lines.length || !exporter) {
+          return;
         }
-      );
+
+        const svg = exporter.toSVG(state.lines);
+
+        exporter.downloadFile("ascii-art.svg", svg, "image/svg+xml");
+      });
     }
 
     if (els.sampleBtn) {
-      els.sampleBtn.addEventListener(
-        "click",
-        loadSample
-      );
+      els.sampleBtn.addEventListener("click", loadSample);
     }
   }
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-      updateControlLabels();
-      setupEvents();
-      setEmptyState();
-    }
-  );
+  document.addEventListener("DOMContentLoaded", () => {
+    updateControlLabels();
+    setupEvents();
+    setEmptyState();
+  });
 })();

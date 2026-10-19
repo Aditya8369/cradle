@@ -49,7 +49,10 @@ class MockElement {
 
   set className(value) {
     this.classList = new MockClassList();
-    String(value).split(/\s+/).filter(Boolean).forEach(name => this.classList.add(name));
+    String(value)
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach(name => this.classList.add(name));
   }
 
   get innerHTML() {
@@ -70,17 +73,23 @@ class MockElement {
   querySelector(selector) {
     if (selector.startsWith(".")) {
       const className = selector.slice(1);
-      return this.walk().find(node => node.classList.contains(className)) || null;
+      return (
+        this.walk().find(node => node.classList.contains(className)) || null
+      );
     }
     return null;
   }
 
   querySelectorAll(selector) {
     if (selector === ".cradle-theme-toggle") {
-      return this.walk().filter(node => node.classList.contains("cradle-theme-toggle"));
+      return this.walk().filter(node =>
+        node.classList.contains("cradle-theme-toggle")
+      );
     }
     if (selector === "[data-cradle-theme-toggle]") {
-      return this.walk().filter(node => Object.prototype.hasOwnProperty.call(node.dataset, "cradleThemeToggle"));
+      return this.walk().filter(node =>
+        Object.prototype.hasOwnProperty.call(node.dataset, "cradleThemeToggle")
+      );
     }
     return [];
   }
@@ -145,7 +154,9 @@ class MockDocument extends MockElement {
 
   querySelectorAll(selector) {
     if (selector === "[data-cradle-theme-toggle]") {
-      return this.walk().filter(node => Object.prototype.hasOwnProperty.call(node.dataset, "cradleThemeToggle"));
+      return this.walk().filter(node =>
+        Object.prototype.hasOwnProperty.call(node.dataset, "cradleThemeToggle")
+      );
     }
     return super.querySelectorAll(selector);
   }
@@ -166,7 +177,12 @@ class MockStorage {
   }
 }
 
-function loadThemeToggle({ storedTheme = null, systemLight = false, storageApi = null, includeStorageApi = true } = {}) {
+function loadThemeToggle({
+  storedTheme = null,
+  systemLight = false,
+  storageApi = null,
+  includeStorageApi = true,
+} = {}) {
   const document = new MockDocument();
   const storage = new MockStorage(storedTheme ? { theme: storedTheme } : {});
   let systemMatches = systemLight;
@@ -192,15 +208,17 @@ function loadThemeToggle({ storedTheme = null, systemLight = false, storageApi =
   const window = {
     document,
     localStorage: storage,
-    ...(includeStorageApi ? {
-      CradleStorage: storageApi || {
-        getRaw: key => storage.getItem(key),
-        setRaw: (key, value) => {
-          storage.setItem(key, value);
-          return true;
-        },
-      },
-    } : {}),
+    ...(includeStorageApi
+      ? {
+          CradleStorage: storageApi || {
+            getRaw: key => storage.getItem(key),
+            setRaw: (key, value) => {
+              storage.setItem(key, value);
+              return true;
+            },
+          },
+        }
+      : {}),
     matchMedia,
     CustomEvent: MockCustomEvent,
     setTimeout,
@@ -229,8 +247,6 @@ function loadThemeToggle({ storedTheme = null, systemLight = false, storageApi =
   };
 }
 
-
-
 test("ThemeToggle falls back safely when the shared storage helper is unavailable", () => {
   const { api, document } = loadThemeToggle({
     storedTheme: null,
@@ -241,22 +257,34 @@ test("ThemeToggle falls back safely when the shared storage helper is unavailabl
 
   // The component must remain usable even when persistence is unavailable.
   assert.equal(api.currentTheme(), "light");
-  assert.equal(document.documentElement.classList.contains("light-theme"), true);
+  assert.equal(
+    document.documentElement.classList.contains("light-theme"),
+    true
+  );
   assert.doesNotThrow(() => api.toggleTheme());
   assert.equal(api.currentTheme(), "dark");
 });
 test("ThemeToggle initializes from a stored theme and applies the html class", () => {
-  const { api, document } = loadThemeToggle({ storedTheme: "light", systemLight: false });
+  const { api, document } = loadThemeToggle({
+    storedTheme: "light",
+    systemLight: false,
+  });
 
   assert.equal(api.currentTheme(), "light");
-  assert.equal(document.documentElement.classList.contains("light-theme"), true);
+  assert.equal(
+    document.documentElement.classList.contains("light-theme"),
+    true
+  );
 });
 
 test("ThemeToggle falls back to the system preference when no theme is stored", () => {
   const { api, document, storage } = loadThemeToggle({ systemLight: true });
 
   assert.equal(api.currentTheme(), "light");
-  assert.equal(document.documentElement.classList.contains("light-theme"), true);
+  assert.equal(
+    document.documentElement.classList.contains("light-theme"),
+    true
+  );
   assert.equal(storage.getItem("theme"), null);
 });
 
@@ -264,7 +292,10 @@ test("ThemeToggle defaults to dark when the system prefers dark", () => {
   const { api, document } = loadThemeToggle({ systemLight: false });
 
   assert.equal(api.currentTheme(), "dark");
-  assert.equal(document.documentElement.classList.contains("light-theme"), false);
+  assert.equal(
+    document.documentElement.classList.contains("light-theme"),
+    false
+  );
 });
 
 test("toggleTheme changes the theme and persists it", () => {
@@ -272,7 +303,10 @@ test("toggleTheme changes the theme and persists it", () => {
 
   api.toggleTheme();
   assert.equal(api.currentTheme(), "light");
-  assert.equal(document.documentElement.classList.contains("light-theme"), true);
+  assert.equal(
+    document.documentElement.classList.contains("light-theme"),
+    true
+  );
   assert.equal(storage.getItem("theme"), "light");
 
   api.toggleTheme();
@@ -308,17 +342,25 @@ test("clicking a created toggle changes theme and updates all instances", () => 
   first.dispatchEvent({ type: "click" });
 
   assert.equal(storage.getItem("theme"), "light");
-  assert.equal(document.documentElement.classList.contains("light-theme"), true);
+  assert.equal(
+    document.documentElement.classList.contains("light-theme"),
+    true
+  );
   assert.equal(first.getAttribute("aria-checked"), "true");
   assert.equal(second.getAttribute("aria-checked"), "true");
   assert.equal(first.getAttribute("aria-label"), "Switch to dark theme");
-  assert.equal(second.querySelector(".cradle-theme-toggle__icon").textContent, "☀️");
+  assert.equal(
+    second.querySelector(".cradle-theme-toggle__icon").textContent,
+    "☀️"
+  );
 });
 
 test("themechange is dispatched with the new theme in event.detail", () => {
   const { api, document } = loadThemeToggle({ storedTheme: "dark" });
   const events = [];
-  document.documentElement.addEventListener("cradle:themechange", event => events.push(event));
+  document.documentElement.addEventListener("cradle:themechange", event =>
+    events.push(event)
+  );
 
   api.applyTheme("light");
 
@@ -355,17 +397,28 @@ test("upgradeAll auto-upgrades marked elements and is idempotent", () => {
   assert.equal(element.getAttribute("aria-checked"), "true");
   assert.equal(element.type, "button");
   assert.equal(element.children.length, 1);
-  assert.equal(element.querySelector(".cradle-theme-toggle__icon").textContent, "☀️");
-  assert.equal(document.getElementById("cradle-theme-toggle-styles") !== null, true);
+  assert.equal(
+    element.querySelector(".cradle-theme-toggle__icon").textContent,
+    "☀️"
+  );
+  assert.equal(
+    document.getElementById("cradle-theme-toggle-styles") !== null,
+    true
+  );
 
   element.dispatchEvent({ type: "click" });
   assert.equal(api.currentTheme(), "dark");
 });
 
 test("init resolves the stored theme and emits the themechange event", () => {
-  const { api, document } = loadThemeToggle({ storedTheme: "dark", systemLight: true });
+  const { api, document } = loadThemeToggle({
+    storedTheme: "dark",
+    systemLight: true,
+  });
   const events = [];
-  document.documentElement.addEventListener("cradle:themechange", event => events.push(event));
+  document.documentElement.addEventListener("cradle:themechange", event =>
+    events.push(event)
+  );
 
   api.init();
 

@@ -165,11 +165,14 @@ function loadSampleResume() {
 }
 
 async function copyMarkdown() {
-  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.share === "function"
+  ) {
     try {
       await navigator.share({
         title: "Resume Markdown",
-        text: markdownInput.value
+        text: markdownInput.value,
       });
       setStatus("Markdown shared");
       return;

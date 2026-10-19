@@ -136,8 +136,7 @@ main {
 
   margin: 0 auto;
 
-  padding: clamp(1.1rem, 2.5vh, 1.8rem) 1rem
-    clamp(0.8rem, 1.8vh, 1.25rem);
+  padding: clamp(1.1rem, 2.5vh, 1.8rem) 1rem clamp(0.8rem, 1.8vh, 1.25rem);
 
   text-align: center;
 }
@@ -185,12 +184,7 @@ main {
 .hero h1 span {
   display: block;
 
-  background:
-    linear-gradient(
-      135deg,
-      #38bdf8,
-      #818cf8
-    );
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
 
   -webkit-background-clip: text;
   background-clip: text;
@@ -235,8 +229,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 16px;
 
-  box-shadow:
-    0 18px 60px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
 
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -250,11 +243,9 @@ main {
 .upload-card.drag-over {
   border-color: var(--accent);
 
-  background:
-    rgba(56, 189, 248, 0.07);
+  background: rgba(56, 189, 248, 0.07);
 
-  box-shadow:
-    0 0 40px var(--accent-glow);
+  box-shadow: 0 0 40px var(--accent-glow);
 }
 
 .upload-icon {
@@ -275,8 +266,7 @@ main {
 
   font-size: 1.45rem;
 
-  box-shadow:
-    0 0 25px rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.08);
 }
 
 .upload-card h2 {
@@ -323,8 +313,7 @@ main {
 
   transform: translateY(-1px);
 
-  box-shadow:
-    0 8px 25px var(--accent-glow);
+  box-shadow: 0 8px 25px var(--accent-glow);
 }
 
 .upload-hint {
@@ -493,8 +482,7 @@ main:has(.results-section:not(.hidden)) .about-section {
 }
 
 .btn-accent:hover {
-  box-shadow:
-    0 0 18px var(--accent-glow);
+  box-shadow: 0 0 18px var(--accent-glow);
 }
 
 /* =========================================================
@@ -586,26 +574,10 @@ main:has(.results-section:not(.hidden)) .about-section {
   background-color: #080d17;
 
   background-image:
-    linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.025) 25%,
-      transparent 25%
-    ),
-    linear-gradient(
-      -45deg,
-      rgba(255, 255, 255, 0.025) 25%,
-      transparent 25%
-    ),
-    linear-gradient(
-      45deg,
-      transparent 75%,
-      rgba(255, 255, 255, 0.025) 75%
-    ),
-    linear-gradient(
-      -45deg,
-      transparent 75%,
-      rgba(255, 255, 255, 0.025) 75%
-    );
+    linear-gradient(45deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.025) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.025) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.025) 75%);
 
   background-size: 24px 24px;
 
@@ -629,8 +601,7 @@ main:has(.results-section:not(.hidden)) .about-section {
 
   border-radius: 6px;
 
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* =========================================================
@@ -719,8 +690,7 @@ main:has(.results-section:not(.hidden)) .about-section {
 .metadata-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   gap: 0.35rem;
 }
@@ -744,8 +714,7 @@ main:has(.results-section:not(.hidden)) .about-section {
 .metadata-item:hover {
   background: rgba(255, 255, 255, 0.04);
 
-  border-color:
-    rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.12);
 }
 
 .metadata-item span {
@@ -870,8 +839,7 @@ main:has(.results-section:not(.hidden)) .about-section {
 .feature-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 0.5rem;
 
@@ -900,8 +868,7 @@ main:has(.results-section:not(.hidden)) .about-section {
 
   background: var(--card-hover);
 
-  border-color:
-    rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.2);
 }
 
 .feature-card > span {
@@ -957,9 +924,7 @@ footer {
 * {
   scrollbar-width: thin;
 
-  scrollbar-color:
-    rgba(148, 163, 184, 0.2)
-    transparent;
+  scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -1123,9 +1088,7 @@ footer {
   }
 
   .hero {
-    padding:
-      1.5rem 1rem
-      1rem;
+    padding: 1.5rem 1rem 1rem;
   }
 
   .hero h1 {
@@ -1140,8 +1103,7 @@ footer {
   .upload-card {
     min-height: 200px;
 
-    padding:
-      1.25rem 1rem;
+    padding: 1.25rem 1rem;
   }
 
   .top-bar {
@@ -1163,8 +1125,7 @@ footer {
   }
 
   .about-section {
-    padding:
-      1.5rem 1rem;
+    padding: 1.5rem 1rem;
   }
 
   .image-preview {

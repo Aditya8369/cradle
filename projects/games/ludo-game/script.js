@@ -611,7 +611,8 @@ function loadGame(saveData) {
 }
 
 // Initial Load Logic
-const savedDataString = localStorage.getItem("cradle_ludo_save") || localStorage.getItem("ludoSave");
+const savedDataString =
+  localStorage.getItem("cradle_ludo_save") || localStorage.getItem("ludoSave");
 const resumeModal = document.getElementById("resumeModal");
 
 if (savedDataString) {

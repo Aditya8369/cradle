@@ -39,11 +39,11 @@ The system operates in a loop: Input change → Debounced Parse → Tree Reconst
 
 ## Component Breakdown
 
-| File | Responsibility |
-| --- | --- |
-| `index.html` | Page shell, input area, tree container, and stats bar |
-| `script.js` | JSON parsing, recursive tree rendering, state management (collapsed/selected), search logic, and utility functions |
-| `style.css` | Layout, typography, syntax highlighting colors, and tree node animations |
+| File         | Responsibility                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `index.html` | Page shell, input area, tree container, and stats bar                                                              |
+| `script.js`  | JSON parsing, recursive tree rendering, state management (collapsed/selected), search logic, and utility functions |
+| `style.css`  | Layout, typography, syntax highlighting colors, and tree node animations                                           |
 
 ---
 
@@ -87,10 +87,10 @@ Partial or full re-render of the tree
 
 ## Technologies Used
 
-| Technology | Purpose |
-| --- | --- |
-| HTML5 | Semantic structure and layout |
-| CSS3 | Tree styling, syntax highlighting, and responsive design |
+| Technology        | Purpose                                                    |
+| ----------------- | ---------------------------------------------------------- |
+| HTML5             | Semantic structure and layout                              |
+| CSS3              | Tree styling, syntax highlighting, and responsive design   |
 | JavaScript (ES6+) | Recursive rendering, JSON processing, and DOM manipulation |
 
 ---

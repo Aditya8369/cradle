@@ -3,11 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="canonical" href="https://facelessism.github.io/cradle/projects/dev-tools/css-grid-generator/" />
-    <meta property="og:url" content="https://facelessism.github.io/cradle/projects/dev-tools/css-grid-generator/"/>
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/dev-tools/css-grid-generator/"
+    />
+    <meta
+      property="og:url"
+      content="https://facelessism.github.io/cradle/projects/dev-tools/css-grid-generator/"
+    />
 
     <title>CSS Grid Generator</title>
-    <meta name="description" content="CSS Grid Generator lets users design CSS Grid layouts visually in the browser. Users configure columns, rows, gap sizes, and item placements, then see a live pr..." />
+    <meta
+      name="description"
+      content="CSS Grid Generator lets users design CSS Grid layouts visually in the browser. Users configure columns, rows, gap sizes, and item placements, then see a live pr..."
+    />
 
     <meta
       name="description"
@@ -22,9 +31,12 @@
     />
     <link rel="stylesheet" href="../../../src/components/ui/tokens.css" />
     <link rel="stylesheet" href="style.css" />
-      <meta property="og:title" content="CSS Grid Generator" />
-    <meta property="og:description" content="CSS Grid Generator lets users design CSS Grid layouts visually in the browser. Users configure columns, rows, gap sizes, and item placements, then see a live pr..." />
-</head>
+    <meta property="og:title" content="CSS Grid Generator" />
+    <meta
+      property="og:description"
+      content="CSS Grid Generator lets users design CSS Grid layouts visually in the browser. Users configure columns, rows, gap sizes, and item placements, then see a live pr..."
+    />
+  </head>
   <body>
     <div class="glow-bg"></div>
 
@@ -51,17 +63,57 @@
                 <div class="config-group">
                   <label for="columnsCount">Columns</label>
                   <div class="stepper">
-                    <button class="stepper-btn" data-target="columnsCount" data-dir="-1">−</button>
-                    <input type="number" id="columnsCount" value="3" min="1" max="12" />
-                    <button class="stepper-btn" data-target="columnsCount" data-dir="1">+</button>
+                    <button
+                      class="stepper-btn"
+                      data-target="columnsCount"
+                      data-dir="-1"
+                      aria-label="Decrease columns"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      id="columnsCount"
+                      value="3"
+                      min="1"
+                      max="12"
+                    />
+                    <button
+                      class="stepper-btn"
+                      data-target="columnsCount"
+                      data-dir="1"
+                      aria-label="Increase columns"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
                 <div class="config-group">
                   <label for="rowsCount">Rows</label>
                   <div class="stepper">
-                    <button class="stepper-btn" data-target="rowsCount" data-dir="-1">−</button>
-                    <input type="number" id="rowsCount" value="3" min="1" max="12" />
-                    <button class="stepper-btn" data-target="rowsCount" data-dir="1">+</button>
+                    <button
+                      class="stepper-btn"
+                      data-target="rowsCount"
+                      data-dir="-1"
+                      aria-label="Decrease rows"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      id="rowsCount"
+                      value="3"
+                      min="1"
+                      max="12"
+                    />
+                    <button
+                      class="stepper-btn"
+                      data-target="rowsCount"
+                      data-dir="1"
+                      aria-label="Increase rows"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               </div>
@@ -91,11 +143,21 @@
               <div class="config-row">
                 <div class="config-group">
                   <label for="colGap">Column Gap</label>
-                  <input type="text" id="colGap" value="12px" placeholder="e.g. 10px, 1rem" />
+                  <input
+                    type="text"
+                    id="colGap"
+                    value="12px"
+                    placeholder="e.g. 10px, 1rem"
+                  />
                 </div>
                 <div class="config-group">
                   <label for="rowGap">Row Gap</label>
-                  <input type="text" id="rowGap" value="12px" placeholder="e.g. 10px, 1rem" />
+                  <input
+                    type="text"
+                    id="rowGap"
+                    value="12px"
+                    placeholder="e.g. 10px, 1rem"
+                  />
                 </div>
               </div>
 
@@ -140,32 +202,64 @@
             </div>
 
             <!-- Selected Item Card -->
-            <div class="card item-card" id="itemConfigCard" style="display:none;">
+            <div
+              class="card item-card"
+              id="itemConfigCard"
+              style="display: none"
+            >
               <h2>🎨 Item Configuration</h2>
               <p class="item-info" id="itemInfo">No item selected</p>
               <div class="config-row">
                 <div class="config-group">
                   <label for="itemColStart">Column Start</label>
-                  <input type="number" id="itemColStart" min="1" max="12" value="1" />
+                  <input
+                    type="number"
+                    id="itemColStart"
+                    min="1"
+                    max="12"
+                    value="1"
+                  />
                 </div>
                 <div class="config-group">
                   <label for="itemColEnd">Column End</label>
-                  <input type="number" id="itemColEnd" min="1" max="13" value="2" />
+                  <input
+                    type="number"
+                    id="itemColEnd"
+                    min="1"
+                    max="13"
+                    value="2"
+                  />
                 </div>
               </div>
               <div class="config-row">
                 <div class="config-group">
                   <label for="itemRowStart">Row Start</label>
-                  <input type="number" id="itemRowStart" min="1" max="12" value="1" />
+                  <input
+                    type="number"
+                    id="itemRowStart"
+                    min="1"
+                    max="12"
+                    value="1"
+                  />
                 </div>
                 <div class="config-group">
                   <label for="itemRowEnd">Row End</label>
-                  <input type="number" id="itemRowEnd" min="1" max="13" value="2" />
+                  <input
+                    type="number"
+                    id="itemRowEnd"
+                    min="1"
+                    max="13"
+                    value="2"
+                  />
                 </div>
               </div>
               <div class="config-group">
                 <label for="itemAreaName">Area Name</label>
-                <input type="text" id="itemAreaName" placeholder="e.g. header, sidebar" />
+                <input
+                  type="text"
+                  id="itemAreaName"
+                  placeholder="e.g. header, sidebar"
+                />
               </div>
               <div class="config-group">
                 <label for="itemColor">Background Color</label>
@@ -177,9 +271,15 @@
             <div class="card actions-card">
               <h2>🛠 Actions</h2>
               <div class="action-buttons">
-                <button class="btn btn-action" id="addItemBtn">+ Add Item</button>
-                <button class="btn btn-action btn-danger" id="removeItemBtn">− Remove Item</button>
-                <button class="btn btn-action" id="resetGridBtn">↺ Reset</button>
+                <button class="btn btn-action" id="addItemBtn">
+                  + Add Item
+                </button>
+                <button class="btn btn-action btn-danger" id="removeItemBtn">
+                  − Remove Item
+                </button>
+                <button class="btn btn-action" id="resetGridBtn">
+                  ↺ Reset
+                </button>
               </div>
             </div>
           </section>
@@ -213,8 +313,17 @@
                 </div>
               </div>
               <div class="code-container">
-                <pre class="code-output" id="codeOutput"><code id="codeContent"></code></pre>
-                <button class="copy-btn" id="copyCodeBtn" title="Copy to clipboard">📋</button>
+                <pre
+                  class="code-output"
+                  id="codeOutput"
+                ><code id="codeContent"></code></pre>
+                <button
+                  class="copy-btn"
+                  id="copyCodeBtn"
+                  title="Copy to clipboard"
+                >
+                  📋
+                </button>
               </div>
             </div>
           </section>

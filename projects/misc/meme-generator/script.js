@@ -193,10 +193,7 @@ if (fileUpload) {
 
       URL.revokeObjectURL(objectUrl);
 
-      if (
-        width > MAX_IMAGE_WIDTH ||
-        height > MAX_IMAGE_HEIGHT
-      ) {
+      if (width > MAX_IMAGE_WIDTH || height > MAX_IMAGE_HEIGHT) {
         showError(
           `Image resolution is too high (${width} × ${height}px). Maximum allowed resolution is ${MAX_IMAGE_WIDTH} × ${MAX_IMAGE_HEIGHT}px.`
         );
@@ -281,4 +278,3 @@ if (downloadBtn) {
 // Initial Kickoff
 loadMemeFromUrl(currentImgUrl);
 renderPresetsUI();
-

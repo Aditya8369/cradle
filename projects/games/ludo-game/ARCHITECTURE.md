@@ -42,13 +42,13 @@ The render loop redraws the whole board on every frame, while token movement is 
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell, 600x600 canvas, side panels, resume/setup modals, loads the three scripts |
-| `ludoEngine.js` | Deterministic game rules: board geometry, move validation, captures, win detection |
-| `ludoBot.js` | Heuristic scoring of candidate moves and selection of the best move for bot players |
-| `script.js` | Canvas rendering engine, turn controller, event listeners, save/load |
-| `style.css` | Layout, 3D dice cube, modals, player indicators, responsive design |
+| File            | Responsibility                                                                        |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `index.html`    | Page shell, 600x600 canvas, side panels, resume/setup modals, loads the three scripts |
+| `ludoEngine.js` | Deterministic game rules: board geometry, move validation, captures, win detection    |
+| `ludoBot.js`    | Heuristic scoring of candidate moves and selection of the best move for bot players   |
+| `script.js`     | Canvas rendering engine, turn controller, event listeners, save/load                  |
+| `style.css`     | Layout, 3D dice cube, modals, player indicators, responsive design                    |
 
 ---
 
@@ -108,16 +108,16 @@ First player to get all 4 tokens to the centre wins
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page shell, canvas element, modals |
-| CSS3 | Layout, 3D dice cube, modals, responsive side panels |
-| Vanilla JavaScript (ES6+) | Game logic, canvas rendering, event handling |
-| Canvas API | Drawing the board, tokens, and center triangles each frame |
-| CSS 3D transforms | Rotating the dice cube |
-| localStorage API | Persisting and resuming game sessions |
-| Google Fonts (Outfit) | UI typography |
-| Node.js test runner | Headless unit tests for `ludoEngine.js` and `ludoBot.js` |
+| Technology                | Purpose                                                    |
+| ------------------------- | ---------------------------------------------------------- |
+| HTML5                     | Page shell, canvas element, modals                         |
+| CSS3                      | Layout, 3D dice cube, modals, responsive side panels       |
+| Vanilla JavaScript (ES6+) | Game logic, canvas rendering, event handling               |
+| Canvas API                | Drawing the board, tokens, and center triangles each frame |
+| CSS 3D transforms         | Rotating the dice cube                                     |
+| localStorage API          | Persisting and resuming game sessions                      |
+| Google Fonts (Outfit)     | UI typography                                              |
+| Node.js test runner       | Headless unit tests for `ludoEngine.js` and `ludoBot.js`   |
 
 ---
 
@@ -180,9 +180,9 @@ First player to get all 4 tokens to the centre wins
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Outfit (font) | — | Google Fonts CDN (`<link>` tag) | UI typography |
+| Dependency    | Version | How loaded                      | Purpose       |
+| ------------- | ------- | ------------------------------- | ------------- |
+| Outfit (font) | —       | Google Fonts CDN (`<link>` tag) | UI typography |
 
 No JavaScript libraries are used — only native browser APIs, plus the Node.js test runner for development.
 

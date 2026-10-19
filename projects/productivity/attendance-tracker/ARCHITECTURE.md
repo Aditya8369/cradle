@@ -46,12 +46,12 @@ The application uses a standard decoupled **Frontend-First Architecture** where 
 
 ## Component Breakdown
 
-| File | Responsibility |
-| --- | --- |
-| `index.html` | Dashboard shell, stat cards, subjects table, recent history panel, chart canvas, and the Add New Subject modal. |
+| File              | Responsibility                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `index.html`      | Dashboard shell, stat cards, subjects table, recent history panel, chart canvas, and the Add New Subject modal.                |
 | `data-handler.js` | Pure logic: `calculateStats()`, `exportToCSV()`, and `parseCSV()`. Uses a CommonJS export so it can be unit tested in Node.js. |
-| `script.js` | State loading, `render()`, subject add/update/remove, history logging, CSV import/export, chart updates, and modal wiring. |
-| `style.css` | Scoped UI styles, themes, counter groups, stat cards, tables, and modal layout. |
+| `script.js`       | State loading, `render()`, subject add/update/remove, history logging, CSV import/export, chart updates, and modal wiring.     |
+| `style.css`       | Scoped UI styles, themes, counter groups, stat cards, tables, and modal layout.                                                |
 
 ---
 
@@ -93,14 +93,14 @@ render() saves state back to localStorage and refreshes the UI
 
 ## Technologies Used
 
-| Technology | Purpose |
-| --- | --- |
-| HTML5 | Semantic dashboard structure, stat cards, tables, and modal form |
-| CSS3 (Custom Properties) | Dashboard theming and layouts via `style.css` and Cradle `tokens.css` |
-| Vanilla JavaScript (ES6+) | State management, DOM rendering, CSV handling, and event wiring |
-| localStorage API | Persisting subjects and history under the `att_v5` key |
-| Chart.js (CDN) | Rendering the Present / Absent pie chart |
-| Cradle UI components | Shared `Button.js`, `Card.js`, `BackToHome.js`, and design tokens |
+| Technology                | Purpose                                                               |
+| ------------------------- | --------------------------------------------------------------------- |
+| HTML5                     | Semantic dashboard structure, stat cards, tables, and modal form      |
+| CSS3 (Custom Properties)  | Dashboard theming and layouts via `style.css` and Cradle `tokens.css` |
+| Vanilla JavaScript (ES6+) | State management, DOM rendering, CSV handling, and event wiring       |
+| localStorage API          | Persisting subjects and history under the `att_v5` key                |
+| Chart.js (CDN)            | Rendering the Present / Absent pie chart                              |
+| Cradle UI components      | Shared `Button.js`, `Card.js`, `BackToHome.js`, and design tokens     |
 
 ---
 
@@ -138,9 +138,9 @@ render() saves state back to localStorage and refreshes the UI
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-| --- | --- | --- | --- |
-| Chart.js | latest | CDN (`<script>` from cdn.jsdelivr.net) | Pie chart rendering |
+| Dependency | Version | How loaded                             | Purpose             |
+| ---------- | ------- | -------------------------------------- | ------------------- |
+| Chart.js   | latest  | CDN (`<script>` from cdn.jsdelivr.net) | Pie chart rendering |
 
 The project also loads shared Cradle UI files (`tokens.css`, `Button.js`, `Card.js`, `BackToHome.js`) from the repository's `src/components/ui` directory.
 

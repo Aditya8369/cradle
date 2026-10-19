@@ -71,9 +71,11 @@ body {
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(to right,
-      var(--cradle-text),
-      var(--theme-accent));
+  background: linear-gradient(
+    to right,
+    var(--cradle-text),
+    var(--theme-accent)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -712,7 +714,6 @@ body {
 
 /* ===================== MOBILE RESPONSIVE ===================== */
 @media (max-width: 768px) {
-
   /* Container */
   .app-container {
     padding: 16px;

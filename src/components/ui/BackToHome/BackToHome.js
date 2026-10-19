@@ -42,17 +42,27 @@
 
   /* ── HTML sanitizer ──────────────────────────────────────── */
   const _sanitize =
-    (typeof window !== "undefined" && window.CradleSanitize && window.CradleSanitize.sanitizeHtml) ||
-    (typeof require === "function" && (function () { try { return require("../sanitizeHtml.js").sanitizeHtml; } catch { return null; } })()) ||
-    function (html) { return String(html ?? ""); };
+    (typeof window !== "undefined" &&
+      window.CradleSanitize &&
+      window.CradleSanitize.sanitizeHtml) ||
+    (typeof require === "function" &&
+      (function () {
+        try {
+          return require("../sanitizeHtml.js").sanitizeHtml;
+        } catch {
+          return null;
+        }
+      })()) ||
+    function (html) {
+      return String(html ?? "");
+    };
 
   /* This script's own URL, captured at load time (document.currentScript is
      only valid during synchronous execution). It sits at a fixed path under
      the site root, so we can resolve the home URL from it — which is correct
      regardless of how deep the current page is or what base path the site is
      deployed under (e.g. /<repo>/ on GitHub Pages). */
-  const SELF_SRC =
-    (document.currentScript && document.currentScript.src) || "";
+  const SELF_SRC = (document.currentScript && document.currentScript.src) || "";
   const SELF_REL = "src/components/ui/BackToHome/BackToHome.js";
 
   /* ── Styles ───────────────────────────────────────────── */
@@ -233,7 +243,7 @@
       link.setAttribute("role", "button");
       link.tabIndex = 0;
 
-      link.addEventListener("keydown", (e) => {
+      link.addEventListener("keydown", e => {
         if (e.key === " " || e.key === "Enter") {
           e.preventDefault();
           link.click();

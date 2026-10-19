@@ -32,20 +32,19 @@ image-classifier/
 
 ## System / Project Architecture Overview
 
-The project follows a simple separation of concerns: 
+The project follows a simple separation of concerns:
 index.html defines the structure, style.css handles all presentation, and script.js owns all behaviour.
 There is no build step — the browser loads files directly. The project can be run seperately by running the index.html file of this project
-
 
 ---
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | UI of the project and loads scripts |
-| `script.js` | Handles logic of the project and loading of the model |
-| `style.css` | Layout, colours, animations, responsive design |
+| File         | Responsibility                                        |
+| ------------ | ----------------------------------------------------- |
+| `index.html` | UI of the project and loads scripts                   |
+| `script.js`  | Handles logic of the project and loading of the model |
+| `style.css`  | Layout, colours, animations, responsive design        |
 
 ---
 
@@ -72,13 +71,13 @@ D --> E
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 | Layout and responsive design |
-| JavaScript | Model logic and prediction |
-| MobileNet | Image classification model |
-| KNN | Algorithm to identify classes |
+| Technology | Purpose                            |
+| ---------- | ---------------------------------- |
+| HTML5      | Page structure and semantic markup |
+| CSS3       | Layout and responsive design       |
+| JavaScript | Model logic and prediction         |
+| MobileNet  | Image classification model         |
+| KNN        | Algorithm to identify classes      |
 
 ---
 
@@ -113,9 +112,9 @@ D --> E
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Outfit (font) | - | Google Fonts CDN | UI typography |
+| Dependency    | Version | How loaded       | Purpose       |
+| ------------- | ------- | ---------------- | ------------- |
+| Outfit (font) | -       | Google Fonts CDN | UI typography |
 
 ---
 

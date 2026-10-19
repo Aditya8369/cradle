@@ -19,7 +19,7 @@
       tile256: "#edcc61",
       tile512: "#edc850",
       tile1024: "#edc53f",
-      tile2048: "#edc22e"
+      tile2048: "#edc22e",
     },
     darkNeon: {
       name: "Dark Neon",
@@ -36,7 +36,7 @@
       tile256: "#facc15",
       tile512: "#4ade80",
       tile1024: "#2dd4bf",
-      tile2048: "#a78bfa"
+      tile2048: "#a78bfa",
     },
     cyberpunk: {
       name: "Cyberpunk",
@@ -53,8 +53,8 @@
       tile256: "#00ffff",
       tile512: "#ffff00",
       tile1024: "#ff0055",
-      tile2048: "#33ff00"
-    }
+      tile2048: "#33ff00",
+    },
   };
 
   function getTheme(themeKey = "classic") {
@@ -64,7 +64,7 @@
   function getAvailableThemes() {
     return Object.keys(THEMES).map(key => ({
       key,
-      name: THEMES[key].name
+      name: THEMES[key].name,
     }));
   }
 

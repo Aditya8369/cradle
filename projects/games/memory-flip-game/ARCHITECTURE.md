@@ -35,12 +35,12 @@ The page is built from three `<section>` screens (home, game, result) that are s
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Three screens, navbar stats, mode selector, and high-score displays |
-| `script.js` | Deck building, card click handling, match checking, screen switching |
-| `utils.js` | Pure `localStorage` helpers for reading and saving high scores |
-| `style.css` | Card flip animation, shake feedback, board grid, navbar layout |
+| File         | Responsibility                                                       |
+| ------------ | -------------------------------------------------------------------- |
+| `index.html` | Three screens, navbar stats, mode selector, and high-score displays  |
+| `script.js`  | Deck building, card click handling, match checking, screen switching |
+| `utils.js`   | Pure `localStorage` helpers for reading and saving high scores       |
+| `style.css`  | Card flip animation, shake feedback, board grid, navbar layout       |
 
 ---
 
@@ -92,13 +92,13 @@ User clicks "Play Again" → startGame() restarts
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic sections for home, game, and result screens |
-| CSS3 (Grid, Flexbox, 3D transforms) | Board layout, navbar, card flip effect |
-| Vanilla JavaScript (ES6+) | Game logic, DOM creation, event handling |
-| localStorage API | High score persistence per mode |
-| Google Fonts (Fraunces, Space Grotesk) | Display and body typography |
+| Technology                             | Purpose                                              |
+| -------------------------------------- | ---------------------------------------------------- |
+| HTML5                                  | Semantic sections for home, game, and result screens |
+| CSS3 (Grid, Flexbox, 3D transforms)    | Board layout, navbar, card flip effect               |
+| Vanilla JavaScript (ES6+)              | Game logic, DOM creation, event handling             |
+| localStorage API                       | High score persistence per mode                      |
+| Google Fonts (Fraunces, Space Grotesk) | Display and body typography                          |
 
 ---
 

@@ -76,9 +76,7 @@ function renderMemeCanvas(canvas, imgElement, options = {}) {
 
     bottomLines.forEach((line, index) => {
       const y =
-        canvas.height -
-        padding -
-        (bottomLines.length - 1 - index) * lineHeight;
+        canvas.height - padding - (bottomLines.length - 1 - index) * lineHeight;
 
       ctx.strokeText(line, canvas.width / 2, y);
       ctx.fillText(line, canvas.width / 2, y);

@@ -54,10 +54,18 @@
         const a = blocks[i];
         const b = blocks[j];
 
-        const startA = a.startMinutes !== undefined ? a.startMinutes : timeToMinutes(a.start);
-        const endA = a.endMinutes !== undefined ? a.endMinutes : timeToMinutes(a.end);
-        const startB = b.startMinutes !== undefined ? b.startMinutes : timeToMinutes(b.start);
-        const endB = b.endMinutes !== undefined ? b.endMinutes : timeToMinutes(b.end);
+        const startA =
+          a.startMinutes !== undefined
+            ? a.startMinutes
+            : timeToMinutes(a.start);
+        const endA =
+          a.endMinutes !== undefined ? a.endMinutes : timeToMinutes(a.end);
+        const startB =
+          b.startMinutes !== undefined
+            ? b.startMinutes
+            : timeToMinutes(b.start);
+        const endB =
+          b.endMinutes !== undefined ? b.endMinutes : timeToMinutes(b.end);
 
         if (isOverlapping(startA, endA, startB, endB)) {
           collidingIds.add(a.id);
@@ -79,8 +87,14 @@
     let grandTotalMinutes = 0;
 
     blocks.forEach(block => {
-      const start = block.startMinutes !== undefined ? block.startMinutes : timeToMinutes(block.start);
-      const end = block.endMinutes !== undefined ? block.endMinutes : timeToMinutes(block.end);
+      const start =
+        block.startMinutes !== undefined
+          ? block.startMinutes
+          : timeToMinutes(block.start);
+      const end =
+        block.endMinutes !== undefined
+          ? block.endMinutes
+          : timeToMinutes(block.end);
       const duration = Math.max(0, end - start);
 
       const cat = block.category || "other";
@@ -93,11 +107,17 @@
       breakdown[cat] = {
         minutes: mins,
         hours: Math.round((mins / 60) * 10) / 10,
-        percentage: grandTotalMinutes > 0 ? Math.round((mins / grandTotalMinutes) * 100) : 0
+        percentage:
+          grandTotalMinutes > 0
+            ? Math.round((mins / grandTotalMinutes) * 100)
+            : 0,
       };
     });
 
-    return { totalHours: Math.round((grandTotalMinutes / 60) * 10) / 10, breakdown };
+    return {
+      totalHours: Math.round((grandTotalMinutes / 60) * 10) / 10,
+      breakdown,
+    };
   }
 
   /**
@@ -112,12 +132,14 @@
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
       "PRODID:-//Cradle//Time Blocking Planner//EN",
-      "CALSCALE:GREGORIAN"
+      "CALSCALE:GREGORIAN",
     ];
 
     blocks.forEach(b => {
-      const startMins = b.startMinutes !== undefined ? b.startMinutes : timeToMinutes(b.start);
-      const endMins = b.endMinutes !== undefined ? b.endMinutes : timeToMinutes(b.end);
+      const startMins =
+        b.startMinutes !== undefined ? b.startMinutes : timeToMinutes(b.start);
+      const endMins =
+        b.endMinutes !== undefined ? b.endMinutes : timeToMinutes(b.end);
 
       const startH = String(Math.floor(startMins / 60)).padStart(2, "0");
       const startM = String(startMins % 60).padStart(2, "0");

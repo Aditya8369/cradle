@@ -58,12 +58,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell with two-column layout, all UI controls and preview area |
-| `style.css` | Dark/light theme, grid preview styling, responsive layout, code output styling |
-| `gridEngine.js` | Pure logic: presets, CSS generation, HTML generation, template area building |
-| `script.js` | UI controller: state management, event wiring, live preview rendering, copy actions |
+| File            | Responsibility                                                                      |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `index.html`    | Page shell with two-column layout, all UI controls and preview area                 |
+| `style.css`     | Dark/light theme, grid preview styling, responsive layout, code output styling      |
+| `gridEngine.js` | Pure logic: presets, CSS generation, HTML generation, template area building        |
+| `script.js`     | UI controller: state management, event wiring, live preview rendering, copy actions |
 
 ---
 
@@ -112,14 +112,14 @@ User clicks Copy → clipboard API copies code
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Grid, Flexbox, Custom Properties) | Layout, theming, responsive design |
-| Vanilla JavaScript (ES6+) | UI logic, state management, DOM manipulation |
-| CradleEscape | Shared HTML escaping utility |
-| CradleBackToHome | Shared navigation component |
-| Google Fonts (Space Grotesk, Fira Code) | Typography |
+| Technology                              | Purpose                                      |
+| --------------------------------------- | -------------------------------------------- |
+| HTML5                                   | Page structure and semantic markup           |
+| CSS3 (Grid, Flexbox, Custom Properties) | Layout, theming, responsive design           |
+| Vanilla JavaScript (ES6+)               | UI logic, state management, DOM manipulation |
+| CradleEscape                            | Shared HTML escaping utility                 |
+| CradleBackToHome                        | Shared navigation component                  |
+| Google Fonts (Space Grotesk, Fira Code) | Typography                                   |
 
 ---
 
@@ -172,12 +172,12 @@ User clicks Copy → clipboard API copies code
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Outfit / Space Grotesk | — | Google Fonts CDN | UI typography |
-| Fira Code | — | Google Fonts CDN | Code output monospace font |
-| Cradle `escapeHtml.js` | — | Local script tag | HTML escaping for user content |
-| Cradle `BackToHome.js` | — | Local script tag (defer) | Shared navigation |
+| Dependency             | Version | How loaded               | Purpose                        |
+| ---------------------- | ------- | ------------------------ | ------------------------------ |
+| Outfit / Space Grotesk | —       | Google Fonts CDN         | UI typography                  |
+| Fira Code              | —       | Google Fonts CDN         | Code output monospace font     |
+| Cradle `escapeHtml.js` | —       | Local script tag         | HTML escaping for user content |
+| Cradle `BackToHome.js` | —       | Local script tag (defer) | Shared navigation              |
 
 ---
 

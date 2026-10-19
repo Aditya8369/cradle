@@ -19,12 +19,7 @@
   /**
    * Supported URI schemes.
    */
-  const SUPPORTED_PROTOCOLS = [
-    "http:",
-    "https:",
-    "ftp:",
-    "mailto:",
-  ];
+  const SUPPORTED_PROTOCOLS = ["http:", "https:", "ftp:", "mailto:"];
 
   /**
    * Normalize a URL input before parsing.
@@ -168,7 +163,7 @@
     if (/^\d+(?:\.\d+){3}$/.test(hostname)) {
       const parts = hostname.split(".");
 
-      return parts.every((part) => {
+      return parts.every(part => {
         if (part.length > 1 && part.startsWith("0")) {
           return false;
         }
@@ -402,29 +397,11 @@
         ? extension.toLowerCase().replace(/^\./, "")
         : "";
 
-    const images = [
-      "png",
-      "jpg",
-      "jpeg",
-      "gif",
-      "webp",
-      "svg",
-      "avif",
-    ];
+    const images = ["png", "jpg", "jpeg", "gif", "webp", "svg", "avif"];
 
-    const videos = [
-      "mp4",
-      "webm",
-      "mov",
-      "mkv",
-    ];
+    const videos = ["mp4", "webm", "mov", "mkv"];
 
-    const documents = [
-      "pdf",
-      "doc",
-      "docx",
-      "txt",
-    ];
+    const documents = ["pdf", "doc", "docx", "txt"];
 
     if (images.includes(normalizedExtension)) {
       return "Image ";
@@ -451,16 +428,12 @@
         : "";
 
     if (
-      ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(
-        normalizedExtension
-      )
+      ["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(normalizedExtension)
     ) {
       return "Image URL";
     }
 
-    if (
-      ["mp4", "webm", "mov"].includes(normalizedExtension)
-    ) {
+    if (["mp4", "webm", "mov"].includes(normalizedExtension)) {
       return "Video URL";
     }
 

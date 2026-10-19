@@ -4,12 +4,18 @@ import MorseEngine from "../projects/misc/morse-code-studio/morseEngine.js";
 
 test("textToMorse converts plain text to standard morse representation", () => {
   assert.equal(MorseEngine.textToMorse("SOS"), "... --- ...");
-  assert.equal(MorseEngine.textToMorse("Hello World"), ".... . .-.. .-.. --- / .-- --- .-. .-.. -..");
+  assert.equal(
+    MorseEngine.textToMorse("Hello World"),
+    ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
+  );
 });
 
 test("morseToText decodes morse signals back to uppercase text", () => {
   assert.equal(MorseEngine.morseToText("... --- ..."), "SOS");
-  assert.equal(MorseEngine.morseToText(".... . .-.. .-.. --- / .-- --- .-. .-.. -.."), "HELLO WORLD");
+  assert.equal(
+    MorseEngine.morseToText(".... . .-.. .-.. --- / .-- --- .-. .-.. -.."),
+    "HELLO WORLD"
+  );
 });
 
 test("getDitDurationMs computes duration correctly based on WPM speed", () => {

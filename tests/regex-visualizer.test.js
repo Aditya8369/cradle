@@ -31,7 +31,12 @@ test("parsePatternTokens generates detailed semantic explanations", () => {
 });
 
 test("executeReplace performs string substitution accurately", () => {
-  const { output, error } = RegexEngine.executeReplace("hello", "gi", "Hello World", "hi");
+  const { output, error } = RegexEngine.executeReplace(
+    "hello",
+    "gi",
+    "Hello World",
+    "hi"
+  );
   assert.equal(error, null);
   assert.equal(output, "hi World");
 });

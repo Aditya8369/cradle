@@ -37,12 +37,12 @@ The game is a single-page app with two clear layers. The `BOARD` array in `scrip
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Board, players/turn/log panel, setup overlay, Chance/Chest modal |
-| `script.js` | Board data, cards, game state, dice/turn logic, rendering, event handling |
-| `gameLogic.js` | `cellGridArea` and `computeRent` as pure, Node-testable functions |
-| `style.css` | 11x11 CSS Grid board, CSS dice pips, buttons, modal overlay |
+| File           | Responsibility                                                            |
+| -------------- | ------------------------------------------------------------------------- |
+| `index.html`   | Board, players/turn/log panel, setup overlay, Chance/Chest modal          |
+| `script.js`    | Board data, cards, game state, dice/turn logic, rendering, event handling |
+| `gameLogic.js` | `cellGridArea` and `computeRent` as pure, Node-testable functions         |
+| `style.css`    | 11x11 CSS Grid board, CSS dice pips, buttons, modal overlay               |
 
 ---
 
@@ -102,12 +102,12 @@ When only one player is left → that player wins, buttons are disabled
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Board, panels, overlay, modal markup |
-| CSS3 (Grid, Flexbox) | 11x11 board layout, dice pips, buttons |
+| Technology                | Purpose                                  |
+| ------------------------- | ---------------------------------------- |
+| HTML5                     | Board, panels, overlay, modal markup     |
+| CSS3 (Grid, Flexbox)      | 11x11 board layout, dice pips, buttons   |
 | Vanilla JavaScript (ES6+) | Game state, rules, DOM rendering, events |
-| Node.js test runner | Headless tests for `gameLogic.js` |
+| Node.js test runner       | Headless tests for `gameLogic.js`        |
 
 ---
 
@@ -207,5 +207,5 @@ None. The project uses only native browser APIs — no external libraries, fonts
 
 ## References
 
-- [Monopoly (game) — Wikipedia](https://en.wikipedia.org/wiki/Monopoly_(game))
+- [Monopoly (game) — Wikipedia](https://en.wikipedia.org/wiki/Monopoly_%28game%29)
 - [MDN Web Docs — CSS Grid Layout](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout)

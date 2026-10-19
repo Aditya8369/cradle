@@ -283,11 +283,22 @@ body {
 
 /* ---- Highlight Classes ---- */
 
-.hl-string  { color: #a7f3d0; }
-.hl-number  { color: #93c5fd; }
-.hl-boolean { color: #c4b5fd; }
-.hl-null    { color: #d1d5db; font-style: italic; }
-.hl-punct   { color: #64748b; }
+.hl-string {
+  color: #a7f3d0;
+}
+.hl-number {
+  color: #93c5fd;
+}
+.hl-boolean {
+  color: #c4b5fd;
+}
+.hl-null {
+  color: #d1d5db;
+  font-style: italic;
+}
+.hl-punct {
+  color: #64748b;
+}
 
 /* ---- Responsive ---- */
 

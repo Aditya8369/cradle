@@ -379,9 +379,7 @@ document
 document
   .querySelector(".btn-import-action")
   ?.addEventListener("click", triggerImport);
-document
-  .getElementById("csvFileInput")
-  ?.addEventListener("change", importCSV);
+document.getElementById("csvFileInput")?.addEventListener("change", importCSV);
 document
   .getElementById("btn-new-subject")
   ?.addEventListener("click", openModal);

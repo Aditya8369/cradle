@@ -255,8 +255,8 @@
             font-size: 0.85rem;
           "
         >
-          <code>CradleEscape.escapeHtml()</code> neutralises markup before it
-          is inserted into <code>innerHTML</code>.
+          <code>CradleEscape.escapeHtml()</code> neutralises markup before it is
+          inserted into <code>innerHTML</code>.
         </div>
       </div>
 
@@ -514,22 +514,20 @@
       });
 
       /* ── BackToHome — minimal variant ── */
-      document
-        .getElementById("bth-minimal-mount")
-        .appendChild(
-          CradleBackToHome.create({
-            to: "../../index.html",
-            label: "Back to Home",
-            variant: "minimal",
-          })
-        );
+      document.getElementById("bth-minimal-mount").appendChild(
+        CradleBackToHome.create({
+          to: "../../index.html",
+          label: "Back to Home",
+          variant: "minimal",
+        })
+      );
 
       /* ── EscapeHtml — utility ── */
       const escapeDemo = document.getElementById("escape-demo");
       const samples = [
         '<script>alert("XSS")<\/script>',
         "John's Chip & Co.",
-        'plain text <b>inert</b>',
+        "plain text <b>inert</b>",
       ];
       samples.forEach(text => {
         const el = document.createElement("code");

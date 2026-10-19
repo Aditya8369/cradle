@@ -2,39 +2,39 @@
    NEURAL NETWORK WORKER
    Handles compute-intensive NN operations off the main thread
    ============================================================ */
-importScripts('nnEngine.js');
+importScripts("nnEngine.js");
 let net = null;
 let dataset = [];
 let targets = [];
-self.onmessage = function(e) {
+self.onmessage = function (e) {
   const { type, payload } = e.data;
   switch (type) {
-    case 'INIT_NETWORK': {
+    case "INIT_NETWORK": {
       const { layers, activationName, lr } = payload;
       net = new NeuralNetwork(layers, activationName, lr);
-      self.postMessage({ type: 'NETWORK_INITED' });
+      self.postMessage({ type: "NETWORK_INITED" });
       break;
     }
-    case 'INIT_DATA': {
+    case "INIT_DATA": {
       const { datasetType, numPoints, noise, customData } = payload;
-      if (datasetType === 'custom') {
+      if (datasetType === "custom") {
         dataset = customData.map(p => [...p]);
       } else {
         dataset = generateDataset(datasetType, numPoints, noise);
       }
-      
+
       // Split into inputs and targets
       const inputs = dataset.map(d => [d[0], d[1]]);
       targets = dataset.map(d => d[2]);
-      
-      self.postMessage({ type: 'DATA_INITED', count: dataset.length });
+
+      self.postMessage({ type: "DATA_INITED", count: dataset.length });
       break;
     }
-    case 'TRAIN_STEP': {
+    case "TRAIN_STEP": {
       if (!net || dataset.length === 0) return;
       const inputs = dataset.map(d => [d[0], d[1]]);
       const { speed, batchSize } = payload;
-      
+
       let totalEpochs = 0;
       let lastLoss = 0;
       let lastAcc = 0;
@@ -44,19 +44,19 @@ self.onmessage = function(e) {
         lastAcc = result.accuracy;
         totalEpochs++;
       }
-      self.postMessage({ 
-        type: 'TRAIN_STEP_COMPLETE', 
-        payload: { 
-          loss: lastLoss, 
-          accuracy: lastAcc, 
+      self.postMessage({
+        type: "TRAIN_STEP_COMPLETE",
+        payload: {
+          loss: lastLoss,
+          accuracy: lastAcc,
           epochs: totalEpochs,
           weights: net.weights,
-          biases: net.biases
-        } 
+          biases: net.biases,
+        },
       });
       break;
     }
-    case 'PREDICT_GRID': {
+    case "PREDICT_GRID": {
       if (!net) return;
       const { width, height, res } = payload;
       const predictions = [];
@@ -67,10 +67,10 @@ self.onmessage = function(e) {
           predictions.push(net.predict([x, y]));
         }
       }
-      self.postMessage({ type: 'GRID_PREDICTIONS', payload: predictions });
+      self.postMessage({ type: "GRID_PREDICTIONS", payload: predictions });
       break;
     }
-    case 'UPDATE_PARAMS': {
+    case "UPDATE_PARAMS": {
       if (net && payload.lr !== undefined) {
         net.lr = payload.lr;
       }

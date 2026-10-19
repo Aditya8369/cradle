@@ -34,9 +34,7 @@
 
     if (
       /^data:image\/[a-z]+;base64,/.test(val) ||
-      (val.length % 4 === 0 &&
-        /^[A-Za-z0-9+/=]+$/.test(val) &&
-        val.length > 30)
+      (val.length % 4 === 0 && /^[A-Za-z0-9+/=]+$/.test(val) && val.length > 30)
     ) {
       return "base64";
     }
@@ -86,68 +84,68 @@
   }
 
   /**
- * Read all key-value entries from LocalStorage or SessionStorage store.
- *
- * Gracefully handles unavailable storage and storage access errors.
- */
-function readWebStorage(storeType = "localStorage") {
-  const items = [];
-  let totalBytes = 0;
+   * Read all key-value entries from LocalStorage or SessionStorage store.
+   *
+   * Gracefully handles unavailable storage and storage access errors.
+   */
+  function readWebStorage(storeType = "localStorage") {
+    const items = [];
+    let totalBytes = 0;
 
-  let store;
+    let store;
 
-  try {
-    store =
-      storeType === "sessionStorage"
-        ? window.sessionStorage
-        : window.localStorage;
-  } catch (error) {
-    return {
-      items,
-      totalBytes,
-      formattedTotal: "0 B"
-    };
-  }
-
-  if (!store) {
-    return {
-      items,
-      totalBytes,
-      formattedTotal: "0 B"
-    };
-  }
-
-  try {
-    for (let i = 0; i < store.length; i++) {
-      const key = store.key(i);
-
-      if (key === null) continue;
-
-      const value = store.getItem(key);
-      const bytes = calculateByteSize(key, value);
-      const type = detectDataType(value);
-
-      totalBytes += bytes;
-
-      items.push({
-        key,
-        value,
-        bytes,
-        formattedBytes: formatBytes(bytes),
-        type
-      });
+    try {
+      store =
+        storeType === "sessionStorage"
+          ? window.sessionStorage
+          : window.localStorage;
+    } catch (error) {
+      return {
+        items,
+        totalBytes,
+        formattedTotal: "0 B",
+      };
     }
-  } catch (error) {
-    // Storage may become unavailable while being read.
-    // Return entries collected before the failure.
-  }
 
-  return {
-    items,
-    totalBytes,
-    formattedTotal: formatBytes(totalBytes)
-  };
-}
+    if (!store) {
+      return {
+        items,
+        totalBytes,
+        formattedTotal: "0 B",
+      };
+    }
+
+    try {
+      for (let i = 0; i < store.length; i++) {
+        const key = store.key(i);
+
+        if (key === null) continue;
+
+        const value = store.getItem(key);
+        const bytes = calculateByteSize(key, value);
+        const type = detectDataType(value);
+
+        totalBytes += bytes;
+
+        items.push({
+          key,
+          value,
+          bytes,
+          formattedBytes: formatBytes(bytes),
+          type,
+        });
+      }
+    } catch (error) {
+      // Storage may become unavailable while being read.
+      // Return entries collected before the failure.
+    }
+
+    return {
+      items,
+      totalBytes,
+      formattedTotal: formatBytes(totalBytes),
+    };
+  }
 
   /**
    * Read document cookies as structured key-value array.
@@ -161,7 +159,7 @@ function readWebStorage(storeType = "localStorage") {
       return {
         items,
         totalBytes,
-        formattedTotal: "0 B"
+        formattedTotal: "0 B",
       };
     }
 
@@ -181,14 +179,14 @@ function readWebStorage(storeType = "localStorage") {
         value,
         bytes,
         formattedBytes: formatBytes(bytes),
-        type
+        type,
       });
     });
 
     return {
       items,
       totalBytes,
-      formattedTotal: formatBytes(totalBytes)
+      formattedTotal: formatBytes(totalBytes),
     };
   }
 
@@ -198,7 +196,8 @@ function readWebStorage(storeType = "localStorage") {
   exports.filterItems = filterItems;
   exports.readWebStorage = readWebStorage;
   exports.readCookies = readCookies;
-
-})(typeof module !== "undefined" && module.exports
-  ? module.exports
-  : (window.StorageEngine = {}));
+})(
+  typeof module !== "undefined" && module.exports
+    ? module.exports
+    : (window.StorageEngine = {})
+);

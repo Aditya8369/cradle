@@ -20,7 +20,9 @@
   /** Validate and sanitize regex flags string */
   function sanitizeFlags(flags = "") {
     if (typeof flags !== "string") return "g";
-    const unique = Array.from(new Set(flags.split(""))).filter(f => VALID_FLAGS.includes(f));
+    const unique = Array.from(new Set(flags.split(""))).filter(f =>
+      VALID_FLAGS.includes(f)
+    );
     return unique.join("");
   }
 
@@ -45,27 +47,44 @@
       const char = pattern[i];
 
       if (char === "^") {
-        tokens.push({ token: "^", type: "anchor", explanation: "Starts at the beginning of the string or line" });
+        tokens.push({
+          token: "^",
+          type: "anchor",
+          explanation: "Starts at the beginning of the string or line",
+        });
         i++;
       } else if (char === "$") {
-        tokens.push({ token: "$", type: "anchor", explanation: "Matches the end of the string or line" });
+        tokens.push({
+          token: "$",
+          type: "anchor",
+          explanation: "Matches the end of the string or line",
+        });
         i++;
       } else if (char === ".") {
-        tokens.push({ token: ".", type: "wildcard", explanation: "Matches any single character except newline" });
+        tokens.push({
+          token: ".",
+          type: "wildcard",
+          explanation: "Matches any single character except newline",
+        });
         i++;
       } else if (char === "\\") {
         if (i + 1 < pattern.length) {
           const next = pattern[i + 1];
           let exp = `Escaped literal character '${next}'`;
           if (next === "d") exp = "Matches any digit character [0-9]";
-          else if (next === "w") exp = "Matches any word character [a-zA-Z0-9_]";
+          else if (next === "w")
+            exp = "Matches any word character [a-zA-Z0-9_]";
           else if (next === "s") exp = "Matches any whitespace character";
           else if (next === "b") exp = "Matches a word boundary";
 
           tokens.push({ token: "\\" + next, type: "escape", explanation: exp });
           i += 2;
         } else {
-          tokens.push({ token: "\\", type: "escape", explanation: "Trailing backslash" });
+          tokens.push({
+            token: "\\",
+            type: "escape",
+            explanation: "Trailing backslash",
+          });
           i++;
         }
       } else if (char === "+" || char === "*" || char === "?") {
@@ -74,16 +93,32 @@
           "*": "Matches 0 or more of the preceding token",
           "?": "Matches 0 or 1 of the preceding token (optional)",
         };
-        tokens.push({ token: char, type: "quantifier", explanation: descriptions[char] });
+        tokens.push({
+          token: char,
+          type: "quantifier",
+          explanation: descriptions[char],
+        });
         i++;
       } else if (char === "(") {
-        tokens.push({ token: "(", type: "group", explanation: "Starts a capture group" });
+        tokens.push({
+          token: "(",
+          type: "group",
+          explanation: "Starts a capture group",
+        });
         i++;
       } else if (char === ")") {
-        tokens.push({ token: ")", type: "group", explanation: "Ends a capture group" });
+        tokens.push({
+          token: ")",
+          type: "group",
+          explanation: "Ends a capture group",
+        });
         i++;
       } else {
-        tokens.push({ token: char, type: "literal", explanation: `Matches literal character '${char}'` });
+        tokens.push({
+          token: char,
+          type: "literal",
+          explanation: `Matches literal character '${char}'`,
+        });
         i++;
       }
     }

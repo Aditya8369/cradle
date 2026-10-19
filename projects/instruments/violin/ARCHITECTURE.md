@@ -96,15 +96,15 @@ Responsibilities:
 
 The mini deliberately keeps state small:
 
-| State | Purpose |
-| --- | --- |
-| `selectedString` | Current string selected in the control panel |
-| `audioContext` | Lazily-created browser audio context |
-| `masterGain` | Shared output volume node |
-| `activePointerId` | Current touch/mouse gesture |
-| `lastPointerNote` | Prevents duplicate notes during a drag |
-| `volume` | User-controlled output level |
-| Theme | Stored through the Cradle `theme` convention |
+| State             | Purpose                                      |
+| ----------------- | -------------------------------------------- |
+| `selectedString`  | Current string selected in the control panel |
+| `audioContext`    | Lazily-created browser audio context         |
+| `masterGain`      | Shared output volume node                    |
+| `activePointerId` | Current touch/mouse gesture                  |
+| `lastPointerNote` | Prevents duplicate notes during a drag       |
+| `volume`          | User-controlled output level                 |
+| Theme             | Stored through the Cradle `theme` convention |
 
 The string catalogue is immutable and can be extended by adding string metadata rather than changing the audio engine.
 
@@ -215,11 +215,11 @@ and "Core Modules" above for the detailed breakdown.
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
+| File         | Responsibility                                                      |
+| ------------ | ------------------------------------------------------------------- |
 | `index.html` | Page shell, violin markup, string/fingerboard hit targets, controls |
-| `script.js` | Audio engine, pointer/keyboard interaction, and UI state |
-| `style.css` | Violin illustration, layout, and responsive styling |
+| `script.js`  | Audio engine, pointer/keyboard interaction, and UI state            |
+| `style.css`  | Violin illustration, layout, and responsive styling                 |
 
 ## Data Flow / Execution Flow
 
@@ -230,6 +230,7 @@ load through string/fingerboard resolution to Web Audio playback.
 
 See "Interaction Design" above for keyboard (`A`/`S`/`D`/`F`) and
 mouse/touch string-and-fingerboard details. In summary:
+
 - Four open strings (G, D, A, E) playable via keyboard shortcuts
 - Simplified fingerboard for higher notes via pointer position
 - Volume control and persisted theme
@@ -237,12 +238,12 @@ mouse/touch string-and-fingerboard details. In summary:
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 | Violin illustration, layout, and responsive design |
-| Vanilla JavaScript (ES6+) | Audio engine and interaction logic |
-| Web Audio API | Live bowed-string tone synthesis (see "Audio Design" above) |
+| Technology                | Purpose                                                     |
+| ------------------------- | ----------------------------------------------------------- |
+| HTML5                     | Page structure and semantic markup                          |
+| CSS3                      | Violin illustration, layout, and responsive design          |
+| Vanilla JavaScript (ES6+) | Audio engine and interaction logic                          |
+| Web Audio API             | Live bowed-string tone synthesis (see "Audio Design" above) |
 
 ## File Responsibilities
 

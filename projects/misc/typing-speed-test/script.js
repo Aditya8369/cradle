@@ -30,7 +30,7 @@ const TEXTS = {
     "Scientific discovery often begins with a simple question: why does this happen? Curiosity drives researchers to explore the unknown and challenge established assumptions.",
   ],
   hard: [
-    "Quantum entanglement, a phenomenon Einstein famously derided as \"spooky action at a distance,\" describes how particles become correlated such that the quantum state of one instantaneously influences the state of another regardless of the spatial separation between them.",
+    'Quantum entanglement, a phenomenon Einstein famously derided as "spooky action at a distance," describes how particles become correlated such that the quantum state of one instantaneously influences the state of another regardless of the spatial separation between them.',
     "The socioeconomic implications of artificial intelligence extend far beyond mere automation of repetitive tasks; they encompass fundamental restructuring of labor markets, ethical frameworks for algorithmic decision-making, and the philosophical question of machine consciousness.",
     "Despite meticulous planning and rigorous contingency protocols, the expedition encountered unforeseen complications when atmospheric conditions deteriorated rapidly, rendering navigation instruments unreliable and forcing the team to reassess their strategic approach.",
     "The juxtaposition of Renaissance architectural grandeur with contemporary minimalist design principles creates a compelling dialogue between historical craftsmanship and modern functional aesthetics that challenges conventional notions of spatial harmony.",
@@ -67,15 +67,15 @@ let history = loadHistory();
 
 /* ── DOM Refs ───────────────────────────────────────────────────── */
 
-const $textDisplay    = document.getElementById("textDisplay");
-const $typingInput    = document.getElementById("typingInput");
-const $statWpm        = document.getElementById("statWpm");
-const $statAccuracy   = document.getElementById("statAccuracy");
-const $statTime       = document.getElementById("statTime");
-const $statErrors     = document.getElementById("statErrors");
+const $textDisplay = document.getElementById("textDisplay");
+const $typingInput = document.getElementById("typingInput");
+const $statWpm = document.getElementById("statWpm");
+const $statAccuracy = document.getElementById("statAccuracy");
+const $statTime = document.getElementById("statTime");
+const $statErrors = document.getElementById("statErrors");
 const $statusIndicator = document.getElementById("statusIndicator");
 const $resultsSection = document.getElementById("resultsSection");
-const $historyList    = document.getElementById("historyList");
+const $historyList = document.getElementById("historyList");
 
 /* ── Text Selection ─────────────────────────────────────────────── */
 
@@ -225,16 +225,30 @@ function finishTest() {
   $resultsSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
   // Save to history
-  saveHistory({ wpm, rawWpm, accuracy, chars, errors: errorCount, time: elapsed, difficulty, grade: grade.label, timestamp: Date.now() });
+  saveHistory({
+    wpm,
+    rawWpm,
+    accuracy,
+    chars,
+    errors: errorCount,
+    time: elapsed,
+    difficulty,
+    grade: grade.label,
+    timestamp: Date.now(),
+  });
   renderHistory();
 }
 
 function getGrade(wpm, accuracy) {
   const score = wpm * (accuracy / 100);
-  if (score >= 80 && accuracy >= 95) return { level: "s", emoji: "🏆", label: "Typing Master" };
-  if (score >= 60 && accuracy >= 90) return { level: "a", emoji: "⭐", label: "Excellent" };
-  if (score >= 45 && accuracy >= 85) return { level: "b", emoji: "👍", label: "Good" };
-  if (score >= 30 && accuracy >= 75) return { level: "c", emoji: "📝", label: "Average" };
+  if (score >= 80 && accuracy >= 95)
+    return { level: "s", emoji: "🏆", label: "Typing Master" };
+  if (score >= 60 && accuracy >= 90)
+    return { level: "a", emoji: "⭐", label: "Excellent" };
+  if (score >= 45 && accuracy >= 85)
+    return { level: "b", emoji: "👍", label: "Good" };
+  if (score >= 30 && accuracy >= 75)
+    return { level: "c", emoji: "📝", label: "Average" };
   if (score >= 15) return { level: "d", emoji: "🔧", label: "Needs Practice" };
   return { level: "f", emoji: "📚", label: "Keep Trying" };
 }
@@ -277,25 +291,37 @@ function restart() {
 /* ── History ────────────────────────────────────────────────────── */
 
 function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  } catch {
+    return [];
+  }
 }
 
 function saveHistory(entry) {
   history.unshift(entry);
   if (history.length > 20) history.length = 20;
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch { /* */ }
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    /* */
+  }
 }
 
 function renderHistory() {
   if (history.length === 0) {
-    $historyList.innerHTML = '<p class="empty-state">No tests yet. Start typing!</p>';
+    $historyList.innerHTML =
+      '<p class="empty-state">No tests yet. Start typing!</p>';
     return;
   }
   $historyList.innerHTML = "";
   history.forEach((h, idx) => {
     const item = document.createElement("div");
     item.className = "history-item";
-    const timeStr = new Date(h.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timeStr = new Date(h.timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     item.innerHTML = `
       <div class="history-main">
         <strong>${h.wpm} WPM</strong> · ${h.accuracy}% accuracy · ${h.difficulty}
@@ -305,7 +331,11 @@ function renderHistory() {
     `;
     item.querySelector(".history-del").addEventListener("click", () => {
       history.splice(idx, 1);
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch { /* */ }
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      } catch {
+        /* */
+      }
       renderHistory();
     });
     $historyList.appendChild(item);
@@ -316,7 +346,11 @@ function clearHistory() {
   if (history.length === 0) return;
   if (!confirm("Clear all test history?")) return;
   history = [];
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch { /* */ }
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    /* */
+  }
   renderHistory();
 }
 
@@ -325,7 +359,9 @@ function clearHistory() {
 // Difficulty buttons
 document.querySelectorAll(".diff-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
+    document
+      .querySelectorAll(".diff-btn")
+      .forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     difficulty = btn.dataset.difficulty;
     restart();
@@ -335,7 +371,9 @@ document.querySelectorAll(".diff-btn").forEach(btn => {
 // Duration buttons
 document.querySelectorAll(".time-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".time-btn").forEach(b => b.classList.remove("active"));
+    document
+      .querySelectorAll(".time-btn")
+      .forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     duration = parseInt(btn.dataset.seconds, 10);
     restart();
@@ -346,17 +384,19 @@ document.querySelectorAll(".time-btn").forEach(btn => {
 $typingInput.addEventListener("input", handleInput);
 
 // Prevent paste
-$typingInput.addEventListener("paste", (e) => e.preventDefault());
+$typingInput.addEventListener("paste", e => e.preventDefault());
 
 // Restart buttons
 document.getElementById("btnRestart").addEventListener("click", restart);
 document.getElementById("btnTryAgain").addEventListener("click", restart);
 
 // Clear history
-document.getElementById("btnClearHistory").addEventListener("click", clearHistory);
+document
+  .getElementById("btnClearHistory")
+  .addEventListener("click", clearHistory);
 
 // Keyboard shortcut: Escape to restart
-document.addEventListener("keydown", (e) => {
+document.addEventListener("keydown", e => {
   if (e.key === "Escape") {
     restart();
   }

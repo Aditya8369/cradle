@@ -3,7 +3,8 @@ const assert = require("node:assert/strict");
 const ResumeEngine = require("../projects/editor/markdown-resume-generator/resumeEngine");
 
 test("ResumeEngine parseInlineMarkdown formats bold, italic, and links", () => {
-  const input = "Check [GitHub](https://github.com) and **bold** text with *italic*.";
+  const input =
+    "Check [GitHub](https://github.com) and **bold** text with *italic*.";
   const html = ResumeEngine.parseInlineMarkdown(input);
   assert.ok(html.includes('<a href="https://github.com"'));
   assert.ok(html.includes("<strong>bold</strong>"));

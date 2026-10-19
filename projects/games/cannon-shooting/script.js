@@ -9,9 +9,7 @@ let countdown = fireTime / 1000 - 3;
  * To add new audio sources, add their URL here and ensure
  * the origin is in the trusted list below.
  */
-const TRUSTED_AUDIO_ORIGINS = [
-  "https://soundbible.com",
-];
+const TRUSTED_AUDIO_ORIGINS = ["https://soundbible.com"];
 const TRUSTED_AUDIO_URLS = new Set([
   "https://soundbible.com/mp3/Sniper_Rifle-Kibblesbob-2053709564.mp3",
   "https://soundbible.com/mp3/Super%20Punch%20MMA-SoundBible.com-1869306362.mp3",
@@ -26,7 +24,8 @@ function isTrustedAudioUrl(url) {
   if (typeof url !== "string" || !url) return false;
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:")
+      return false;
     if (!TRUSTED_AUDIO_URLS.has(url)) {
       const originAllowed = TRUSTED_AUDIO_ORIGINS.some(
         trusted => parsed.origin === trusted
@@ -51,7 +50,9 @@ function createTrustedAudio(url) {
     return null;
   }
   const audio = new Audio(url);
-  audio.onerror = () => { /* audio unavailable — graceful degradation */ };
+  audio.onerror = () => {
+    /* audio unavailable — graceful degradation */
+  };
   return audio;
 }
 
@@ -89,7 +90,7 @@ function animateLeft(el, targetLeft, duration, callback) {
   el.style.transition = `left ${duration}ms linear`;
   void el.offsetWidth; // force reflow so the transition applies
   el.style.left = targetLeft;
-  const onEnd = (e) => {
+  const onEnd = e => {
     if (e.propertyName !== "left") return;
     el.removeEventListener("transitionend", onEnd);
     el.style.transition = "";
@@ -122,11 +123,11 @@ setInterval(() => {
 
   const lvlMon = document.querySelector(".level-monitor");
   if (lvlMon) lvlMon.textContent = cmCanAngle;
-  canBalls.forEach((ball) => {
+  canBalls.forEach(ball => {
     ball.style.transition = "";
     ball.style.left = "0";
   });
-  allPipe.forEach((pipe) => pipe.classList.remove("fire"));
+  allPipe.forEach(pipe => pipe.classList.remove("fire"));
   document.querySelector(".game-container")?.classList.remove("defended");
   const levelEl = document.querySelector(".level");
   if (levelEl) levelEl.style.width = ballMileage + "cm";
@@ -141,14 +142,11 @@ setInterval(() => {
     );
 
     try {
-      if (fireAudio) fireAudio.play().catch(() => { });
-    } catch (e) { }
-    allPipe.forEach((pipe) => pipe.classList.add("fire"));
+      if (fireAudio) fireAudio.play().catch(() => {});
+    } catch (e) {}
+    allPipe.forEach(pipe => pipe.classList.add("fire"));
 
-    const scoreResult = CannonEngine.calculateScore(
-      isHit,
-      stats.currentStreak
-    );
+    const scoreResult = CannonEngine.calculateScore(isHit, stats.currentStreak);
     stats = CannonStorage.recordShot(
       stats,
       isHit,
@@ -159,15 +157,15 @@ setInterval(() => {
 
     if (isHit) {
       document.querySelector(".game-container")?.classList.add("defended");
-      canBalls.forEach((ball) => {
+      canBalls.forEach(ball => {
         animateLeft(ball, -ballMileage + 4.23 + "cm", 500, () => {
           try {
-            if (hitAudio) hitAudio.play().catch(() => { });
-          } catch (e) { }
+            if (hitAudio) hitAudio.play().catch(() => {});
+          } catch (e) {}
         });
       });
     } else {
-      canBalls.forEach((ball) => animateLeft(ball, "-100vw", 1000));
+      canBalls.forEach(ball => animateLeft(ball, "-100vw", 1000));
     }
   }, fireTime - 2000);
 }, fireTime);

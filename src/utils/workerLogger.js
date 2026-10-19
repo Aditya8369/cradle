@@ -18,9 +18,7 @@ export function logWorkerFailure({
   logger = console,
 } = {}) {
   const safeMessage =
-    typeof message === "string"
-      ? message
-      : message?.message || String(message);
+    typeof message === "string" ? message : message?.message || String(message);
 
   const logEntry = {
     workerName: String(workerName),

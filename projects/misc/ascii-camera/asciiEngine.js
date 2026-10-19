@@ -8,10 +8,11 @@
 
   const PALETTES = {
     standard: " .:-=+*#%@",
-    detailed: " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+    detailed:
+      " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
     blocks: " ░▒▓█",
     binary: " 01",
-    minimal: " .#"
+    minimal: " .#",
   };
 
   /**
@@ -31,7 +32,11 @@
   /**
    * Map luminance (0-255) to character in palette string.
    */
-  function mapLuminanceToChar(lum, palette = PALETTES.standard, invert = false) {
+  function mapLuminanceToChar(
+    lum,
+    palette = PALETTES.standard,
+    invert = false
+  ) {
     const norm = Math.max(0, Math.min(255, lum)) / 255;
     const effectiveNorm = invert ? 1 - norm : norm;
     const index = Math.floor(effectiveNorm * (palette.length - 1));
@@ -55,12 +60,12 @@
     const gx = [
       [-1, 0, 1],
       [-2, 0, 2],
-      [-1, 0, 1]
+      [-1, 0, 1],
     ];
     const gy = [
       [-1, -2, -1],
       [0, 0, 0],
-      [1, 2, 1]
+      [1, 2, 1],
     ];
 
     for (let y = 1; y < height - 1; y++) {
@@ -93,7 +98,7 @@
       invert = false,
       contrast = 1.0,
       brightness = 0,
-      edgeDetection = false
+      edgeDetection = false,
     } = options;
 
     const palette = customPalette || PALETTES[paletteKey] || PALETTES.standard;
@@ -128,7 +133,7 @@
       lines: asciiLines,
       width,
       height,
-      rawText: asciiLines.join("\n")
+      rawText: asciiLines.join("\n"),
     };
   }
 

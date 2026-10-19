@@ -47,14 +47,14 @@ The application is structured into three main layers:
 
 ## Component Breakdown
 
-| File          | Responsibility                                                                                          |
-| ------------- | ------------------------------------------------------------------------------------------------------- |
-| `index.html`  | Page markup, search input, view mode buttons, temperature slider, table container, detail modal         |
-| `style.css`   | 18-column CSS grid layout, category color variables, element tile micro-animations, modal styles        |
-| `elements.js` | Full dataset of 118 elements with atomic properties, melting/boiling points, and shell arrays           |
-| `periodicEngine.js` | Pure calculation engine: phase state, temperature conversion, shell parsing, filtering, stats        |
-| `periodicStorage.js` | Bookmark and settings persistence backed by localStorage with an in-memory fallback                  |
-| `script.js`   | Grid rendering logic, state-of-matter calculator, search & category filters, canvas Bohr model renderer |
+| File                 | Responsibility                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `index.html`         | Page markup, search input, view mode buttons, temperature slider, table container, detail modal         |
+| `style.css`          | 18-column CSS grid layout, category color variables, element tile micro-animations, modal styles        |
+| `elements.js`        | Full dataset of 118 elements with atomic properties, melting/boiling points, and shell arrays           |
+| `periodicEngine.js`  | Pure calculation engine: phase state, temperature conversion, shell parsing, filtering, stats           |
+| `periodicStorage.js` | Bookmark and settings persistence backed by localStorage with an in-memory fallback                     |
+| `script.js`          | Grid rendering logic, state-of-matter calculator, search & category filters, canvas Bohr model renderer |
 
 ---
 
@@ -166,9 +166,9 @@ None. Uses native browser APIs exclusively.
 ## Development Notes
 
 - Open `index.html` directly in any web browser, or serve via local web server:
-   ```bash
-   python -m http.server 8000
-   ```
+  ```bash
+  python -m http.server 8000
+  ```
 - Navigate to `http://localhost:8000/projects/misc/periodic-table/` in your browser.
 - `periodicEngine.js` and `periodicStorage.js` are UMD-style modules that work in both the browser and Node.js for testing.
 

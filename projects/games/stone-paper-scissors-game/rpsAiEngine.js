@@ -32,7 +32,10 @@
     function recordMove(playerChoice) {
       if (history.length > 0) {
         const prevMove = history[history.length - 1];
-        if (matrix[prevMove] && typeof matrix[prevMove][playerChoice] === "number") {
+        if (
+          matrix[prevMove] &&
+          typeof matrix[prevMove][playerChoice] === "number"
+        ) {
           matrix[prevMove][playerChoice] += 1;
         }
       }
@@ -83,7 +86,9 @@
         return choices[Math.floor(Math.random() * choices.length)];
       }
 
-      return candidateCounters[Math.floor(Math.random() * candidateCounters.length)];
+      return candidateCounters[
+        Math.floor(Math.random() * candidateCounters.length)
+      ];
     }
 
     function reset() {
@@ -95,7 +100,7 @@
       recordMove,
       predictNextPlayerMove,
       getOptimalCounter,
-      reset
+      reset,
     };
   }
 

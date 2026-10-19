@@ -46,12 +46,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page header, color inputs, hair style selector, canvas preview box |
-| `avatarEngine.js` | Grid coordinate constants, SVG string generator, random option builder |
-| `script.js` | Input event listeners, DOM parser injection, XMLSerializer PNG exporter |
-| `style.css` | Modern flex layout, button styles, centered preview box |
+| File              | Responsibility                                                          |
+| ----------------- | ----------------------------------------------------------------------- |
+| `index.html`      | Page header, color inputs, hair style selector, canvas preview box      |
+| `avatarEngine.js` | Grid coordinate constants, SVG string generator, random option builder  |
+| `script.js`       | Input event listeners, DOM parser injection, XMLSerializer PNG exporter |
+| `style.css`       | Modern flex layout, button styles, centered preview box                 |
 
 ---
 
@@ -83,10 +83,10 @@ User clicks Download -> SVG rasterized onto HTML5 Canvas to produce PNG download
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Color inputs, selection dropdowns, SVG element |
-| CSS3 | Flex layout and UI styling |
+| Technology                | Purpose                                             |
+| ------------------------- | --------------------------------------------------- |
+| HTML5                     | Color inputs, selection dropdowns, SVG element      |
+| CSS3                      | Flex layout and UI styling                          |
 | Vanilla JavaScript (ES6+) | Avatar Engine, DOM Parser, Canvas PNG rasterization |
 
 ---
@@ -94,16 +94,20 @@ User clicks Download -> SVG rasterized onto HTML5 Canvas to produce PNG download
 ## File Responsibilities
 
 ### `index.html`
+
 - Color picker inputs, style select dropdown, preview SVG shell, download button.
 
 ### `avatarEngine.js`
+
 - `generateAvatarSVG(options)` — Produces `<svg>` markup with 16x16 `<rect>` layers.
 - `generateRandomOptions()` — Returns randomized hex color values and hair style index.
 
 ### `script.js`
+
 - `renderAvatar()` — Fetches input values, invokes `AvatarEngine`, and updates DOM.
 
 ### `style.css`
+
 - Centered container styling, color picker layout rules.
 
 ---

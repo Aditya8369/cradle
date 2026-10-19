@@ -31,7 +31,10 @@ test("wrapText breaks long titles into lines of appropriate width", () => {
   const singleLine = wrapText("Short Title", 20);
   assert.deepEqual(singleLine, ["Short Title"]);
 
-  const multiLine = wrapText("This is a rather long title for a project showcase", 20);
+  const multiLine = wrapText(
+    "This is a rather long title for a project showcase",
+    20
+  );
   assert.ok(multiLine.length > 1);
   for (const line of multiLine) {
     assert.ok(line.length <= 20);
@@ -177,8 +180,12 @@ test("validateProjectsSync detects out-of-order projects in registry", () => {
   const dataDir = path.join(root, "data");
   const outputFile = path.join(dataDir, "projects.json");
 
-  fs.mkdirSync(path.join(projectsDir, "games", "alpha-game"), { recursive: true });
-  fs.mkdirSync(path.join(projectsDir, "games", "beta-game"), { recursive: true });
+  fs.mkdirSync(path.join(projectsDir, "games", "alpha-game"), {
+    recursive: true,
+  });
+  fs.mkdirSync(path.join(projectsDir, "games", "beta-game"), {
+    recursive: true,
+  });
   fs.mkdirSync(dataDir, { recursive: true });
 
   // Out of order: Beta before Alpha
@@ -214,8 +221,12 @@ test("validateProjectsSync succeeds when registry is generated and synchronized"
   const dataDir = path.join(root, "data");
   const outputFile = path.join(dataDir, "projects.json");
 
-  fs.mkdirSync(path.join(projectsDir, "games", "alpha-game"), { recursive: true });
-  fs.mkdirSync(path.join(projectsDir, "productivity", "beta-tool"), { recursive: true });
+  fs.mkdirSync(path.join(projectsDir, "games", "alpha-game"), {
+    recursive: true,
+  });
+  fs.mkdirSync(path.join(projectsDir, "productivity", "beta-tool"), {
+    recursive: true,
+  });
   fs.mkdirSync(dataDir, { recursive: true });
 
   generateProjects({
@@ -248,7 +259,9 @@ test("buildProjectsRegistry produces identical output on repeated runs (reproduc
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-repro-test-"));
   const projectsDir = path.join(root, "projects");
   fs.mkdirSync(path.join(projectsDir, "games", "game-a"), { recursive: true });
-  fs.mkdirSync(path.join(projectsDir, "productivity", "tool-b"), { recursive: true });
+  fs.mkdirSync(path.join(projectsDir, "productivity", "tool-b"), {
+    recursive: true,
+  });
 
   const run1 = buildProjectsRegistry({
     projectsDir,
@@ -268,7 +281,7 @@ test("buildProjectsRegistry produces identical output on repeated runs (reproduc
 test("buildProjectsRegistry is independent of filesystem traversal order", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-order-test-"));
   const projectsDir = path.join(root, "projects");
-  
+
   const dirsToCreate = [
     path.join(projectsDir, "games", "zebra-game"),
     path.join(projectsDir, "games", "alpha-game"),
@@ -280,14 +293,14 @@ test("buildProjectsRegistry is independent of filesystem traversal order", () =>
   }
 
   const originalReaddirSync = fs.readdirSync;
-  
+
   try {
     // Mock readdirSync returning reversed directory order to simulate different traversal
     fs.readdirSync = (dirPath, options) => {
       const result = originalReaddirSync(dirPath, options);
       return result.reverse();
     };
-    
+
     const { projects: projects1 } = buildProjectsRegistry({
       projectsDir,
       repoRoot: root,
@@ -296,7 +309,7 @@ test("buildProjectsRegistry is independent of filesystem traversal order", () =>
 
     // Reset readdirSync to normal behavior
     fs.readdirSync = originalReaddirSync;
-    
+
     const { projects: projects2 } = buildProjectsRegistry({
       projectsDir,
       repoRoot: root,

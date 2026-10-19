@@ -10,33 +10,24 @@ const {
 } = require("../projects/dev-tools/text-diff-checker/diffEngine.js");
 
 test("diffArrays identifies equal values", () => {
-  assert.deepEqual(
-    diffArrays(["a", "b"], ["a", "b"]),
-    [
-      { type: "equal", value: "a" },
-      { type: "equal", value: "b" },
-    ]
-  );
+  assert.deepEqual(diffArrays(["a", "b"], ["a", "b"]), [
+    { type: "equal", value: "a" },
+    { type: "equal", value: "b" },
+  ]);
 });
 
 test("diffArrays identifies additions", () => {
-  assert.deepEqual(
-    diffArrays(["a"], ["a", "b"]),
-    [
-      { type: "equal", value: "a" },
-      { type: "add", value: "b" },
-    ]
-  );
+  assert.deepEqual(diffArrays(["a"], ["a", "b"]), [
+    { type: "equal", value: "a" },
+    { type: "add", value: "b" },
+  ]);
 });
 
 test("diffArrays identifies deletions", () => {
-  assert.deepEqual(
-    diffArrays(["a", "b"], ["a"]),
-    [
-      { type: "equal", value: "a" },
-      { type: "del", value: "b" },
-    ]
-  );
+  assert.deepEqual(diffArrays(["a", "b"], ["a"]), [
+    { type: "equal", value: "a" },
+    { type: "del", value: "b" },
+  ]);
 });
 
 test("diffArrays handles completely different arrays", () => {
@@ -53,10 +44,11 @@ test("diffArrays handles empty arrays", () => {
 });
 
 test("toLines splits text by newline", () => {
-  assert.deepEqual(
-    toLines("line one\nline two\nline three"),
-    ["line one", "line two", "line three"]
-  );
+  assert.deepEqual(toLines("line one\nline two\nline three"), [
+    "line one",
+    "line two",
+    "line three",
+  ]);
 });
 
 test("toLines returns empty array for empty text", () => {
@@ -64,17 +56,11 @@ test("toLines returns empty array for empty text", () => {
 });
 
 test("toWordTokens preserves whitespace", () => {
-  assert.deepEqual(
-    toWordTokens("hello world"),
-    ["hello", " ", "world"]
-  );
+  assert.deepEqual(toWordTokens("hello world"), ["hello", " ", "world"]);
 });
 
 test("toWordTokens handles multiple spaces", () => {
-  assert.deepEqual(
-    toWordTokens("hello   world"),
-    ["hello", "   ", "world"]
-  );
+  assert.deepEqual(toWordTokens("hello   world"), ["hello", "   ", "world"]);
 });
 
 test("toWordTokens returns empty array for empty text", () => {
@@ -89,10 +75,7 @@ test("escapeHtml escapes HTML-sensitive characters", () => {
 });
 
 test("inlineWordDiff highlights deleted words on the left", () => {
-  const result = inlineWordDiff(
-    "hello world",
-    "hello there"
-  );
+  const result = inlineWordDiff("hello world", "hello there");
 
   assert.match(result.leftHtml, /word-del/);
   assert.match(result.rightHtml, /word-add/);
@@ -102,20 +85,14 @@ test("inlineWordDiff highlights deleted words on the left", () => {
 });
 
 test("inlineWordDiff preserves unchanged words", () => {
-  const result = inlineWordDiff(
-    "hello world",
-    "hello there"
-  );
+  const result = inlineWordDiff("hello world", "hello there");
 
   assert.match(result.leftHtml, /hello/);
   assert.match(result.rightHtml, /hello/);
 });
 
 test("inlineWordDiff escapes HTML in changed words", () => {
-  const result = inlineWordDiff(
-    "<script>",
-    "safe"
-  );
+  const result = inlineWordDiff("<script>", "safe");
 
   assert.match(result.leftHtml, /&lt;script&gt;/);
   assert.doesNotMatch(result.leftHtml, /<script>/);

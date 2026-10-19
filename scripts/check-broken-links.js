@@ -11,7 +11,7 @@ const EXTERNAL_PREFIXES = [
   "javascript:",
   "data:",
   "tel:",
-  "#"
+  "#",
 ];
 
 function getFiles(dir) {
@@ -24,7 +24,10 @@ function getFiles(dir) {
 
     if (entry.isDirectory()) {
       results = results.concat(getFiles(fullPath));
-    } else if (entry.isFile() && TARGET_EXTS.has(path.extname(entry.name).toLowerCase())) {
+    } else if (
+      entry.isFile() &&
+      TARGET_EXTS.has(path.extname(entry.name).toLowerCase())
+    ) {
       results.push(fullPath);
     }
   }
@@ -86,7 +89,8 @@ function validateLinks() {
   for (const filePath of files) {
     const ext = path.extname(filePath).toLowerCase();
     const content = fs.readFileSync(filePath, "utf-8");
-    const rawLinks = ext === ".md" ? parseMarkdownLinks(content) : parseHtmlLinks(content);
+    const rawLinks =
+      ext === ".md" ? parseMarkdownLinks(content) : parseHtmlLinks(content);
 
     for (const { target, lineNumber } of rawLinks) {
       if (!target || isExternal(target)) continue;
@@ -107,7 +111,7 @@ function validateLinks() {
           source: relSource,
           line: lineNumber,
           target,
-          resolvedPath: path.relative(REPO_ROOT, resolvedPath)
+          resolvedPath: path.relative(REPO_ROOT, resolvedPath),
         });
       }
     }
@@ -117,18 +121,24 @@ function validateLinks() {
 }
 
 function main() {
-  console.log("Scanning repository for broken internal links in documentation and project pages...");
+  console.log(
+    "Scanning repository for broken internal links in documentation and project pages..."
+  );
   const broken = validateLinks();
 
   if (broken.length > 0) {
     console.error(`\n❌ Found ${broken.length} broken internal link(s):\n`);
     broken.forEach(({ source, line, target, resolvedPath }) => {
-      console.error(`  - ${source}:${line} -> "${target}" (Resolved: ${resolvedPath})`);
+      console.error(
+        `  - ${source}:${line} -> "${target}" (Resolved: ${resolvedPath})`
+      );
     });
     console.error("\nPlease fix all broken internal links.");
     process.exit(1);
   } else {
-    console.log("\n✅ All internal links in documentation and project pages are valid!");
+    console.log(
+      "\n✅ All internal links in documentation and project pages are valid!"
+    );
     process.exit(0);
   }
 }
@@ -143,5 +153,5 @@ module.exports = {
   parseHtmlLinks,
   isExternal,
   sanitizePath,
-  validateLinks
+  validateLinks,
 };

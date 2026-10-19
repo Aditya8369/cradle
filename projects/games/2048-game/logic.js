@@ -15,10 +15,7 @@
       size = 4;
     }
 
-    const board = Array.from(
-      { length: size },
-      () => Array(size).fill(0)
-    );
+    const board = Array.from({ length: size }, () => Array(size).fill(0));
 
     const state = {
       board,
@@ -54,11 +51,9 @@
       return false;
     }
 
-    const target =
-      emptyCells[Math.floor(random() * emptyCells.length)];
+    const target = emptyCells[Math.floor(random() * emptyCells.length)];
 
-    state.board[target.row][target.col] =
-      random() < 0.9 ? 2 : 4;
+    state.board[target.row][target.col] = random() < 0.9 ? 2 : 4;
 
     return true;
   }
@@ -122,19 +117,16 @@
     const rows = board.length;
     const cols = board[0].length;
 
-    const nextBoard = Array.from(
-      { length: rows },
-      () => Array(cols).fill(0)
-    );
+    const nextBoard = Array.from({ length: rows }, () => Array(cols).fill(0));
 
     let scoreGain = 0;
     let moved = false;
 
     function processLine(sourceLine, originalLine) {
-      const {
-        line,
-        scoreGain: lineScore,
-      } = collapseLine(sourceLine, sourceLine.length);
+      const { line, scoreGain: lineScore } = collapseLine(
+        sourceLine,
+        sourceLine.length
+      );
 
       scoreGain += lineScore;
 
@@ -154,15 +146,10 @@
             ? [...originalLine]
             : [...originalLine].reverse();
 
-        const collapsed = processLine(
-          sourceLine,
-          originalLine
-        );
+        const collapsed = processLine(sourceLine, originalLine);
 
         const targetLine =
-          direction === "left"
-            ? collapsed
-            : [...collapsed].reverse();
+          direction === "left" ? collapsed : [...collapsed].reverse();
 
         nextBoard[row] = targetLine;
       }
@@ -178,19 +165,12 @@
       const originalLine = board.map(row => row[col]);
 
       const sourceLine =
-        direction === "up"
-          ? [...originalLine]
-          : [...originalLine].reverse();
+        direction === "up" ? [...originalLine] : [...originalLine].reverse();
 
-      const collapsed = processLine(
-        sourceLine,
-        originalLine
-      );
+      const collapsed = processLine(sourceLine, originalLine);
 
       const targetLine =
-        direction === "up"
-          ? collapsed
-          : [...collapsed].reverse();
+        direction === "up" ? collapsed : [...collapsed].reverse();
 
       targetLine.forEach((value, row) => {
         nextBoard[row][col] = value;
@@ -204,11 +184,7 @@
     };
   }
 
-  function moveGameState(
-    state,
-    direction,
-    random = Math.random
-  ) {
+  function moveGameState(state, direction, random = Math.random) {
     const next = {
       board: cloneBoard(state.board),
       score: state.score,
@@ -229,10 +205,7 @@
 
     // Every merge contributes its value exactly once.
     next.score += scoreGain;
-    next.bestScore = Math.max(
-      next.bestScore,
-      next.score
-    );
+    next.bestScore = Math.max(next.bestScore, next.score);
     next.moved = moved;
 
     // A new tile is added only after a successful move.
@@ -247,9 +220,7 @@
   }
 
   function hasWon(board) {
-    return board.some(row =>
-      row.some(value => value >= 2048)
-    );
+    return board.some(row => row.some(value => value >= 2048));
   }
 
   function canMove(board) {

@@ -55,11 +55,11 @@ The project follows a clean separation of concerns:
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell, semantic HTML, loads fonts, icons, scripts |
-| `style.css` | Full visual design — layout, controls, canvas areas, responsive |
-| `script.js` | DOM controller — canvas drawing, user interactions, animation loop |
+| File               | Responsibility                                                        |
+| ------------------ | --------------------------------------------------------------------- |
+| `index.html`       | Page shell, semantic HTML, loads fonts, icons, scripts                |
+| `style.css`        | Full visual design — layout, controls, canvas areas, responsive       |
+| `script.js`        | DOM controller — canvas drawing, user interactions, animation loop    |
 | `fourierEngine.js` | Pure math — Fourier coefficients, waveform computation, normalisation |
 
 ---
@@ -116,14 +116,14 @@ Animate Build mode:
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 (Grid, Flexbox, Custom Properties) | Layout and responsive design |
-| Vanilla JavaScript (ES6+, Canvas API) | Rendering, controls, animation |
-| Font Awesome 6.5.1 (CDN) | UI icons |
-| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | Typography |
-| Cradle tokens.css | Shared design tokens (colours, spacing, typography) |
+| Technology                                          | Purpose                                             |
+| --------------------------------------------------- | --------------------------------------------------- |
+| HTML5                                               | Page structure and semantic markup                  |
+| CSS3 (Grid, Flexbox, Custom Properties)             | Layout and responsive design                        |
+| Vanilla JavaScript (ES6+, Canvas API)               | Rendering, controls, animation                      |
+| Font Awesome 6.5.1 (CDN)                            | UI icons                                            |
+| Google Fonts (Space Grotesk, Inter, JetBrains Mono) | Typography                                          |
+| Cradle tokens.css                                   | Shared design tokens (colours, spacing, typography) |
 
 ---
 
@@ -170,12 +170,12 @@ Animate Build mode:
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Font Awesome | 6.5.1 | CDN (`<link>`) | UI icons |
-| Space Grotesk / Inter / JetBrains Mono | — | Google Fonts CDN | Typography |
-| Cradle tokens.css | — | Local stylesheet | Shared design tokens |
-| Cradle BackToHome.js | — | Local script | Home navigation button |
+| Dependency                             | Version | How loaded       | Purpose                |
+| -------------------------------------- | ------- | ---------------- | ---------------------- |
+| Font Awesome                           | 6.5.1   | CDN (`<link>`)   | UI icons               |
+| Space Grotesk / Inter / JetBrains Mono | —       | Google Fonts CDN | Typography             |
+| Cradle tokens.css                      | —       | Local stylesheet | Shared design tokens   |
+| Cradle BackToHome.js                   | —       | Local script     | Home navigation button |
 
 All runtime dependencies are loaded via CDN or local reference. There is no build step, package manager, or npm dependency.
 

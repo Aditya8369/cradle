@@ -1,31 +1,31 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   /* ------------------------------------------------------------------ */
   /*  DOM References                                                     */
   /* ------------------------------------------------------------------ */
-  const baseColorInput = document.getElementById('baseColor');
-  const hexInput = document.getElementById('hexInput');
-  const randomBtn = document.getElementById('randomBtn');
-  const harmonyButtons = document.querySelectorAll('.btn-harmony');
-  const paletteGrid = document.getElementById('paletteGrid');
-  const regenerateBtn = document.getElementById('regenerateBtn');
-  const contrastBg = document.getElementById('contrastBg');
-  const contrastFg = document.getElementById('contrastFg');
-  const useFromPaletteBtn = document.getElementById('useFromPalette');
-  const contrastResults = document.getElementById('contrastResults');
-  const contrastPreview = document.getElementById('contrastPreview');
-  const exportTabs = document.querySelectorAll('.btn-tab');
-  const exportCode = document.getElementById('exportCode');
-  const copyExport = document.getElementById('copyExport');
+  const baseColorInput = document.getElementById("baseColor");
+  const hexInput = document.getElementById("hexInput");
+  const randomBtn = document.getElementById("randomBtn");
+  const harmonyButtons = document.querySelectorAll(".btn-harmony");
+  const paletteGrid = document.getElementById("paletteGrid");
+  const regenerateBtn = document.getElementById("regenerateBtn");
+  const contrastBg = document.getElementById("contrastBg");
+  const contrastFg = document.getElementById("contrastFg");
+  const useFromPaletteBtn = document.getElementById("useFromPalette");
+  const contrastResults = document.getElementById("contrastResults");
+  const contrastPreview = document.getElementById("contrastPreview");
+  const exportTabs = document.querySelectorAll(".btn-tab");
+  const exportCode = document.getElementById("exportCode");
+  const copyExport = document.getElementById("copyExport");
 
   /* ------------------------------------------------------------------ */
   /*  State                                                              */
   /* ------------------------------------------------------------------ */
-  let currentHex = '#38bdf8';
-  let currentMode = 'complementary';
-  let currentFormat = 'css';
+  let currentHex = "#38bdf8";
+  let currentMode = "complementary";
+  let currentFormat = "css";
   let palette = [];
   let lockedIndices = new Set();
-  let contrastUseMode = 'fg'; // toggles between fg and bg when clicking palette swatch
+  let contrastUseMode = "fg"; // toggles between fg and bg when clicking palette swatch
 
   /* ------------------------------------------------------------------ */
   /*  Color Utility Functions                                            */
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /** Parse hex to { r, g, b } 0-255 */
   function hexToRgb(hex) {
-    const h = hex.replace('#', '');
+    const h = hex.replace("#", "");
     return {
       r: parseInt(h.substring(0, 2), 16),
       g: parseInt(h.substring(2, 4), 16),
@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /** RGB to hex */
   function rgbToHex(r, g, b) {
-    const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+    const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
     return (
-      '#' +
+      "#" +
       [clamp(r), clamp(g), clamp(b)]
-        .map((v) => v.toString(16).padStart(2, '0'))
-        .join('')
+        .map(v => v.toString(16).padStart(2, "0"))
+        .join("")
     );
   }
 
@@ -67,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
     else if (max === g) h = ((b - r) / d + 2) / 6;
     else h = ((r - g) / d + 4) / 6;
-    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+    return {
+      h: Math.round(h * 360),
+      s: Math.round(s * 100),
+      l: Math.round(l * 100),
+    };
   }
 
   /** HSL to RGB */
@@ -93,12 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
       g = hue2rgb(p, q, h);
       b = hue2rgb(p, q, h - 1 / 3);
     }
-    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255),
+    };
   }
 
   /** Relative luminance for WCAG 2.x */
   function luminance(r, g, b) {
-    const a = [r, g, b].map((v) => {
+    const a = [r, g, b].map(v => {
       v /= 255;
       return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
@@ -118,7 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /** Random hex color */
   function randomHex() {
-    return '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+    return (
+      "#" +
+      Math.floor(Math.random() * 0xffffff)
+        .toString(16)
+        .padStart(6, "0")
+    );
   }
 
   /* ------------------------------------------------------------------ */
@@ -137,45 +150,83 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     switch (mode) {
-      case 'complementary':
+      case "complementary":
         colors.push(hex);
         colors.push(hslToHex(hsl.h + 180, hsl.s, hsl.l));
-        colors.push(hslToHex(hsl.h, Math.max(hsl.s - 20, 10), Math.min(hsl.l + 20, 90)));
-        colors.push(hslToHex(hsl.h + 180, Math.max(hsl.s - 20, 10), Math.min(hsl.l + 20, 90)));
+        colors.push(
+          hslToHex(hsl.h, Math.max(hsl.s - 20, 10), Math.min(hsl.l + 20, 90))
+        );
+        colors.push(
+          hslToHex(
+            hsl.h + 180,
+            Math.max(hsl.s - 20, 10),
+            Math.min(hsl.l + 20, 90)
+          )
+        );
         colors.push(hslToHex(hsl.h, hsl.s, Math.max(hsl.l - 25, 10)));
         break;
 
-      case 'analogous':
+      case "analogous":
         for (let i = -2; i <= 2; i++) {
           colors.push(hslToHex(hsl.h + i * 30, hsl.s, hsl.l));
         }
         break;
 
-      case 'triadic':
+      case "triadic":
         colors.push(hex);
         colors.push(hslToHex(hsl.h + 120, hsl.s, hsl.l));
         colors.push(hslToHex(hsl.h + 240, hsl.s, hsl.l));
-        colors.push(hslToHex(hsl.h + 120, Math.max(hsl.s - 15, 10), Math.min(hsl.l + 15, 90)));
-        colors.push(hslToHex(hsl.h + 240, Math.max(hsl.s - 15, 10), Math.min(hsl.l + 15, 90)));
+        colors.push(
+          hslToHex(
+            hsl.h + 120,
+            Math.max(hsl.s - 15, 10),
+            Math.min(hsl.l + 15, 90)
+          )
+        );
+        colors.push(
+          hslToHex(
+            hsl.h + 240,
+            Math.max(hsl.s - 15, 10),
+            Math.min(hsl.l + 15, 90)
+          )
+        );
         break;
 
-      case 'split-complementary':
+      case "split-complementary":
         colors.push(hex);
         colors.push(hslToHex(hsl.h + 150, hsl.s, hsl.l));
         colors.push(hslToHex(hsl.h + 210, hsl.s, hsl.l));
-        colors.push(hslToHex(hsl.h + 150, Math.max(hsl.s - 20, 10), Math.min(hsl.l + 20, 90)));
-        colors.push(hslToHex(hsl.h + 210, Math.max(hsl.s - 20, 10), Math.min(hsl.l + 20, 90)));
+        colors.push(
+          hslToHex(
+            hsl.h + 150,
+            Math.max(hsl.s - 20, 10),
+            Math.min(hsl.l + 20, 90)
+          )
+        );
+        colors.push(
+          hslToHex(
+            hsl.h + 210,
+            Math.max(hsl.s - 20, 10),
+            Math.min(hsl.l + 20, 90)
+          )
+        );
         break;
 
-      case 'tetradic':
+      case "tetradic":
         colors.push(hex);
         colors.push(hslToHex(hsl.h + 90, hsl.s, hsl.l));
         colors.push(hslToHex(hsl.h + 180, hsl.s, hsl.l));
         colors.push(hslToHex(hsl.h + 270, hsl.s, hsl.l));
-        colors.push(hslToHex(hsl.h + 45, Math.max(hsl.s - 20, 10), Math.min(hsl.l + 15, 90)));
+        colors.push(
+          hslToHex(
+            hsl.h + 45,
+            Math.max(hsl.s - 20, 10),
+            Math.min(hsl.l + 15, 90)
+          )
+        );
         break;
 
-      case 'monochromatic':
+      case "monochromatic":
         colors.push(hslToHex(hsl.h, hsl.s, Math.max(hsl.l - 30, 8)));
         colors.push(hslToHex(hsl.h, hsl.s, Math.max(hsl.l - 15, 12)));
         colors.push(hex);
@@ -210,10 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return `
           <div class="swatch" data-index="${idx}">
             <div class="swatch-color" style="background:${color}">
-              <button class="swatch-lock ${isLocked ? 'locked' : ''}"
+              <button class="swatch-lock ${isLocked ? "locked" : ""}"
                       data-index="${idx}"
-                      title="${isLocked ? 'Unlock' : 'Lock'} color">
-                ${isLocked ? '🔒' : '🔓'}
+                      title="${isLocked ? "Unlock" : "Lock"} color">
+                ${isLocked ? "🔒" : "🔓"}
               </button>
             </div>
             <div class="swatch-info">
@@ -222,11 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>`;
       })
-      .join('');
+      .join("");
 
     // Bind lock buttons
-    document.querySelectorAll('.swatch-lock').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+    document.querySelectorAll(".swatch-lock").forEach(btn => {
+      btn.addEventListener("click", e => {
         e.stopPropagation();
         const idx = parseInt(btn.dataset.index, 10);
         if (lockedIndices.has(idx)) lockedIndices.delete(idx);
@@ -236,20 +287,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Click swatch to use in contrast checker (alternating fg/bg)
-    document.querySelectorAll('.swatch').forEach((swatch) => {
-      swatch.addEventListener('click', (e) => {
-        if (e.target.closest('.swatch-lock')) return;
+    document.querySelectorAll(".swatch").forEach(swatch => {
+      swatch.addEventListener("click", e => {
+        if (e.target.closest(".swatch-lock")) return;
         const idx = parseInt(swatch.dataset.index, 10);
         const color = palette[idx];
-        if (contrastUseMode === 'fg') {
+        if (contrastUseMode === "fg") {
           contrastFg.value = color;
-          contrastUseMode = 'bg';
+          contrastUseMode = "bg";
         } else {
           contrastBg.value = color;
-          contrastUseMode = 'fg';
+          contrastUseMode = "fg";
         }
         runContrastCheck();
-        showToast(`Applied ${color.toUpperCase()} as ${contrastUseMode === 'fg' ? 'background' : 'foreground'}`);
+        showToast(
+          `Applied ${color.toUpperCase()} as ${contrastUseMode === "fg" ? "background" : "foreground"}`
+        );
       });
     });
 
@@ -272,9 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
     contrastResults.innerHTML = `
       <div class="contrast-ratio">${ratio.toFixed(2)}:1</div>
       <div class="contrast-badges">
-        <span class="${aa ? 'badge-pass' : 'badge-fail'}">AA Normal ${aa ? '✓' : '✗'}</span>
-        <span class="${aaLarge ? 'badge-pass' : 'badge-fail'}">AA Large ${aaLarge ? '✓' : '✗'}</span>
-        <span class="${aaa ? 'badge-pass' : 'badge-fail'}">AAA ${aaa ? '✓' : '✗'}</span>
+        <span class="${aa ? "badge-pass" : "badge-fail"}">AA Normal ${aa ? "✓" : "✗"}</span>
+        <span class="${aaLarge ? "badge-pass" : "badge-fail"}">AA Large ${aaLarge ? "✓" : "✗"}</span>
+        <span class="${aaa ? "badge-pass" : "badge-fail"}">AAA ${aaa ? "✓" : "✗"}</span>
       </div>`;
 
     contrastPreview.style.background = bg;
@@ -287,18 +340,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateExport() {
     const names = palette.map((_, i) => `color-${i + 1}`);
-    let code = '';
+    let code = "";
 
     switch (currentFormat) {
-      case 'css':
-        code = ':root {\n';
+      case "css":
+        code = ":root {\n";
         palette.forEach((c, i) => {
           code += `  --${names[i]}: ${c};\n`;
         });
-        code += '}';
+        code += "}";
         break;
 
-      case 'tailwind':
+      case "tailwind":
         code = `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n        palette: {\n`;
         palette.forEach((c, i) => {
           code += `          '${(i + 1) * 100}': '${c}',\n`;
@@ -306,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
         code += `        },\n      },\n    },\n  },\n};`;
         break;
 
-      case 'json':
+      case "json":
         const obj = {};
         palette.forEach((c, i) => {
           const rgb = hexToRgb(c);
@@ -320,15 +373,15 @@ document.addEventListener('DOMContentLoaded', () => {
         code = JSON.stringify(obj, null, 2);
         break;
 
-      case 'scss':
+      case "scss":
         palette.forEach((c, i) => {
           code += `$${names[i]}: ${c};\n`;
         });
-        code += '\n$palette: (\n';
+        code += "\n$palette: (\n";
         palette.forEach((c, i) => {
-          code += `  '${names[i]}': $${names[i]}${i < palette.length - 1 ? ',' : ''}\n`;
+          code += `  '${names[i]}': $${names[i]}${i < palette.length - 1 ? "," : ""}\n`;
         });
-        code += ');';
+        code += ");";
         break;
     }
 
@@ -342,14 +395,17 @@ document.addEventListener('DOMContentLoaded', () => {
   let toastEl = null;
   function showToast(msg) {
     if (!toastEl) {
-      toastEl = document.createElement('div');
-      toastEl.className = 'toast';
+      toastEl = document.createElement("div");
+      toastEl.className = "toast";
       document.body.appendChild(toastEl);
     }
     toastEl.textContent = msg;
-    toastEl.classList.add('visible');
+    toastEl.classList.add("visible");
     clearTimeout(toastEl._timer);
-    toastEl._timer = setTimeout(() => toastEl.classList.remove('visible'), 1800);
+    toastEl._timer = setTimeout(
+      () => toastEl.classList.remove("visible"),
+      1800
+    );
   }
 
   /* ------------------------------------------------------------------ */
@@ -357,37 +413,37 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ------------------------------------------------------------------ */
 
   // Base color picker
-  baseColorInput.addEventListener('input', (e) => {
+  baseColorInput.addEventListener("input", e => {
     currentHex = e.target.value;
-    hexInput.value = currentHex.replace('#', '');
+    hexInput.value = currentHex.replace("#", "");
     renderPalette();
   });
 
   // Hex text input
-  hexInput.addEventListener('input', (e) => {
-    let val = e.target.value.replace(/[^0-9a-fA-F]/g, '').substring(0, 6);
+  hexInput.addEventListener("input", e => {
+    let val = e.target.value.replace(/[^0-9a-fA-F]/g, "").substring(0, 6);
     e.target.value = val;
     if (val.length === 6) {
-      currentHex = '#' + val;
+      currentHex = "#" + val;
       baseColorInput.value = currentHex;
       renderPalette();
     }
   });
 
   // Random button
-  randomBtn.addEventListener('click', () => {
+  randomBtn.addEventListener("click", () => {
     currentHex = randomHex();
     baseColorInput.value = currentHex;
-    hexInput.value = currentHex.replace('#', '');
+    hexInput.value = currentHex.replace("#", "");
     renderPalette();
-    showToast('Random palette generated!');
+    showToast("Random palette generated!");
   });
 
   // Harmony mode buttons
-  harmonyButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      harmonyButtons.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+  harmonyButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      harmonyButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
       currentMode = btn.dataset.mode;
       lockedIndices.clear();
       renderPalette();
@@ -395,48 +451,48 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Regenerate
-  regenerateBtn.addEventListener('click', () => {
+  regenerateBtn.addEventListener("click", () => {
     lockedIndices.clear();
     renderPalette();
-    showToast('Palette regenerated!');
+    showToast("Palette regenerated!");
   });
 
   // Contrast checker inputs
-  contrastBg.addEventListener('input', runContrastCheck);
-  contrastFg.addEventListener('input', runContrastCheck);
+  contrastBg.addEventListener("input", runContrastCheck);
+  contrastFg.addEventListener("input", runContrastCheck);
 
-  useFromPaletteBtn.addEventListener('click', () => {
+  useFromPaletteBtn.addEventListener("click", () => {
     if (palette.length >= 2) {
       contrastBg.value = palette[0];
       contrastFg.value = palette[1];
       runContrastCheck();
-      showToast('Loaded first two palette colors');
+      showToast("Loaded first two palette colors");
     }
   });
 
   // Export format tabs
-  exportTabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      exportTabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
+  exportTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      exportTabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
       currentFormat = tab.dataset.format;
       updateExport();
     });
   });
 
   // Copy export
-  copyExport.addEventListener('click', async () => {
+  copyExport.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(exportCode.textContent);
-      copyExport.classList.add('copied');
-      copyExport.textContent = '✓ Copied';
-      showToast('Copied to clipboard!');
+      copyExport.classList.add("copied");
+      copyExport.textContent = "✓ Copied";
+      showToast("Copied to clipboard!");
       setTimeout(() => {
-        copyExport.classList.remove('copied');
-        copyExport.textContent = '📋 Copy';
+        copyExport.classList.remove("copied");
+        copyExport.textContent = "📋 Copy";
       }, 2000);
     } catch {
-      showToast('Failed to copy — try selecting manually');
+      showToast("Failed to copy — try selecting manually");
     }
   });
 

@@ -5,7 +5,8 @@ const LEGACY_CHALLENGE_STORAGE_KEY = "pairwise_challenge_high_score";
 
 function getHighScore(mode = "standard") {
   const key = mode === "challenge" ? CHALLENGE_STORAGE_KEY : STORAGE_KEY;
-  const legacyKey = mode === "challenge" ? LEGACY_CHALLENGE_STORAGE_KEY : LEGACY_STORAGE_KEY;
+  const legacyKey =
+    mode === "challenge" ? LEGACY_CHALLENGE_STORAGE_KEY : LEGACY_STORAGE_KEY;
   const score = localStorage.getItem(key) || localStorage.getItem(legacyKey);
   return score ? parseInt(score, 10) : null;
 }

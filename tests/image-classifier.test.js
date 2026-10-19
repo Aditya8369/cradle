@@ -53,9 +53,21 @@ test("calculateClampedDimensions handles square oversized images", () => {
 });
 
 test("calculateClampedDimensions handles invalid or zero input dimensions gracefully", () => {
-  assert.deepEqual(calculateClampedDimensions(0, 500), { width: 0, height: 0, resized: false });
-  assert.deepEqual(calculateClampedDimensions(-100, 500), { width: 0, height: 0, resized: false });
-  assert.deepEqual(calculateClampedDimensions("abc", 500), { width: 0, height: 0, resized: false });
+  assert.deepEqual(calculateClampedDimensions(0, 500), {
+    width: 0,
+    height: 0,
+    resized: false,
+  });
+  assert.deepEqual(calculateClampedDimensions(-100, 500), {
+    width: 0,
+    height: 0,
+    resized: false,
+  });
+  assert.deepEqual(calculateClampedDimensions("abc", 500), {
+    width: 0,
+    height: 0,
+    resized: false,
+  });
 });
 
 // validateAndClampImage

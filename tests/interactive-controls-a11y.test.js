@@ -37,7 +37,10 @@ test("interactive range sliders expose accessible names, values, and tooltips", 
     }
   }
 
-  assert.ok(sliders.length > 0, "Found interactive range sliders across projects");
+  assert.ok(
+    sliders.length > 0,
+    "Found interactive range sliders across projects"
+  );
 
   for (const slider of sliders) {
     assert.ok(

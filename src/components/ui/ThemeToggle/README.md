@@ -9,7 +9,7 @@ A reusable light/dark theme toggle component. See `ThemeToggle.js` for full usag
 Dispatched on `document.documentElement` every time the theme changes — whether triggered by clicking a toggle button or by an OS-level `prefers-color-scheme` change (only when the user hasn't manually set a preference).
 
 ```js
-document.documentElement.addEventListener("cradle:themechange", (e) => {
+document.documentElement.addEventListener("cradle:themechange", e => {
   console.log(e.detail.theme); // "light" | "dark"
 });
 ```

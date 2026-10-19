@@ -61,15 +61,15 @@ let settings = {
 };
 
 function getPeakLevel(dataArray) {
-    if (typeof VisualizerEngine !== 'undefined') {
-        return VisualizerEngine.calculatePeakLevel(dataArray);
-    }
-    let max = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-        const val = Math.abs(dataArray[i] - 128);
-        if (val > max) max = val;
-    }
-    return Math.min(1, max / 128);
+  if (typeof VisualizerEngine !== "undefined") {
+    return VisualizerEngine.calculatePeakLevel(dataArray);
+  }
+  let max = 0;
+  for (let i = 0; i < dataArray.length; i++) {
+    const val = Math.abs(dataArray[i] - 128);
+    if (val > max) max = val;
+  }
+  return Math.min(1, max / 128);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -115,7 +115,9 @@ const ui = {
 // Canvas contexts
 const ctxWave = ui.canvasWaveform ? ui.canvasWaveform.getContext("2d") : null;
 const ctxSpec = ui.canvasSpectrum ? ui.canvasSpectrum.getContext("2d") : null;
-const ctxSpgm = ui.canvasSpectrogram ? ui.canvasSpectrogram.getContext("2d") : null;
+const ctxSpgm = ui.canvasSpectrogram
+  ? ui.canvasSpectrogram.getContext("2d")
+  : null;
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Canvas Setup — responsive sizing
@@ -123,7 +125,9 @@ const ctxSpgm = ui.canvasSpectrogram ? ui.canvasSpectrogram.getContext("2d") : n
 function resizeCanvases() {
   [ui.canvasWaveform, ui.canvasSpectrum, ui.canvasSpectrogram].forEach(c => {
     if (!c) return;
-    const rect = c.parentElement ? c.parentElement.getBoundingClientRect() : c.getBoundingClientRect();
+    const rect = c.parentElement
+      ? c.parentElement.getBoundingClientRect()
+      : c.getBoundingClientRect();
     c.width = Math.max(100, Math.floor(rect.width));
     c.height = Math.max(60, Math.floor(rect.height));
   });
@@ -543,10 +547,10 @@ function renderRecordings() {
 
   if (ui.recordingsList) {
     ui.recordingsList.innerHTML = recordings
-    .slice()
-    .reverse()
-    .map(
-      rec => `
+      .slice()
+      .reverse()
+      .map(
+        rec => `
     <div class="recording-row" id="row-${rec.id}">
       <div class="recording-name">${escapeHtml(rec.name)}</div>
       <div class="recording-meta">${formatDuration(rec.duration)}</div>
@@ -556,18 +560,18 @@ function renderRecordings() {
         <button class="rec-del-btn"  data-id="${rec.id}" title="Delete">🗑</button>
       </div>
     </div>`
-    )
-    .join("");
+      )
+      .join("");
 
-  ui.recordingsList?.querySelectorAll(".rec-play-btn").forEach(btn => {
-    btn.addEventListener("click", () => togglePlayback(btn.dataset.id));
-  });
-  ui.recordingsList?.querySelectorAll(".rec-dl-btn").forEach(btn => {
-    btn.addEventListener("click", () => downloadRecording(btn.dataset.id));
-  });
-  ui.recordingsList?.querySelectorAll(".rec-del-btn").forEach(btn => {
-    btn.addEventListener("click", () => deleteRecording(btn.dataset.id));
-  });
+    ui.recordingsList?.querySelectorAll(".rec-play-btn").forEach(btn => {
+      btn.addEventListener("click", () => togglePlayback(btn.dataset.id));
+    });
+    ui.recordingsList?.querySelectorAll(".rec-dl-btn").forEach(btn => {
+      btn.addEventListener("click", () => downloadRecording(btn.dataset.id));
+    });
+    ui.recordingsList?.querySelectorAll(".rec-del-btn").forEach(btn => {
+      btn.addEventListener("click", () => deleteRecording(btn.dataset.id));
+    });
   }
 }
 
@@ -714,7 +718,8 @@ ui.fftSizeSelect?.addEventListener("change", () => {
 ui.smoothingRange?.addEventListener("input", () => {
   if (!ui.smoothingRange) return;
   settings.smoothing = parseFloat(ui.smoothingRange.value);
-  if (ui.smoothingVal) ui.smoothingVal.textContent = settings.smoothing.toFixed(2);
+  if (ui.smoothingVal)
+    ui.smoothingVal.textContent = settings.smoothing.toFixed(2);
   if (analyser) applyAnalyserSettings();
 });
 

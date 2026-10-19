@@ -36,11 +36,11 @@ User decides on the various design parameters available via the UI. The circuit 
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | UI of the project and loads scripts |
-| `script.js` | Handles logic of the project and loading of the model |
-| `style.css` | Layout, colours, animations, responsive design |
+| File         | Responsibility                                        |
+| ------------ | ----------------------------------------------------- |
+| `index.html` | UI of the project and loads scripts                   |
+| `script.js`  | Handles logic of the project and loading of the model |
+| `style.css`  | Layout, colours, animations, responsive design        |
 
 ---
 
@@ -76,11 +76,11 @@ User can compare it with their previous designs
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 | Layout and responsive design |
-| JavaScript | Circuit metrics calculation and canvasing  |
+| Technology | Purpose                                   |
+| ---------- | ----------------------------------------- |
+| HTML5      | Page structure and semantic markup        |
+| CSS3       | Layout and responsive design              |
+| JavaScript | Circuit metrics calculation and canvasing |
 
 ---
 
@@ -115,9 +115,9 @@ User can compare it with their previous designs
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| Outfit (font) | - | Google Fonts CDN | UI typography |
+| Dependency    | Version | How loaded       | Purpose       |
+| ------------- | ------- | ---------------- | ------------- |
+| Outfit (font) | -       | Google Fonts CDN | UI typography |
 
 ---
 

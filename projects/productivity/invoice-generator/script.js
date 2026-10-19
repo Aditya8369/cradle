@@ -31,11 +31,24 @@ const sampleInvoice = {
   discount: 500,
   shipping: 0,
   paymentTerms: "Payment due within 15 days by bank transfer or UPI.",
-  notes: "Thank you for your business. Please mention the invoice number while making payment.",
+  notes:
+    "Thank you for your business. Please mention the invoice number while making payment.",
   items: [
-    { description: "Landing page design and responsive build", quantity: 1, rate: 12000 },
-    { description: "Invoice and lead management UI setup", quantity: 1, rate: 8500 },
-    { description: "Testing, documentation, and deployment support", quantity: 2, rate: 2500 },
+    {
+      description: "Landing page design and responsive build",
+      quantity: 1,
+      rate: 12000,
+    },
+    {
+      description: "Invoice and lead management UI setup",
+      quantity: 1,
+      rate: 8500,
+    },
+    {
+      description: "Testing, documentation, and deployment support",
+      quantity: 2,
+      rate: 2500,
+    },
   ],
 };
 
@@ -76,8 +89,10 @@ function loadInvoice(invoice) {
   logoInput.dataset.logo = invoice.logo || "";
 
   itemsList.innerHTML = "";
-  const items = invoice.items?.length ? invoice.items : [{ description: "", quantity: 1, rate: 0 }];
-  items.forEach((item) => addItem(item));
+  const items = invoice.items?.length
+    ? invoice.items
+    : [{ description: "", quantity: 1, rate: 0 }];
+  items.forEach(item => addItem(item));
   updateInvoice();
   setStatus("Invoice loaded");
 }
@@ -98,7 +113,9 @@ function addItem(item = { description: "", quantity: 1, rate: 0 }) {
       updateInvoice();
     });
   }
-  row.querySelectorAll("input").forEach((input) => input.addEventListener("input", updateInvoice));
+  row
+    .querySelectorAll("input")
+    .forEach(input => input.addEventListener("input", updateInvoice));
   itemsList.appendChild(row);
   updateInvoice();
 }
@@ -130,7 +147,7 @@ function collectInvoice() {
     shipping: toNumber(getValue("shipping")),
     paymentTerms: getValue("paymentTerms"),
     notes: getValue("notes"),
-    items: Array.from(itemsList.children).map((row) => ({
+    items: Array.from(itemsList.children).map(row => ({
       description: (row.querySelector(".item-description")?.value || "").trim(),
       quantity: toNumber(row.querySelector(".item-quantity")?.value),
       rate: toNumber(row.querySelector(".item-rate")?.value),
@@ -139,7 +156,10 @@ function collectInvoice() {
 }
 
 function calculateTotals(invoice) {
-  const subtotal = invoice.items.reduce((sum, item) => sum + item.quantity * item.rate, 0);
+  const subtotal = invoice.items.reduce(
+    (sum, item) => sum + item.quantity * item.rate,
+    0
+  );
   const discount = Math.min(invoice.discount, subtotal);
   const taxableAmount = Math.max(subtotal - discount, 0);
   const tax = taxableAmount * (invoice.taxRate / 100);
@@ -160,13 +180,19 @@ function renderItemTotals(invoice) {
     const item = invoice.items[index];
     if (!item) return;
     const totalEl = row.querySelector(".item-total");
-    if (totalEl) totalEl.textContent = formatMoney(item.quantity * item.rate, invoice.currency);
+    if (totalEl)
+      totalEl.textContent = formatMoney(
+        item.quantity * item.rate,
+        invoice.currency
+      );
   });
 }
 
 function renderPreview(invoice, totals) {
   invoicePreview.className = `invoice-preview template-${invoice.template}`;
-  const visibleItems = invoice.items.filter((item) => item.description || item.quantity || item.rate);
+  const visibleItems = invoice.items.filter(
+    item => item.description || item.quantity || item.rate
+  );
 
   invoicePreview.innerHTML = `
     <header class="invoice-top">
@@ -207,14 +233,18 @@ function renderPreview(invoice, totals) {
         </tr>
       </thead>
       <tbody>
-        ${visibleItems.map((item) => `
+        ${visibleItems
+          .map(
+            item => `
           <tr>
             <td>${escapeHtml(item.description || "Invoice item")}</td>
             <td>${formatNumber(item.quantity)}</td>
             <td>${formatMoney(item.rate, invoice.currency)}</td>
             <td>${formatMoney(item.quantity * item.rate, invoice.currency)}</td>
           </tr>
-        `).join("")}
+        `
+          )
+          .join("")}
       </tbody>
     </table>
 
@@ -246,7 +276,7 @@ function renderLogo(invoice) {
 
   const initials = (invoice.businessName || "IN")
     .split(/\s+/)
-    .map((word) => word.charAt(0))
+    .map(word => word.charAt(0))
     .join("")
     .slice(0, 2)
     .toUpperCase();
@@ -267,7 +297,11 @@ function handleLogoUpload(event) {
 }
 
 function exportInvoiceJson() {
-  downloadFile("invoice-generator-data.json", JSON.stringify(collectInvoice(), null, 2), "application/json");
+  downloadFile(
+    "invoice-generator-data.json",
+    JSON.stringify(collectInvoice(), null, 2),
+    "application/json"
+  );
   setStatus("Invoice JSON exported");
 }
 
@@ -317,7 +351,10 @@ function downloadFile(filename, content, type) {
 }
 
 function formatMoney(value, currency) {
-  if (typeof InvoiceEngine !== "undefined" && typeof InvoiceEngine.formatCurrency === "function") {
+  if (
+    typeof InvoiceEngine !== "undefined" &&
+    typeof InvoiceEngine.formatCurrency === "function"
+  ) {
     return InvoiceEngine.formatCurrency(value, currency);
   }
   return new Intl.NumberFormat("en-US", {

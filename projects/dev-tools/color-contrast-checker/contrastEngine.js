@@ -22,9 +22,13 @@ const ContrastEngine = (() => {
     if (!match) return null;
 
     const hex = match[1];
-    const expanded = hex.length === 3
-      ? hex.split("").map(char => char + char).join("")
-      : hex;
+    const expanded =
+      hex.length === 3
+        ? hex
+            .split("")
+            .map(char => char + char)
+            .join("")
+        : hex;
 
     return `#${expanded.toLowerCase()}`;
   }
@@ -101,7 +105,12 @@ const ContrastEngine = (() => {
     });
   }
 
-  function findAccessibleVariant(foreground, background, targetRatio, direction) {
+  function findAccessibleVariant(
+    foreground,
+    background,
+    targetRatio,
+    direction
+  ) {
     const target = direction === "lighter" ? "#ffffff" : "#000000";
     for (let step = 1; step <= 20; step += 1) {
       const amount = step / 20;
@@ -120,19 +129,34 @@ const ContrastEngine = (() => {
     };
   }
 
-  function suggestAccessibleAlternatives(foreground, background, targetRatio = WCAG_THRESHOLDS.normalAA) {
+  function suggestAccessibleAlternatives(
+    foreground,
+    background,
+    targetRatio = WCAG_THRESHOLDS.normalAA
+  ) {
     const current = calculateContrastRatio(foreground, background);
     if (current >= targetRatio) {
       return [];
     }
 
-    const lighter = findAccessibleVariant(foreground, background, targetRatio, "lighter");
-    const darker = findAccessibleVariant(foreground, background, targetRatio, "darker");
+    const lighter = findAccessibleVariant(
+      foreground,
+      background,
+      targetRatio,
+      "lighter"
+    );
+    const darker = findAccessibleVariant(
+      foreground,
+      background,
+      targetRatio,
+      "darker"
+    );
 
     return [lighter, darker]
       .filter(item => item.ratio >= targetRatio)
-      .filter((item, index, list) =>
-        list.findIndex(candidate => candidate.color === item.color) === index
+      .filter(
+        (item, index, list) =>
+          list.findIndex(candidate => candidate.color === item.color) === index
       )
       .sort((a, b) => b.ratio - a.ratio)
       .slice(0, 2);

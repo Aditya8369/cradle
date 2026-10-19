@@ -1,4 +1,3 @@
-
 const boardElement = document.getElementById("board");
 const playerCountElement = document.getElementById("playerCount");
 const gridPresetElement = document.getElementById("gridPreset");
@@ -24,8 +23,8 @@ try {
   matchHistory =
     JSON.parse(
       localStorage.getItem("cradle_dot_game_history") ||
-      localStorage.getItem("dotGameHistory") ||
-      "[]"
+        localStorage.getItem("dotGameHistory") ||
+        "[]"
     ) || [];
 } catch {
   matchHistory = [];
@@ -93,11 +92,7 @@ function handleSizeChange(size) {
     return;
   }
 
-  if (
-    state.isActive &&
-    state.analytics &&
-    state.analytics.moves > 0
-  ) {
+  if (state.isActive && state.analytics && state.analytics.moves > 0) {
     const confirmed = confirm(
       "Are you sure you want to change the board size and reset the active match?"
     );
@@ -131,8 +126,7 @@ function restoreGridControls() {
 
 function renderBoard() {
   boardElement.innerHTML = "";
-  boardElement.style.gridTemplateColumns =
-    `repeat(${boardSize}, minmax(0, 1fr))`;
+  boardElement.style.gridTemplateColumns = `repeat(${boardSize}, minmax(0, 1fr))`;
 
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
@@ -140,8 +134,7 @@ function renderBoard() {
       const cell = document.createElement("button");
 
       cell.type = "button";
-      cell.className =
-        `cell${data.owner ? ` ${data.owner}` : ""}`;
+      cell.className = `cell${data.owner ? ` ${data.owner}` : ""}`;
 
       cell.textContent = data.dots || "";
 
@@ -182,26 +175,17 @@ function setTheme(theme) {
 
     themeToggle.setAttribute(
       "aria-label",
-      isLight
-        ? "Switch to dark theme"
-        : "Switch to light theme"
+      isLight ? "Switch to dark theme" : "Switch to light theme"
     );
   }
 
-  localStorage.setItem(
-    "theme",
-    isLight ? "light" : "dark"
-  );
+  localStorage.setItem("theme", isLight ? "light" : "dark");
 
-  localStorage.setItem(
-    "cradle_theme",
-    isLight ? "light" : "dark"
-  );
+  localStorage.setItem("cradle_theme", isLight ? "light" : "dark");
 }
 
 function toggleTheme() {
-  const isLight =
-    document.documentElement.classList.contains("light-theme");
+  const isLight = document.documentElement.classList.contains("light-theme");
 
   setTheme(isLight ? "dark" : "light");
 }
@@ -216,11 +200,7 @@ function clearHint() {
   });
 }
 
-function getBestMove(
-  board,
-  player,
-  difficulty = "medium"
-) {
+function getBestMove(board, player, difficulty = "medium") {
   const validMoves = getValidMoves(board, player);
 
   if (validMoves.length === 0) {
@@ -233,11 +213,7 @@ function getBestMove(
 
   const scoredMoves = validMoves.map(move => {
     const cell = board[move.r][move.c];
-    const capacity = getCapacity(
-      move.r,
-      move.c,
-      board.length
-    );
+    const capacity = getCapacity(move.r, move.c, board.length);
 
     let score = 0;
 
@@ -246,10 +222,8 @@ function getBestMove(
     }
 
     if (
-      (move.r === 0 ||
-        move.r === board.length - 1) &&
-      (move.c === 0 ||
-        move.c === board.length - 1)
+      (move.r === 0 || move.r === board.length - 1) &&
+      (move.c === 0 || move.c === board.length - 1)
     ) {
       score += 5;
     }
@@ -265,21 +239,17 @@ function getBestMove(
 
     return {
       move,
-      score
+      score,
     };
   });
 
-  const maxScore = Math.max(
-    ...scoredMoves.map(item => item.score)
-  );
+  const maxScore = Math.max(...scoredMoves.map(item => item.score));
 
   const bestMoves = scoredMoves
     .filter(item => item.score === maxScore)
     .map(item => item.move);
 
-  return bestMoves[
-    Math.floor(Math.random() * bestMoves.length)
-  ];
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 }
 
 function countPlayerCells(player) {
@@ -287,9 +257,7 @@ function countPlayerCells(player) {
 
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
-      if (
-        state.board[row][col].owner === player
-      ) {
+      if (state.board[row][col].owner === player) {
         count++;
       }
     }
@@ -300,50 +268,31 @@ function countPlayerCells(player) {
 
 function nextTurn() {
   const totalPlayers = state.players.length;
-  const openingComplete =
-    state.analytics.moves > totalPlayers;
+  const openingComplete = state.analytics.moves > totalPlayers;
 
-  for (
-    let step = 1;
-    step <= totalPlayers;
-    step++
-  ) {
-    const nextIndex =
-      (state.currentPlayer + step) %
-      totalPlayers;
+  for (let step = 1; step <= totalPlayers; step++) {
+    const nextIndex = (state.currentPlayer + step) % totalPlayers;
 
-    if (
-      !openingComplete ||
-      countPlayerCells(
-        state.players[nextIndex]
-      ) > 0
-    ) {
+    if (!openingComplete || countPlayerCells(state.players[nextIndex]) > 0) {
       state.currentPlayer = nextIndex;
       return;
     }
   }
 
-  state.currentPlayer =
-    (state.currentPlayer + 1) %
-    totalPlayers;
+  state.currentPlayer = (state.currentPlayer + 1) % totalPlayers;
 }
 
 function handleAiTurn() {
   if (!state.isActive) return;
   if (state.gameMode !== "pvai") return;
 
-  const player =
-    state.players[state.currentPlayer];
+  const player = state.players[state.currentPlayer];
 
   if (player === COLORS[0]) return;
 
   state.isAiTurnProcessing = true;
 
-  const move = getBestMove(
-    state.board,
-    player,
-    difficultyElement.value
-  );
+  const move = getBestMove(state.board, player, difficultyElement.value);
 
   if (move) {
     addDot(move.r, move.c);
@@ -355,17 +304,11 @@ function handleAiTurn() {
 function addDot(row, col) {
   if (!state.isActive) return;
 
-  if (
-    row < 0 ||
-    row >= boardSize ||
-    col < 0 ||
-    col >= boardSize
-  ) {
+  if (row < 0 || row >= boardSize || col < 0 || col >= boardSize) {
     return;
   }
 
-  const player =
-    state.players[state.currentPlayer];
+  const player = state.players[state.currentPlayer];
 
   if (
     state.gameMode === "pvai" &&
@@ -377,10 +320,7 @@ function addDot(row, col) {
 
   const cell = state.board[row][col];
 
-  if (
-    cell.owner &&
-    cell.owner !== player
-  ) {
+  if (cell.owner && cell.owner !== player) {
     return;
   }
 
@@ -388,12 +328,9 @@ function addDot(row, col) {
 
   state.analytics.moves++;
 
-  const moveDuration =
-    Date.now() - state.lastMoveTime;
+  const moveDuration = Date.now() - state.lastMoveTime;
 
-  state.analytics.moveTimes[player].push(
-    moveDuration
-  );
+  state.analytics.moveTimes[player].push(moveDuration);
 
   state.lastMoveTime = Date.now();
 
@@ -402,34 +339,27 @@ function addDot(row, col) {
 
   render(false);
 
-  resolveBoardStep(
-    [{ row, col }],
-    didExplode => {
-      if (state.isActive) {
-        checkGameOver();
-      }
-
-      if (!state.isActive) {
-        render();
-        return;
-      }
-
-      state.extraTurn = didExplode;
-
-      if (!didExplode) {
-        nextTurn();
-      }
-
-      render();
+  resolveBoardStep([{ row, col }], didExplode => {
+    if (state.isActive) {
+      checkGameOver();
     }
-  );
+
+    if (!state.isActive) {
+      render();
+      return;
+    }
+
+    state.extraTurn = didExplode;
+
+    if (!didExplode) {
+      nextTurn();
+    }
+
+    render();
+  });
 }
 
-function resolveBoardStep(
-  queue,
-  onDone,
-  explodedAny = false
-) {
+function resolveBoardStep(queue, onDone, explodedAny = false) {
   if (queue.length === 0) {
     onDone(explodedAny);
     return;
@@ -440,11 +370,7 @@ function resolveBoardStep(
   for (const { row, col } of queue) {
     const cell = state.board[row][col];
 
-    const capacity = getCapacity(
-      row,
-      col,
-      boardSize
-    );
+    const capacity = getCapacity(row, col, boardSize);
 
     while (cell.dots >= capacity) {
       const owner = cell.owner;
@@ -456,7 +382,7 @@ function resolveBoardStep(
         [-1, 0],
         [1, 0],
         [0, -1],
-        [0, 1]
+        [0, 1],
       ]) {
         const nextRow = row + dr;
         const nextCol = col + dc;
@@ -469,7 +395,7 @@ function resolveBoardStep(
         ) {
           next.push({
             row: nextRow,
-            col: nextCol
+            col: nextCol,
           });
         }
       }
@@ -480,11 +406,7 @@ function resolveBoardStep(
 
   if (next.length > 0) {
     setTimeout(() => {
-      resolveBoardStep(
-        next,
-        onDone,
-        explodedAny
-      );
+      resolveBoardStep(next, onDone, explodedAny);
     }, 0);
   } else {
     onDone(explodedAny);
@@ -494,11 +416,7 @@ function resolveBoardStep(
 function explode(row, col, owner) {
   const cell = state.board[row][col];
 
-  const capacity = getCapacity(
-    row,
-    col,
-    boardSize
-  );
+  const capacity = getCapacity(row, col, boardSize);
 
   cell.dots -= capacity;
 
@@ -513,7 +431,7 @@ function explode(row, col, owner) {
     [-1, 0],
     [1, 0],
     [0, -1],
-    [0, 1]
+    [0, 1],
   ]) {
     const nextRow = row + dr;
     const nextCol = col + dc;
@@ -527,13 +445,9 @@ function explode(row, col, owner) {
       continue;
     }
 
-    const neighbor =
-      state.board[nextRow][nextCol];
+    const neighbor = state.board[nextRow][nextCol];
 
-    if (
-      neighbor.owner &&
-      neighbor.owner !== owner
-    ) {
+    if (neighbor.owner && neighbor.owner !== owner) {
       state.analytics.captures[owner]++;
     }
 
@@ -543,10 +457,7 @@ function explode(row, col, owner) {
 }
 
 function checkGameOver() {
-  if (
-    state.analytics.moves <=
-    state.players.length
-  ) {
+  if (state.analytics.moves <= state.players.length) {
     return;
   }
 
@@ -554,8 +465,7 @@ function checkGameOver() {
 
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
-      const owner =
-        state.board[row][col].owner;
+      const owner = state.board[row][col].owner;
 
       if (owner) {
         activePlayers.add(owner);
@@ -566,10 +476,7 @@ function checkGameOver() {
   if (activePlayers.size <= 1) {
     state.isActive = false;
 
-    state.winner =
-      activePlayers.size === 1
-        ? [...activePlayers][0]
-        : "draw";
+    state.winner = activePlayers.size === 1 ? [...activePlayers][0] : "draw";
 
     saveMatchHistory();
     renderAnalytics();
@@ -582,26 +489,16 @@ function renderStats() {
   state.players.forEach(player => {
     const count = state.board
       .flat()
-      .filter(cell => cell.owner === player)
-      .length;
+      .filter(cell => cell.owner === player).length;
 
-    const card =
-      document.createElement("div");
+    const card = document.createElement("div");
 
-    card.className =
-      `player-card ${player}`;
+    card.className = `player-card ${player}`;
 
-    card.textContent =
-      `${player.toUpperCase()} : ${count}`;
+    card.textContent = `${player.toUpperCase()} : ${count}`;
 
-    if (
-      !state.isActive &&
-      state.winner === player
-    ) {
-      card.setAttribute(
-        "data-winner",
-        "true"
-      );
+    if (!state.isActive && state.winner === player) {
+      card.setAttribute("data-winner", "true");
     }
 
     playerStatsElement.appendChild(card);
@@ -610,26 +507,18 @@ function renderStats() {
 
 function render(triggerAiTurn = true) {
   if (state.isActive) {
-    const player =
-      state.players[state.currentPlayer];
+    const player = state.players[state.currentPlayer];
 
-    currentPlayerElement.textContent =
-      state.extraTurn
-        ? `${player} (Extra Turn!)`
-        : player;
+    currentPlayerElement.textContent = state.extraTurn
+      ? `${player} (Extra Turn!)`
+      : player;
 
-    if (
-      triggerAiTurn &&
-      state.gameMode === "pvai" &&
-      player !== COLORS[0]
-    ) {
+    if (triggerAiTurn && state.gameMode === "pvai" && player !== COLORS[0]) {
       setTimeout(handleAiTurn, 250);
     }
   } else {
     currentPlayerElement.textContent =
-      state.winner === "draw"
-        ? "Draw!"
-        : `${state.winner.toUpperCase()} Wins!`;
+      state.winner === "draw" ? "Draw!" : `${state.winner.toUpperCase()} Wins!`;
   }
 
   renderBoard();
@@ -650,11 +539,9 @@ function render(triggerAiTurn = true) {
 }
 
 function startGame() {
-  const playerCount =
-    Number(playerCountElement.value);
+  const playerCount = Number(playerCountElement.value);
 
-  const players =
-    COLORS.slice(0, playerCount);
+  const players = COLORS.slice(0, playerCount);
 
   const moveTimes = {};
   const captures = {};
@@ -679,8 +566,8 @@ function startGame() {
       moveTimes,
       totalExplosions: 0,
       captures,
-      gridSize: `${boardSize}x${boardSize}`
-    }
+      gridSize: `${boardSize}x${boardSize}`,
+    },
   };
 
   restoreGridControls();
@@ -695,30 +582,24 @@ function saveMatchHistory() {
     players: state.players.length,
     winner: state.winner,
     moves: state.analytics.moves,
-    explosions:
-      state.analytics.totalExplosions,
-    stats: {}
+    explosions: state.analytics.totalExplosions,
+    stats: {},
   };
 
   state.players.forEach(player => {
-    const times =
-      state.analytics.moveTimes[player];
+    const times = state.analytics.moveTimes[player];
 
     const averageTime = times.length
       ? (
-          times.reduce(
-            (sum, time) => sum + time,
-            0
-          ) /
+          times.reduce((sum, time) => sum + time, 0) /
           times.length /
           1000
         ).toFixed(1)
       : "0.0";
 
     historyEntry.stats[player] = {
-      captures:
-        state.analytics.captures[player],
-      avgMoveTime: averageTime
+      captures: state.analytics.captures[player],
+      avgMoveTime: averageTime,
     };
   });
 
@@ -728,10 +609,7 @@ function saveMatchHistory() {
     matchHistory.pop();
   }
 
-  localStorage.setItem(
-    "cradle_dot_game_history",
-    JSON.stringify(matchHistory)
-  );
+  localStorage.setItem("cradle_dot_game_history", JSON.stringify(matchHistory));
 }
 
 function renderAnalytics() {
@@ -744,108 +622,64 @@ function renderAnalytics() {
   analyticsContainer.innerHTML = "";
 
   matchHistory.forEach(match => {
-    const card =
-      document.createElement("div");
+    const card = document.createElement("div");
 
-    card.className =
-      "analytics-card";
+    card.className = "analytics-card";
 
-    const title =
-      document.createElement("h3");
+    const title = document.createElement("h3");
 
-    title.textContent =
-      `Match on ${match.date} (${match.gridSize})`;
+    title.textContent = `Match on ${match.date} (${match.gridSize})`;
 
     card.appendChild(title);
 
-    const statsGrid =
-      document.createElement("div");
+    const statsGrid = document.createElement("div");
 
-    statsGrid.className =
-      "stats-grid";
+    statsGrid.className = "stats-grid";
 
-    addStat(
-      statsGrid,
-      "Winner",
-      match.winner
-    );
+    addStat(statsGrid, "Winner", match.winner);
 
-    addStat(
-      statsGrid,
-      "Total Moves",
-      match.moves
-    );
+    addStat(statsGrid, "Total Moves", match.moves);
 
-    addStat(
-      statsGrid,
-      "Total Explosions",
-      match.explosions
-    );
+    addStat(statsGrid, "Total Explosions", match.explosions);
 
     card.appendChild(statsGrid);
 
-    const captureHeading =
-      document.createElement("h4");
+    const captureHeading = document.createElement("h4");
 
-    captureHeading.textContent =
-      "Captures per Player";
+    captureHeading.textContent = "Captures per Player";
 
     card.appendChild(captureHeading);
 
-    card.appendChild(
-      createChart(
-        match.stats,
-        "captures"
-      )
-    );
+    card.appendChild(createChart(match.stats, "captures"));
 
-    const timeHeading =
-      document.createElement("h4");
+    const timeHeading = document.createElement("h4");
 
-    timeHeading.textContent =
-      "Avg Move Time (s)";
+    timeHeading.textContent = "Avg Move Time (s)";
 
     card.appendChild(timeHeading);
 
-    card.appendChild(
-      createChart(
-        match.stats,
-        "avgMoveTime"
-      )
-    );
+    card.appendChild(createChart(match.stats, "avgMoveTime"));
 
     analyticsContainer.appendChild(card);
   });
 }
 
-function addStat(
-  container,
-  label,
-  value
-) {
-  const item =
-    document.createElement("div");
+function addStat(container, label, value) {
+  const item = document.createElement("div");
 
-  item.className =
-    "stat-item";
+  item.className = "stat-item";
 
-  const labelElement =
-    document.createElement("span");
+  const labelElement = document.createElement("span");
 
-  labelElement.className =
-    "stat-label";
+  labelElement.className = "stat-label";
 
-  labelElement.textContent =
-    label;
+  labelElement.textContent = label;
 
-  const valueElement =
-    document.createElement("span");
+  const valueElement = document.createElement("span");
 
-  valueElement.className =
-    "stat-val";
+  valueElement.className = "stat-val";
 
-  valueElement.textContent =
-    value;
+  valueElement.textContent = value;
 
   item.appendChild(labelElement);
   item.appendChild(valueElement);
@@ -854,144 +688,97 @@ function addStat(
 }
 
 function createChart(stats, property) {
-  const container =
-    document.createElement("div");
+  const container = document.createElement("div");
 
-  const values =
-    Object.values(stats).map(
-      data => Number(data[property]) || 0
-    );
+  const values = Object.values(stats).map(data => Number(data[property]) || 0);
 
-  const maxValue =
-    Math.max(...values, 0);
+  const maxValue = Math.max(...values, 0);
 
-  Object.entries(stats).forEach(
-    ([player, data]) => {
-      const value =
-        Number(data[property]) || 0;
+  Object.entries(stats).forEach(([player, data]) => {
+    const value = Number(data[property]) || 0;
 
-      const percentage =
-        maxValue > 0
-          ? (value / maxValue) * 100
-          : 0;
+    const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
 
-      const row =
-        document.createElement("div");
+    const row = document.createElement("div");
 
-      row.className =
-        "chart-bar";
+    row.className = "chart-bar";
 
-      const label =
-        document.createElement("div");
+    const label = document.createElement("div");
 
-      label.className =
-        `chart-label ${player}`;
+    label.className = `chart-label ${player}`;
 
-      label.textContent =
-        player;
+    label.textContent = player;
 
-      const background =
-        document.createElement("div");
+    const background = document.createElement("div");
 
-      background.className =
-        "chart-bar-bg";
+    background.className = "chart-bar-bg";
 
-      const fill =
-        document.createElement("div");
+    const fill = document.createElement("div");
 
-      fill.className =
-        `chart-bar-fill ${player}`;
+    fill.className = `chart-bar-fill ${player}`;
 
-      fill.style.width =
-        `${percentage}%`;
+    fill.style.width = `${percentage}%`;
 
-      background.appendChild(fill);
+    background.appendChild(fill);
 
-      const valueElement =
-        document.createElement("div");
+    const valueElement = document.createElement("div");
 
-      valueElement.className =
-        "chart-value";
+    valueElement.className = "chart-value";
 
-      valueElement.textContent =
-        property === "avgMoveTime"
-          ? `${value}s`
-          : value;
+    valueElement.textContent = property === "avgMoveTime" ? `${value}s` : value;
 
-      row.appendChild(label);
-      row.appendChild(background);
-      row.appendChild(valueElement);
+    row.appendChild(label);
+    row.appendChild(background);
+    row.appendChild(valueElement);
 
-      container.appendChild(row);
-    }
-  );
+    container.appendChild(row);
+  });
 
   return container;
 }
 
-newGameButton.addEventListener(
-  "click",
-  () => {
-    if (
-      state.isActive &&
-      state.analytics &&
-      state.analytics.moves > 0
-    ) {
-      if (
-        !confirm(
-          "Are you sure you want to start a new game?"
-        )
-      ) {
-        return;
-      }
+newGameButton.addEventListener("click", () => {
+  if (state.isActive && state.analytics && state.analytics.moves > 0) {
+    if (!confirm("Are you sure you want to start a new game?")) {
+      return;
     }
-
-    startGame();
   }
-);
+
+  startGame();
+});
 
 if (hintBtnElement) {
-  hintBtnElement.addEventListener(
-    "click",
-    () => {
-      if (!state.isActive) return;
+  hintBtnElement.addEventListener("click", () => {
+    if (!state.isActive) return;
 
-      const player =
-        state.players[state.currentPlayer];
+    const player = state.players[state.currentPlayer];
 
-      if (
-        state.gameMode === "pvai" &&
-        player !== COLORS[0]
-      ) {
-        return;
-      }
-
-      clearHint();
-
-      const bestMove = getBestMove(
-        state.board,
-        player,
-        difficultyElement.value
-      );
-
-      if (!bestMove) return;
-
-      const index =
-        bestMove.r * boardSize +
-        bestMove.c;
-
-      const cell =
-        boardElement.children[index];
-
-      if (cell) {
-        cell.classList.add("hint");
-      }
+    if (state.gameMode === "pvai" && player !== COLORS[0]) {
+      return;
     }
-  );
+
+    clearHint();
+
+    const bestMove = getBestMove(state.board, player, difficultyElement.value);
+
+    if (!bestMove) return;
+
+    const index = bestMove.r * boardSize + bestMove.c;
+
+    const cell = boardElement.children[index];
+
+    if (cell) {
+      cell.classList.add("hint");
+    }
+  });
 }
 
 function updateActiveBounds() {
-  if (boardElement && typeof DotGameEngine !== "undefined" && DotGameEngine.recomputeBounds) {
+  if (
+    boardElement &&
+    typeof DotGameEngine !== "undefined" &&
+    DotGameEngine.recomputeBounds
+  ) {
     const rect = boardElement.getBoundingClientRect();
     const w = rect.width || boardElement.clientWidth || 0;
     const h = rect.height || boardElement.clientHeight || 0;
@@ -1006,34 +793,23 @@ initTheme();
 renderAnalytics();
 startGame();
 
-window.testExtreme = function() {
+window.testExtreme = function () {
   state.board = createBoard(boardSize);
 
-  const row =
-    Math.floor(boardSize / 2);
+  const row = Math.floor(boardSize / 2);
 
-  const col =
-    Math.floor(boardSize / 2);
+  const col = Math.floor(boardSize / 2);
 
   state.board[row][col].owner = "red";
   state.board[row][col].dots = 10;
 
-  console.log(
-    "Before:",
-    state.board[row][col]
-  );
+  console.log("Before:", state.board[row][col]);
 
   render();
 
-  resolveBoardStep(
-    [{ row, col }],
-    () => {
-      console.log(
-        "After:",
-        state.board[row][col]
-      );
+  resolveBoardStep([{ row, col }], () => {
+    console.log("After:", state.board[row][col]);
 
-      render();
-    }
-  );
+    render();
+  });
 };

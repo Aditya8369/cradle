@@ -25,20 +25,31 @@ test("validatePortfolio passes with only name and role set", () => {
 });
 
 test("validatePortfolio rejects wrong types for array sections", () => {
-  const result = engine.validatePortfolio({ name: "Ada", role: "Engineer", skills: "not-an-array" });
+  const result = engine.validatePortfolio({
+    name: "Ada",
+    role: "Engineer",
+    skills: "not-an-array",
+  });
   assert.strictEqual(result.valid, false);
   assert.ok(result.errors.includes("skills must be an array."));
 });
 
 test("validatePortfolio rejects a non-object contact field", () => {
-  const result = engine.validatePortfolio({ name: "Ada", role: "Engineer", contact: ["oops"] });
+  const result = engine.validatePortfolio({
+    name: "Ada",
+    role: "Engineer",
+    contact: ["oops"],
+  });
   assert.strictEqual(result.valid, false);
   assert.ok(result.errors.includes("Contact must be an object."));
 });
 
 test("parseCommandName lowercases and strips arguments", () => {
   assert.strictEqual(engine.parseCommandName("  SKILLS  "), "skills");
-  assert.strictEqual(engine.parseCommandName("projects extra args"), "projects");
+  assert.strictEqual(
+    engine.parseCommandName("projects extra args"),
+    "projects"
+  );
   assert.strictEqual(engine.parseCommandName(""), "");
   assert.strictEqual(engine.parseCommandName(undefined), "");
 });
@@ -52,18 +63,23 @@ test("buildCommandOutput only auto-runs sections that have content", () => {
     projects: [],
     experience: [],
     education: [{ degree: "BSc", institution: "Somewhere" }],
-    contact: {}
+    contact: {},
   };
 
   const { autoRunOrder } = engine.buildCommandOutput(portfolio);
-  assert.deepStrictEqual(autoRunOrder, ["banner", "whoami", "skills", "education"]);
+  assert.deepStrictEqual(autoRunOrder, [
+    "banner",
+    "whoami",
+    "skills",
+    "education",
+  ]);
 });
 
 test("buildCommandOutput includes a help command listing every command", () => {
   const { commands } = engine.buildCommandOutput(engine.createEmptyPortfolio());
   assert.ok(commands.help);
-  assert.ok(commands.help.lines.some((line) => line.includes("whoami")));
-  assert.ok(commands.help.lines.some((line) => line.includes("contact")));
+  assert.ok(commands.help.lines.some(line => line.includes("whoami")));
+  assert.ok(commands.help.lines.some(line => line.includes("contact")));
 });
 
 test("runCommand resolves a known command from the registry", () => {
@@ -92,10 +108,14 @@ test("runCommand handles empty input without throwing", () => {
 
 test("banner uses the portfolio name when present, and a fallback when absent", () => {
   const named = engine.buildCommandOutput({ name: "Ada", role: "Engineer" });
-  assert.ok(named.commands.banner.lines[0].includes("Ada's terminal portfolio"));
+  assert.ok(
+    named.commands.banner.lines[0].includes("Ada's terminal portfolio")
+  );
 
   const anonymous = engine.buildCommandOutput(engine.createEmptyPortfolio());
-  assert.ok(anonymous.commands.banner.lines[0].includes("my terminal portfolio"));
+  assert.ok(
+    anonymous.commands.banner.lines[0].includes("my terminal portfolio")
+  );
 });
 
 test("clear command is registered with a clientAction and empty lines", () => {
@@ -139,6 +159,9 @@ test("levenshtein computes edit distance correctly", () => {
 
 test("findMatchingCommands powers tab-completion via prefix match", () => {
   const output = engine.buildCommandOutput(engine.createEmptyPortfolio());
-  const matches = engine.findMatchingCommands("e", Object.keys(output.commands));
+  const matches = engine.findMatchingCommands(
+    "e",
+    Object.keys(output.commands)
+  );
   assert.deepStrictEqual(matches, ["education", "experience"]);
 });

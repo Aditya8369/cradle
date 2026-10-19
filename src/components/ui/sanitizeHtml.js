@@ -85,8 +85,4 @@
   }
 
   exports.sanitizeHtml = sanitizeHtml;
-})(
-  typeof exports === "undefined"
-    ? (window.CradleSanitize = {})
-    : exports
-);
+})(typeof exports === "undefined" ? (window.CradleSanitize = {}) : exports);

@@ -10,12 +10,12 @@ The project separates reusable waveform and note data from browser UI logic thro
 
 ## Purpose & Goals
 
-* Demonstrate browser-based audio synthesis using native Web Audio APIs.
-* Visualize generated audio waveforms in real time.
-* Provide an interactive piano keyboard for exploring pitch and frequency.
-* Separate reusable note and frequency data from DOM-dependent logic.
-* Keep the project dependency-free and easy to run directly in a browser.
-* Allow reusable engine data to be tested independently from the UI.
+- Demonstrate browser-based audio synthesis using native Web Audio APIs.
+- Visualize generated audio waveforms in real time.
+- Provide an interactive piano keyboard for exploring pitch and frequency.
+- Separate reusable note and frequency data from DOM-dependent logic.
+- Keep the project dependency-free and easy to run directly in a browser.
+- Allow reusable engine data to be tested independently from the UI.
 
 ---
 
@@ -63,20 +63,20 @@ graph TD
 
 #### Presentation Layer
 
-* `index.html`
-* `style.css`
+- `index.html`
+- `style.css`
 
 Provides the page structure, controls, canvas, piano keyboard, labels, and visual styling.
 
 #### Application Layer
 
-* `script.js`
+- `script.js`
 
 Coordinates DOM interaction, application state, Web Audio API lifecycle, waveform rendering, piano interaction, and keyboard shortcuts.
 
 #### Engine/Data Layer
 
-* `waveformEngine.js`
+- `waveformEngine.js`
 
 Contains reusable note and frequency data. The engine has no DOM dependencies and exposes its data through `WaveformEngine`.
 
@@ -123,7 +123,7 @@ globalThis.WaveformEngine = {
   { note: "G4", freq: 392.0 },
   { note: "A4", freq: 440.0 },
   { note: "B4", freq: 493.88 },
-]
+];
 ```
 
 ### `NOTE_NAMES`
@@ -154,17 +154,17 @@ Keeping these values outside `script.js` allows the reusable data to be loaded i
 
 Its responsibilities include:
 
-* Initializing the Web Audio API.
-* Creating and connecting audio nodes.
-* Starting and stopping audio playback.
-* Updating oscillator waveform type.
-* Updating oscillator frequency.
-* Updating volume.
-* Rendering the waveform on the canvas.
-* Building the piano keyboard from `WaveformEngine.NOTES`.
-* Handling piano key interaction.
-* Handling keyboard shortcuts.
-* Updating UI state and frequency displays.
+- Initializing the Web Audio API.
+- Creating and connecting audio nodes.
+- Starting and stopping audio playback.
+- Updating oscillator waveform type.
+- Updating oscillator frequency.
+- Updating volume.
+- Rendering the waveform on the canvas.
+- Building the piano keyboard from `WaveformEngine.NOTES`.
+- Handling piano key interaction.
+- Handling keyboard shortcuts.
+- Updating UI state and frequency displays.
 
 The application accesses the engine data through the global engine object:
 
@@ -242,21 +242,22 @@ Audio playback stops and visualization is cleared
 
 ## Key Features
 
-* Four waveform types: Sine, Square, Sawtooth, and Triangle.
-* Frequency control from 20 Hz to 2000 Hz.
-* Volume control from 0% to 100%.
-* Real-time oscilloscope visualization.
-* Seven-note piano keyboard from C4 to B4.
-* Live frequency display for selected piano notes.
-* Keyboard shortcuts:
+- Four waveform types: Sine, Square, Sawtooth, and Triangle.
+- Frequency control from 20 Hz to 2000 Hz.
+- Volume control from 0% to 100%.
+- Real-time oscilloscope visualization.
+- Seven-note piano keyboard from C4 to B4.
+- Live frequency display for selected piano notes.
+- Keyboard shortcuts:
 
-  * `Space` — Play/Stop
-  * `1–4` — Select waveform
-  * `A–J` — Play piano notes
-* Canvas waveform glow effect.
-* Peak-level indicator.
-* Responsive layout for smaller screens.
-* No external JavaScript dependencies.
+  - `Space` — Play/Stop
+  - `1–4` — Select waveform
+  - `A–J` — Play piano notes
+
+- Canvas waveform glow effect.
+- Peak-level indicator.
+- Responsive layout for smaller screens.
+- No external JavaScript dependencies.
 
 ---
 
@@ -339,33 +340,33 @@ None.
 
 The project uses only native browser APIs:
 
-* Web Audio API
-* Canvas API
-* DOM APIs
-* JavaScript Web APIs
+- Web Audio API
+- Canvas API
+- DOM APIs
+- JavaScript Web APIs
 
 ---
 
 ## Known Limitations
 
-* Only the white keys C4–B4 are available.
-* Sharps and flats are not currently implemented.
-* Only a single oscillator is used.
-* Polyphonic playback is not supported.
-* The frequency range is limited to 20–2000 Hz.
-* The waveform visualization stops when audio playback stops.
+- Only the white keys C4–B4 are available.
+- Sharps and flats are not currently implemented.
+- Only a single oscillator is used.
+- Polyphonic playback is not supported.
+- The frequency range is limited to 20–2000 Hz.
+- The waveform visualization stops when audio playback stops.
 
 ---
 
 ## Future Improvements
 
-* Add chromatic piano keys including sharps and flats.
-* Support MIDI input.
-* Add ADSR envelope controls.
-* Support multiple oscillators and polyphony.
-* Add a frequency-spectrum or spectrogram view.
-* Add audio recording and WAV export.
-* Add additional octave ranges.
+- Add chromatic piano keys including sharps and flats.
+- Support MIDI input.
+- Add ADSR envelope controls.
+- Support multiple oscillators and polyphony.
+- Add a frequency-spectrum or spectrogram view.
+- Add audio recording and WAV export.
+- Add additional octave ranges.
 
 ---
 
@@ -395,10 +396,10 @@ The reusable engine data can also be tested through the repository's Node-based 
 
 ## References
 
-* [MDN Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-* [MDN OscillatorNode](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode)
-* [MDN GainNode](https://developer.mozilla.org/en-US/docs/Web/API/GainNode)
-* [MDN AnalyserNode](https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode)
-* [MDN Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-* [MDN AudioContext](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext)
-* [Equal Temperament](https://en.wikipedia.org/wiki/Equal_temperament)
+- [MDN Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+- [MDN OscillatorNode](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode)
+- [MDN GainNode](https://developer.mozilla.org/en-US/docs/Web/API/GainNode)
+- [MDN AnalyserNode](https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode)
+- [MDN Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+- [MDN AudioContext](https://developer.mozilla.org/en-US/docs/Web/API/AudioContext)
+- [Equal Temperament](https://en.wikipedia.org/wiki/Equal_temperament)

@@ -47,11 +47,11 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Provides color inputs, preview area, status cards container, suggestions area, palette list, and script loading order. |
-| `style.css` | Defines the dark dev-tools layout, responsive grid, controls, status cards, suggestions, and palette buttons. |
-| `script.js` | Connects DOM events to the engine, syncs color picker and text input values, renders WCAG results, applies palettes, and copies CSS variables. |
+| File                | Responsibility                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.html`        | Provides color inputs, preview area, status cards container, suggestions area, palette list, and script loading order.                                         |
+| `style.css`         | Defines the dark dev-tools layout, responsive grid, controls, status cards, suggestions, and palette buttons.                                                  |
+| `script.js`         | Connects DOM events to the engine, syncs color picker and text input values, renders WCAG results, applies palettes, and copies CSS variables.                 |
 | `contrastEngine.js` | Normalizes hex colors, converts hex to RGB, calculates relative luminance and contrast ratio, evaluates WCAG thresholds, and suggests accessible alternatives. |
 
 ---
@@ -90,13 +90,13 @@ The relevant event handler reruns the report and updates the DOM
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Semantic structure for the tool UI. |
-| CSS3 | Grid, responsive layout, custom properties, and dark dev-tools styling. |
-| Vanilla JavaScript | WCAG calculations, DOM updates, palette interactions, and clipboard support. |
-| Clipboard API | Copies generated CSS variables from the browser. |
-| Node.js `node:test` | Unit tests for contrast math, hex validation, and pass/fail logic. |
+| Technology          | Purpose                                                                      |
+| ------------------- | ---------------------------------------------------------------------------- |
+| HTML5               | Semantic structure for the tool UI.                                          |
+| CSS3                | Grid, responsive layout, custom properties, and dark dev-tools styling.      |
+| Vanilla JavaScript  | WCAG calculations, DOM updates, palette interactions, and clipboard support. |
+| Clipboard API       | Copies generated CSS variables from the browser.                             |
+| Node.js `node:test` | Unit tests for contrast math, hex validation, and pass/fail logic.           |
 
 ---
 

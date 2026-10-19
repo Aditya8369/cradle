@@ -71,13 +71,13 @@ graph TD
 
 ## Component Breakdown
 
-| File         | Responsibility                                                                                              |
-| ------------ | ----------------------------------------------------------------------------------------------------------- |
-| `index.html` | App structure: header, control bar, settings row, three canvas panels, recordings list                      |
-| `style.css`  | Design tokens, button styles, visualiser grid (2-col), recording rows, status pill animations               |
-| `script.js`  | Audio graph, waveform / spectrum / spectrogram draw functions, MediaRecorder, playback, timer, event wiring |
-| `visualizerEngine.js` | Peak-level detection, log frequency-band grouping, radial bar math                                |
-| `audioPresetsEngine.js` | Synth tone presets (sine/square/sawtooth/triangle) and note-to-frequency math                     |
+| File                    | Responsibility                                                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `index.html`            | App structure: header, control bar, settings row, three canvas panels, recordings list                      |
+| `style.css`             | Design tokens, button styles, visualiser grid (2-col), recording rows, status pill animations               |
+| `script.js`             | Audio graph, waveform / spectrum / spectrogram draw functions, MediaRecorder, playback, timer, event wiring |
+| `visualizerEngine.js`   | Peak-level detection, log frequency-band grouping, radial bar math                                          |
+| `audioPresetsEngine.js` | Synth tone presets (sine/square/sawtooth/triangle) and note-to-frequency math                               |
 
 ---
 

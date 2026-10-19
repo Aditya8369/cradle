@@ -172,7 +172,7 @@
     const rawLinesA = splitLines(textA);
     const rawLinesB = splitLines(textB);
 
-    const norm = (line) => {
+    const norm = line => {
       let s = line;
       if (ignoreWhitespace) s = s.trim().replace(/\s+/g, " ");
       if (ignoreCase) s = s.toLowerCase();
@@ -302,4 +302,3 @@
     generateUnifiedPatch,
   };
 });
-

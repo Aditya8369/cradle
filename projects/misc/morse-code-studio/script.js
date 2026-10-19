@@ -84,20 +84,14 @@ async function playMorse() {
 
   try {
     if (!audioContext) {
-      audioContext = new (
-        window.AudioContext || window.webkitAudioContext
-      )();
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     if (audioContext.state === "suspended") {
       await audioContext.resume();
     }
 
-    const sequence = MorseEngine.generateAudioSequence(
-      morse,
-      getWpm(),
-      650
-    );
+    const sequence = MorseEngine.generateAudioSequence(morse, getWpm(), 650);
 
     for (const item of sequence) {
       if (item.type === "tone") {
@@ -122,10 +116,7 @@ function beep(context, duration, frequency) {
     oscillator.frequency.value = frequency;
 
     gain.gain.setValueAtTime(0.0001, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      0.15,
-      context.currentTime + 0.01
-    );
+    gain.gain.exponentialRampToValueAtTime(0.15, context.currentTime + 0.01);
     gain.gain.exponentialRampToValueAtTime(
       0.0001,
       context.currentTime + duration / 1000

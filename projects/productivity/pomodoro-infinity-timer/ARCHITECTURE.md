@@ -39,11 +39,11 @@ The application is state-driven, centering on a global `state` object that track
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the timer display, mode tabs, settings inputs, and the infinity loop SVG |
-| `script.js` | Manages the timer state, controls the SVG animation, generates ambient audio, and handles persistence |
-| `style.css` | Implements the "glow" aesthetics, dark mode theme, and the layout for the stats and log panels |
+| File         | Responsibility                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| `index.html` | Defines the timer display, mode tabs, settings inputs, and the infinity loop SVG                      |
+| `script.js`  | Manages the timer state, controls the SVG animation, generates ambient audio, and handles persistence |
+| `style.css`  | Implements the "glow" aesthetics, dark mode theme, and the layout for the stats and log panels        |
 
 ---
 
@@ -83,13 +83,13 @@ saveState() → Persist current config and stats to localStorage
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | UI structure and SVG graphics |
-| CSS3 | Visual aesthetics, animations, and responsive design |
-| JavaScript (ES6+) | Timer logic, state management, and audio synthesis |
-| Web Audio API | Real-time ambient sound generation and notifications |
-| localStorage | Client-side persistence of settings and daily stats |
+| Technology        | Purpose                                              |
+| ----------------- | ---------------------------------------------------- |
+| HTML5             | UI structure and SVG graphics                        |
+| CSS3              | Visual aesthetics, animations, and responsive design |
+| JavaScript (ES6+) | Timer logic, state management, and audio synthesis   |
+| Web Audio API     | Real-time ambient sound generation and notifications |
+| localStorage      | Client-side persistence of settings and daily stats  |
 
 ---
 

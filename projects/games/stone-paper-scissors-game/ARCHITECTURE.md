@@ -37,14 +37,14 @@ The game is split into a presentation layer and several pure logic modules. `scr
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Full page: navbar mount, game box, how-to section, footer, confetti container, victory modal |
-| `game-engine.js` | Rules matrix and win/tie/loss evaluation with result verbs |
-| `rpsAiEngine.js` | Markov-chain opponent model (`createAiModel`) |
-| `rpsStorage.js` | Persistent win/loss/streak stats via the repo `CradleStorage` utility |
-| `script.js` | All game logic, countdown animation, scoring, and event handling |
-| `style.css` | Cyberpunk theme, animations, responsive layout |
+| File             | Responsibility                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| `index.html`     | Full page: navbar mount, game box, how-to section, footer, confetti container, victory modal |
+| `game-engine.js` | Rules matrix and win/tie/loss evaluation with result verbs                                   |
+| `rpsAiEngine.js` | Markov-chain opponent model (`createAiModel`)                                                |
+| `rpsStorage.js`  | Persistent win/loss/streak stats via the repo `CradleStorage` utility                        |
+| `script.js`      | All game logic, countdown animation, scoring, and event handling                             |
+| `style.css`      | Cyberpunk theme, animations, responsive layout                                               |
 
 ---
 
@@ -101,14 +101,14 @@ Buttons re-enabled for the next round
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure, buttons, modal, confetti container |
-| CSS3 (Grid, Flexbox, keyframes, backdrop-filter) | Theme, animations, responsive layout |
-| Vanilla JavaScript (ES6+) | Game logic, countdown, DOM manipulation |
-| localStorage API (via repo `CradleStorage`) | Persisting match stats and streaks in `rpsStorage.js` |
-| Google Fonts (Orbitron, Rajdhani) | Headings/scores and body text |
-| Node.js test runner | Unit tests for the UMD modules |
+| Technology                                       | Purpose                                               |
+| ------------------------------------------------ | ----------------------------------------------------- |
+| HTML5                                            | Page structure, buttons, modal, confetti container    |
+| CSS3 (Grid, Flexbox, keyframes, backdrop-filter) | Theme, animations, responsive layout                  |
+| Vanilla JavaScript (ES6+)                        | Game logic, countdown, DOM manipulation               |
+| localStorage API (via repo `CradleStorage`)      | Persisting match stats and streaks in `rpsStorage.js` |
+| Google Fonts (Orbitron, Rajdhani)                | Headings/scores and body text                         |
+| Node.js test runner                              | Unit tests for the UMD modules                        |
 
 ---
 

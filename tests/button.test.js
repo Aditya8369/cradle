@@ -191,11 +191,17 @@ test("create renders left and right icons as aria-hidden wrappers", () => {
   });
 
   assert.equal(element.children.length, 3);
-  assert.equal(element.children[0].className, "cradle-btn__icon cradle-btn__icon--left");
+  assert.equal(
+    element.children[0].className,
+    "cradle-btn__icon cradle-btn__icon--left"
+  );
   assert.equal(element.children[0].getAttribute("aria-hidden"), "true");
   assert.equal(element.children[0].innerHTML, "←");
   assert.equal(element.children[1].textContent, "Next");
-  assert.equal(element.children[2].className, "cradle-btn__icon cradle-btn__icon--right");
+  assert.equal(
+    element.children[2].className,
+    "cradle-btn__icon cradle-btn__icon--right"
+  );
   assert.equal(element.children[2].getAttribute("aria-hidden"), "true");
 });
 
@@ -317,9 +323,15 @@ test("HTML auto-upgrade applies variant, size, width and icons while preserving 
   assert.ok(element.classList.contains("cradle-btn--sm"));
   assert.ok(element.classList.contains("cradle-btn--full-width"));
   assert.equal(element.children.length, 3);
-  assert.equal(element.children[0].className, "cradle-btn__icon cradle-btn__icon--left");
+  assert.equal(
+    element.children[0].className,
+    "cradle-btn__icon cradle-btn__icon--left"
+  );
   assert.equal(element.children[1].textContent, "Star this");
-  assert.equal(element.children[2].className, "cradle-btn__icon cradle-btn__icon--right");
+  assert.equal(
+    element.children[2].className,
+    "cradle-btn__icon cradle-btn__icon--right"
+  );
 });
 
 test("HTML auto-upgrade preserves native accessibility attributes and disabled state", () => {
@@ -350,7 +362,10 @@ test("HTML auto-upgrade is safe to call repeatedly without duplicating classes o
 
   const classes = element.className.split(/\s+/).filter(Boolean);
   assert.equal(classes.filter(name => name === "cradle-btn").length, 1);
-  assert.equal(classes.filter(name => name === "cradle-btn--success").length, 1);
+  assert.equal(
+    classes.filter(name => name === "cradle-btn--success").length,
+    1
+  );
   assert.equal(classes.filter(name => name === "cradle-btn--md").length, 1);
 });
 

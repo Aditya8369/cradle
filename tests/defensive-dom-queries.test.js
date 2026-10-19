@@ -63,18 +63,28 @@ function createMockSandbox(missingSelectorPattern = null) {
       addEventListener: () => {},
       removeEventListener: () => {},
       dispatchEvent: () => true,
-      getBoundingClientRect: () => ({ top: 0, left: 0, right: 800, bottom: 600, width: 800, height: 600 }),
+      getBoundingClientRect: () => ({
+        top: 0,
+        left: 0,
+        right: 800,
+        bottom: 600,
+        width: 800,
+        height: 600,
+      }),
 
       querySelector: sel => {
-        if (missingSelectorPattern && missingSelectorPattern.test(sel)) return null;
+        if (missingSelectorPattern && missingSelectorPattern.test(sel))
+          return null;
         return createDummyElement("div");
       },
       querySelectorAll: sel => {
-        if (missingSelectorPattern && missingSelectorPattern.test(sel)) return [];
+        if (missingSelectorPattern && missingSelectorPattern.test(sel))
+          return [];
         return [createDummyElement("div")];
       },
       closest: sel => {
-        if (missingSelectorPattern && missingSelectorPattern.test(sel)) return null;
+        if (missingSelectorPattern && missingSelectorPattern.test(sel))
+          return null;
         return createDummyElement("div");
       },
       parentElement: null,
@@ -115,11 +125,13 @@ function createMockSandbox(missingSelectorPattern = null) {
     title: "Test",
     createElement: tag => createDummyElement(tag),
     getElementById: id => {
-      if (missingSelectorPattern && missingSelectorPattern.test(id)) return null;
+      if (missingSelectorPattern && missingSelectorPattern.test(id))
+        return null;
       return createDummyElement("div");
     },
     querySelector: sel => {
-      if (missingSelectorPattern && missingSelectorPattern.test(sel)) return null;
+      if (missingSelectorPattern && missingSelectorPattern.test(sel))
+        return null;
       return createDummyElement("div");
     },
     querySelectorAll: sel => {
@@ -142,10 +154,16 @@ function createMockSandbox(missingSelectorPattern = null) {
 
   const jqueryMock = sel => {
     if (typeof sel === "function") {
-      try { sel(); } catch (e) {}
+      try {
+        sel();
+      } catch (e) {}
     }
     const el = createDummyElement("div");
-    el.ready = cb => { try { cb(); } catch (e) {} };
+    el.ready = cb => {
+      try {
+        cb();
+      } catch (e) {}
+    };
     el.on = () => el;
     el.off = () => el;
     el.css = () => el;
@@ -166,7 +184,10 @@ function createMockSandbox(missingSelectorPattern = null) {
     localStorage: mockLocalStorage,
     sessionStorage: mockLocalStorage,
     location: { href: "http://localhost/", pathname: "/" },
-    navigator: { userAgent: "NodeTest", clipboard: { writeText: async () => {} } },
+    navigator: {
+      userAgent: "NodeTest",
+      clipboard: { writeText: async () => {} },
+    },
     document: documentMock,
     addEventListener: () => {},
     removeEventListener: () => {},
@@ -176,18 +197,48 @@ function createMockSandbox(missingSelectorPattern = null) {
     clearInterval: () => {},
     requestAnimationFrame: () => 0,
     cancelAnimationFrame: () => {},
-    getComputedStyle: () => ({ getPropertyValue: () => "", width: "800px", height: "600px" }),
+    getComputedStyle: () => ({
+      getPropertyValue: () => "",
+      width: "800px",
+      height: "600px",
+    }),
     matchMedia: () => ({ matches: false, addListener: () => {} }),
-    AudioContext: class { createGain() { return { gain: {} }; } createOscillator() { return { frequency: {} }; } },
-    Audio: class { play() { return Promise.resolve(); } pause() {} },
+    AudioContext: class {
+      createGain() {
+        return { gain: {} };
+      }
+      createOscillator() {
+        return { frequency: {} };
+      }
+    },
+    Audio: class {
+      play() {
+        return Promise.resolve();
+      }
+      pause() {}
+    },
     Image: class {},
     Blob: class {},
     URL: { createObjectURL: () => "", revokeObjectURL: () => {} },
-    Worker: class { postMessage() {} terminate() {} },
-    ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
+    Worker: class {
+      postMessage() {}
+      terminate() {}
+    },
+    ResizeObserver: class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
     Chart: dummyObj,
     QRCodeStyling: dummyObj,
-    WaveformEngine: { generateSineWave: () => [0], generateSquareWave: () => [0], generateSawtoothWave: () => [0], generateTriangleWave: () => [0], generateNoiseWave: () => [0], applyEnvelope: () => [0] },
+    WaveformEngine: {
+      generateSineWave: () => [0],
+      generateSquareWave: () => [0],
+      generateSawtoothWave: () => [0],
+      generateTriangleWave: () => [0],
+      generateNoiseWave: () => [0],
+      applyEnvelope: () => [0],
+    },
     NOTES: [{ note: "C4", freq: 261.63 }],
     ShapeEngine: dummyObj,
     PortfolioEngine: dummyObj,
@@ -202,36 +253,67 @@ function createMockSandbox(missingSelectorPattern = null) {
     getHighScore: () => 0,
     updateHighScore: () => {},
     calculateStats: () => ({ total: 0, present: 0, absent: 0, percentage: 0 }),
-    computeWaveform: () => ({ wave: [0], samples: [0], harmonics: [{ n: 1, amp: 1, freq: 1, phase: 0, samples: [0] }], terms: [{ n: 1, amp: 1, freq: 1, phase: 0 }] }),
+    computeWaveform: () => ({
+      wave: [0],
+      samples: [0],
+      harmonics: [{ n: 1, amp: 1, freq: 1, phase: 0, samples: [0] }],
+      terms: [{ n: 1, amp: 1, freq: 1, phase: 0 }],
+    }),
     fourierCoeff: () => ({ a: 0, b: 1 }),
     sampleAt: () => 0,
     normalise: v => v,
     ClassifierEngine: { loadModels: async () => {}, initializeKNN: () => {} },
-    FlagEngine: { getFlags: () => [], evaluate: () => ({ on: true, bucket: 0 }) },
-    CannonEngine: { calculateBallMileage: () => 10, validateHit: () => true, calculateScore: () => ({ scoreAwarded: 10, newStreak: 1 }) },
-    CannonStorage: { loadStats: () => ({ score: 0, highScore: 0, currentStreak: 0, bestStreak: 0, totalShots: 0, totalHits: 0 }), recordShot: s => s },
+    FlagEngine: {
+      getFlags: () => [],
+      evaluate: () => ({ on: true, bucket: 0 }),
+    },
+    CannonEngine: {
+      calculateBallMileage: () => 10,
+      validateHit: () => true,
+      calculateScore: () => ({ scoreAwarded: 10, newStreak: 1 }),
+    },
+    CannonStorage: {
+      loadStats: () => ({
+        score: 0,
+        highScore: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        totalShots: 0,
+        totalHits: 0,
+      }),
+      recordShot: s => s,
+    },
     escapeHTML: str => String(str || ""),
     escapeHtml: str => String(str || ""),
     WHITE: "w",
     BLACK: "b",
     startPosition: () => [
-      ["r","n","b","q","k","b","n","r"],
-      ["p","p","p","p","p","p","p","p"],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      ["P","P","P","P","P","P","P","P"],
-      ["R","N","B","Q","K","B","N","R"],
+      ["r", "n", "b", "q", "k", "b", "n", "r"],
+      ["p", "p", "p", "p", "p", "p", "p", "p"],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      ["P", "P", "P", "P", "P", "P", "P", "P"],
+      ["R", "N", "B", "Q", "K", "B", "N", "R"],
     ],
     findKing: () => null,
     cloneBoard: b => (b ? b.map(r => r.slice()) : []),
-    SYMBOLS: { w: { p: "♙", r: "♖", n: "♘", b: "♗", q: "♕", k: "♔" }, b: { p: "♟", r: "♜", n: "➞", b: "♝", q: "♛", k: "♚" } },
+    SYMBOLS: {
+      w: { p: "♙", r: "♖", n: "♘", b: "♗", q: "♕", k: "♔" },
+      b: { p: "♟", r: "♜", n: "➞", b: "♝", q: "♛", k: "♚" },
+    },
     getReportError: () => null,
     generatePGN: () => "",
     loadFEN: () => {},
     boardToFEN: () => "",
-    createCPUState: () => ({ RAM: new Uint8Array(256), registers: { A: 0, B: 0, C: 0, D: 0 }, flags: { Z: 0, C: 0 }, PC: 0, halted: false }),
+    createCPUState: () => ({
+      RAM: new Uint8Array(256),
+      registers: { A: 0, B: 0, C: 0, D: 0 },
+      flags: { Z: 0, C: 0 },
+      PC: 0,
+      halted: false,
+    }),
     jQuery: jqueryMock,
     $: jqueryMock,
   };
@@ -287,7 +369,9 @@ test("Defensive DOM queries: scripts load cleanly when parentElement is null", (
       const script = new vm.Script(executableCode, { filename: relPath });
       script.runInContext(context);
     } catch (err) {
-      assert.fail(`Uncaught exception in ${relPath} when parentElement is null:\n  ${err.name}: ${err.message}`);
+      assert.fail(
+        `Uncaught exception in ${relPath} when parentElement is null:\n  ${err.name}: ${err.message}`
+      );
     }
   }
 });
@@ -309,7 +393,9 @@ test("Defensive DOM queries: scripts load cleanly when queried elements return n
       const script = new vm.Script(executableCode, { filename: relPath });
       script.runInContext(context);
     } catch (err) {
-      assert.fail(`Uncaught exception in ${relPath} when DOM lookups return null:\n  ${err.name}: ${err.message}`);
+      assert.fail(
+        `Uncaught exception in ${relPath} when DOM lookups return null:\n  ${err.name}: ${err.message}`
+      );
     }
   }
 });

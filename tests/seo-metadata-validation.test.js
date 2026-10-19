@@ -13,8 +13,8 @@ const BASE_URL = "https://facelessism.github.io/cradle/";
 function getMetaPropertyValues(html, property) {
   const regex = new RegExp(
     `<meta\\s+[^>]*property=["']${escapeRegex(property)}["'][^>]*content=["']([^"']*)["'][^>]*/?>|` +
-    `<meta\\s+[^>]*content=["']([^"']*)["'][^>]*property=["']${escapeRegex(property)}["'][^>]*/?>`,
-    "gi",
+      `<meta\\s+[^>]*content=["']([^"']*)["'][^>]*property=["']${escapeRegex(property)}["'][^>]*/?>`,
+    "gi"
   );
   const values = [];
   let match;
@@ -56,7 +56,7 @@ const diskProjects = getDiskProjects();
 test("SEO metadata validation discovers mini projects", () => {
   assert.ok(
     diskProjects.length > 0,
-    "Expected to discover at least one mini project on disk",
+    "Expected to discover at least one mini project on disk"
   );
 });
 
@@ -64,7 +64,7 @@ for (const project of diskProjects) {
   const indexPath = path.join(project.absPath, "index.html");
   const relIndexPath = `${project.relPath}index.html`;
 
-  test(`SEO metadata validation for ${relIndexPath}`, async (t) => {
+  test(`SEO metadata validation for ${relIndexPath}`, async t => {
     // ── File must exist ──────────────────────────────────────
     const exists = fs.existsSync(indexPath);
     assert.ok(exists, `index.html does not exist at ${relIndexPath}`);
@@ -87,14 +87,14 @@ for (const project of diskProjects) {
       if (canonicals.length === 0) missing.push("canonical");
       assert.ok(
         canonicals.length > 0,
-        `Missing <link rel="canonical"> in ${relIndexPath}`,
+        `Missing <link rel="canonical"> in ${relIndexPath}`
       );
     });
 
     await t.test("no duplicate canonical tags", () => {
       assert.ok(
         canonicals.length <= 1,
-        `Found ${canonicals.length} canonical tags in ${relIndexPath} (expected at most 1)`,
+        `Found ${canonicals.length} canonical tags in ${relIndexPath} (expected at most 1)`
       );
     });
 
@@ -102,21 +102,21 @@ for (const project of diskProjects) {
       await t.test("canonical URL is not empty", () => {
         assert.ok(
           canonicals[0].trim().length > 0,
-          `Canonical URL is empty in ${relIndexPath}`,
+          `Canonical URL is empty in ${relIndexPath}`
         );
       });
 
       await t.test("canonical URL is absolute", () => {
         assert.ok(
           isAbsoluteUrl(canonicals[0]),
-          `Canonical URL "${canonicals[0]}" is not an absolute URL in ${relIndexPath}`,
+          `Canonical URL "${canonicals[0]}" is not an absolute URL in ${relIndexPath}`
         );
       });
 
       await t.test("canonical URL is not localhost", () => {
         assert.ok(
           !isLocalhostUrl(canonicals[0]),
-          `Canonical URL "${canonicals[0]}" points to localhost in ${relIndexPath}`,
+          `Canonical URL "${canonicals[0]}" points to localhost in ${relIndexPath}`
         );
       });
     }
@@ -128,14 +128,14 @@ for (const project of diskProjects) {
       if (ogTitles.length === 0) missing.push("og:title");
       assert.ok(
         ogTitles.length > 0,
-        `Missing <meta property="og:title"> in ${relIndexPath}`,
+        `Missing <meta property="og:title"> in ${relIndexPath}`
       );
     });
 
     await t.test("no duplicate og:title", () => {
       assert.ok(
         ogTitles.length <= 1,
-        `Found ${ogTitles.length} og:title tags in ${relIndexPath} (expected at most 1)`,
+        `Found ${ogTitles.length} og:title tags in ${relIndexPath} (expected at most 1)`
       );
     });
 
@@ -143,7 +143,7 @@ for (const project of diskProjects) {
       await t.test("og:title is not empty", () => {
         assert.ok(
           ogTitles[0].trim().length > 0,
-          `og:title content is empty in ${relIndexPath}`,
+          `og:title content is empty in ${relIndexPath}`
         );
       });
     }
@@ -155,14 +155,14 @@ for (const project of diskProjects) {
       if (ogDescs.length === 0) missing.push("og:description");
       assert.ok(
         ogDescs.length > 0,
-        `Missing <meta property="og:description"> in ${relIndexPath}`,
+        `Missing <meta property="og:description"> in ${relIndexPath}`
       );
     });
 
     await t.test("no duplicate og:description", () => {
       assert.ok(
         ogDescs.length <= 1,
-        `Found ${ogDescs.length} og:description tags in ${relIndexPath} (expected at most 1)`,
+        `Found ${ogDescs.length} og:description tags in ${relIndexPath} (expected at most 1)`
       );
     });
 
@@ -170,7 +170,7 @@ for (const project of diskProjects) {
       await t.test("og:description is not empty", () => {
         assert.ok(
           ogDescs[0].trim().length > 0,
-          `og:description content is empty in ${relIndexPath}`,
+          `og:description content is empty in ${relIndexPath}`
         );
       });
     }
@@ -182,14 +182,14 @@ for (const project of diskProjects) {
       if (ogUrls.length === 0) missing.push("og:url");
       assert.ok(
         ogUrls.length > 0,
-        `Missing <meta property="og:url"> in ${relIndexPath}`,
+        `Missing <meta property="og:url"> in ${relIndexPath}`
       );
     });
 
     await t.test("no duplicate og:url", () => {
       assert.ok(
         ogUrls.length <= 1,
-        `Found ${ogUrls.length} og:url tags in ${relIndexPath} (expected at most 1)`,
+        `Found ${ogUrls.length} og:url tags in ${relIndexPath} (expected at most 1)`
       );
     });
 
@@ -197,21 +197,21 @@ for (const project of diskProjects) {
       await t.test("og:url is not empty", () => {
         assert.ok(
           ogUrls[0].trim().length > 0,
-          `og:url content is empty in ${relIndexPath}`,
+          `og:url content is empty in ${relIndexPath}`
         );
       });
 
       await t.test("og:url is absolute", () => {
         assert.ok(
           isAbsoluteUrl(ogUrls[0]),
-          `og:url "${ogUrls[0]}" is not an absolute URL in ${relIndexPath}`,
+          `og:url "${ogUrls[0]}" is not an absolute URL in ${relIndexPath}`
         );
       });
 
       await t.test("og:url is not localhost", () => {
         assert.ok(
           !isLocalhostUrl(ogUrls[0]),
-          `og:url "${ogUrls[0]}" points to localhost in ${relIndexPath}`,
+          `og:url "${ogUrls[0]}" points to localhost in ${relIndexPath}`
         );
       });
     }
@@ -222,7 +222,7 @@ for (const project of diskProjects) {
     await t.test("no duplicate og:type", () => {
       assert.ok(
         ogTypes.length <= 1,
-        `Found ${ogTypes.length} og:type tags in ${relIndexPath} (expected at most 1)`,
+        `Found ${ogTypes.length} og:type tags in ${relIndexPath} (expected at most 1)`
       );
     });
 
@@ -232,7 +232,7 @@ for (const project of diskProjects) {
         assert.equal(
           canonicals[0],
           ogUrls[0],
-          `Canonical URL "${canonicals[0]}" does not match og:url "${ogUrls[0]}" in ${relIndexPath}`,
+          `Canonical URL "${canonicals[0]}" does not match og:url "${ogUrls[0]}" in ${relIndexPath}`
         );
       });
     }
@@ -241,7 +241,7 @@ for (const project of diskProjects) {
     if (missing.length > 0) {
       await t.test("summary of missing metadata", () => {
         assert.fail(
-          `SEO metadata validation failed for:\n${relIndexPath}\n\nMissing:\n${missing.map((m) => `- ${m}`).join("\n")}`,
+          `SEO metadata validation failed for:\n${relIndexPath}\n\nMissing:\n${missing.map(m => `- ${m}`).join("\n")}`
         );
       });
     }

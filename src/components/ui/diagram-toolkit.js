@@ -1,19 +1,19 @@
 /**
  * Diagram & Visual Planning Toolkit (Issue #523)
- * Generates Mermaid.js syntax for timelines, pipelines, flowcharts, wireframes, 
+ * Generates Mermaid.js syntax for timelines, pipelines, flowcharts, wireframes,
  * roadmaps, process flows, architecture diagrams, mind maps, and decision trees.
  */
 
 export class DiagramToolkit {
   /**
    * Generates a timeline diagram.
-   * @param {string} title 
-   * @param {Array<{period: string, events: string[]}>} milestones 
+   * @param {string} title
+   * @param {Array<{period: string, events: string[]}>} milestones
    */
   static generateTimeline(title, milestones) {
     let output = `timeline\n    title ${title}\n`;
     milestones.forEach(m => {
-      output += `    ${m.period} : ${m.events.join(' : ')}\n`;
+      output += `    ${m.period} : ${m.events.join(" : ")}\n`;
     });
     return output;
   }
@@ -21,9 +21,9 @@ export class DiagramToolkit {
   /**
    * Generates a flowchart or process pipeline.
    * @param {string} direction - e.g., 'TD', 'LR'
-   * @param {Array<{from: string, to: string, label?: string}>} steps 
+   * @param {Array<{from: string, to: string, label?: string}>} steps
    */
-  static generateFlowchart(direction = 'TD', steps = []) {
+  static generateFlowchart(direction = "TD", steps = []) {
     let output = `flowchart ${direction}\n`;
     steps.forEach(step => {
       if (step.label) {
@@ -37,13 +37,13 @@ export class DiagramToolkit {
 
   /**
    * Generates a system architecture or container diagram.
-   * @param {string} title 
-   * @param {Array<{group: string, nodes: Array<{id: string, label: string}>}>} components 
-   * @param {Array<{from: string, to: string, label?: string}>} connections 
+   * @param {string} title
+   * @param {Array<{group: string, nodes: Array<{id: string, label: string}>}>} components
+   * @param {Array<{from: string, to: string, label?: string}>} connections
    */
   static generateArchitecture(title, components = [], connections = []) {
     let output = `graph TB\n    subgraph ${title}\n`;
-    
+
     components.forEach(comp => {
       output += `        subgraph ${comp.group}\n`;
       comp.nodes.forEach(node => {
@@ -66,8 +66,8 @@ export class DiagramToolkit {
 
   /**
    * Generates a mind map structure.
-   * @param {string} centralIdea 
-   * @param {Array<{branch: string, subtopics: string[]}>} branches 
+   * @param {string} centralIdea
+   * @param {Array<{branch: string, subtopics: string[]}>} branches
    */
   static generateMindMap(centralIdea, branches = []) {
     let output = `mindmap\n  root(("${centralIdea}"))\n`;

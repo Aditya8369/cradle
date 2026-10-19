@@ -58,12 +58,12 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|------|---------------|
-| `index.html` | Page structure, semantic markup, category tabs, converter panel, reference table, history panel, loads shared UI tokens |
-| `script.js` | Unit data definitions, conversion engine, category switching, history management (localStorage), keyboard shortcuts, formula display |
-| `style.css` | Layout, component styling, responsive breakpoints, animations, all using Cradle design tokens |
-| `tokens.css` | Shared Cradle design token system (loaded from `src/components/ui/`) |
+| File         | Responsibility                                                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `index.html` | Page structure, semantic markup, category tabs, converter panel, reference table, history panel, loads shared UI tokens              |
+| `script.js`  | Unit data definitions, conversion engine, category switching, history management (localStorage), keyboard shortcuts, formula display |
+| `style.css`  | Layout, component styling, responsive breakpoints, animations, all using Cradle design tokens                                        |
+| `tokens.css` | Shared Cradle design token system (loaded from `src/components/ui/`)                                                                 |
 
 ---
 
@@ -107,16 +107,16 @@ After 600ms debounce, entry added to history → localStorage → history panel 
 
 ## Technologies Used
 
-| Technology | Purpose |
-|------------|---------|
-| HTML5 | Page structure and semantic markup |
+| Technology                              | Purpose                                          |
+| --------------------------------------- | ------------------------------------------------ |
+| HTML5                                   | Page structure and semantic markup               |
 | CSS3 (Custom Properties, Grid, Flexbox) | Layout and responsive design using Cradle tokens |
-| Vanilla JavaScript (ES6+) | Conversion logic, DOM manipulation, history |
-| localStorage API | Persisting conversion history across sessions |
-| Cradle `tokens.css` | Shared design token system |
-| Cradle `BackToHome.js` | Shared back-to-home navigation component |
-| Font Awesome 6.x (CDN) | Icons for category tabs and UI elements |
-| Google Fonts (Space Grotesk, Inter) | Typography |
+| Vanilla JavaScript (ES6+)               | Conversion logic, DOM manipulation, history      |
+| localStorage API                        | Persisting conversion history across sessions    |
+| Cradle `tokens.css`                     | Shared design token system                       |
+| Cradle `BackToHome.js`                  | Shared back-to-home navigation component         |
+| Font Awesome 6.x (CDN)                  | Icons for category tabs and UI elements          |
+| Google Fonts (Space Grotesk, Inter)     | Typography                                       |
 
 ---
 
@@ -168,12 +168,12 @@ After 600ms debounce, entry added to history → localStorage → history panel 
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|------------|---------|------------|---------|
-| Cradle `tokens.css` | — | Local `<link>` tag | Shared design token system |
-| Cradle `BackToHome.js` | — | Local `<script>` tag | Back-to-home navigation |
-| Font Awesome | 6.5.1 | CDN (`<script>` tag) | Icons for categories and UI |
-| Google Fonts (Space Grotesk, Inter) | — | Google Fonts CDN | UI typography |
+| Dependency                          | Version | How loaded           | Purpose                     |
+| ----------------------------------- | ------- | -------------------- | --------------------------- |
+| Cradle `tokens.css`                 | —       | Local `<link>` tag   | Shared design token system  |
+| Cradle `BackToHome.js`              | —       | Local `<script>` tag | Back-to-home navigation     |
+| Font Awesome                        | 6.5.1   | CDN (`<script>` tag) | Icons for categories and UI |
+| Google Fonts (Space Grotesk, Inter) | —       | Google Fonts CDN     | UI typography               |
 
 ---
 

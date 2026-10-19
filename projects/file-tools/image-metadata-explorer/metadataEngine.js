@@ -77,10 +77,7 @@ function gpsToDecimal(coordinates, reference) {
     return null;
   }
 
-  let decimal =
-    degrees +
-    minutes / 60 +
-    seconds / 3600;
+  let decimal = degrees + minutes / 60 + seconds / 3600;
 
   const direction = String(reference || "").toUpperCase();
 
@@ -119,11 +116,7 @@ function getMetadataGroups(metadata) {
     },
   ];
 
-  const cameraKeys = [
-    "make",
-    "model",
-    "lensModel",
-  ];
+  const cameraKeys = ["make", "model", "lensModel"];
 
   const captureKeys = [
     "dateTaken",
@@ -134,18 +127,10 @@ function getMetadataGroups(metadata) {
     "focalLength",
   ];
 
-  const locationKeys = [
-    "latitude",
-    "longitude",
-    "altitude",
-  ];
+  const locationKeys = ["latitude", "longitude", "altitude"];
 
   Object.entries(metadata).forEach(([key, value]) => {
-    if (
-      value === null ||
-      value === undefined ||
-      value === ""
-    ) {
+    if (value === null || value === undefined || value === "") {
       return;
     }
 
@@ -167,9 +152,7 @@ function getMetadataGroups(metadata) {
     });
   });
 
-  return groups.filter(
-    (group) => group.items.length > 0
-  );
+  return groups.filter(group => group.items.length > 0);
 }
 
 /* --------------------------------
@@ -181,9 +164,7 @@ function isValidString(value) {
     return false;
   }
 
-  const cleaned = value
-    .replace(/[\x00-\x1f\x7f]/g, "")
-    .trim();
+  const cleaned = value.replace(/[\x00-\x1f\x7f]/g, "").trim();
 
   return cleaned.length > 0;
 }
@@ -193,17 +174,11 @@ function cleanString(value) {
     return null;
   }
 
-  return value
-    .replace(/[\x00-\x1f\x7f]/g, "")
-    .trim();
+  return value.replace(/[\x00-\x1f\x7f]/g, "").trim();
 }
 
 function readString(view, offset, length) {
-  if (
-    offset < 0 ||
-    length <= 0 ||
-    offset + length > view.byteLength
-  ) {
+  if (offset < 0 || length <= 0 || offset + length > view.byteLength) {
     return null;
   }
 
@@ -249,93 +224,56 @@ function readValue(
   if (totalSize <= 4) {
     valueOffset = valueFieldOffset;
   } else {
-    if (
-      valueFieldOffset + 4 >
-      view.byteLength
-    ) {
+    if (valueFieldOffset + 4 > view.byteLength) {
       return null;
     }
 
-    valueOffset = tiffStart + view.getUint32(
-      valueFieldOffset,
-      littleEndian
-    );
+    valueOffset = tiffStart + view.getUint32(valueFieldOffset, littleEndian);
   }
 
-  if (
-    valueOffset < 0 ||
-    valueOffset + totalSize >
-    view.byteLength
-  ) {
+  if (valueOffset < 0 || valueOffset + totalSize > view.byteLength) {
     return null;
   }
 
   switch (type) {
     case 2:
-      return readString(
-        view,
-        valueOffset,
-        count
-      );
+      return readString(view, valueOffset, count);
 
     case 3: {
       const values = [];
 
       for (let i = 0; i < count; i++) {
-        values.push(
-          view.getUint16(
-            valueOffset + i * 2,
-            littleEndian
-          )
-        );
+        values.push(view.getUint16(valueOffset + i * 2, littleEndian));
       }
 
-      return count === 1
-        ? values[0]
-        : values;
+      return count === 1 ? values[0] : values;
     }
 
     case 4: {
       const values = [];
 
       for (let i = 0; i < count; i++) {
-        values.push(
-          view.getUint32(
-            valueOffset + i * 4,
-            littleEndian
-          )
-        );
+        values.push(view.getUint32(valueOffset + i * 4, littleEndian));
       }
 
-      return count === 1
-        ? values[0]
-        : values;
+      return count === 1 ? values[0] : values;
     }
 
     case 5: {
       const values = [];
 
       for (let i = 0; i < count; i++) {
-        const numerator = view.getUint32(
-          valueOffset + i * 8,
-          littleEndian
-        );
+        const numerator = view.getUint32(valueOffset + i * 8, littleEndian);
 
         const denominator = view.getUint32(
           valueOffset + i * 8 + 4,
           littleEndian
         );
 
-        values.push(
-          denominator === 0
-            ? null
-            : numerator / denominator
-        );
+        values.push(denominator === 0 ? null : numerator / denominator);
       }
 
-      return count === 1
-        ? values[0]
-        : values;
+      return count === 1 ? values[0] : values;
     }
 
     case 1:
@@ -343,59 +281,37 @@ function readValue(
       const values = [];
 
       for (let i = 0; i < count; i++) {
-        values.push(
-          view.getUint8(
-            valueOffset + i
-          )
-        );
+        values.push(view.getUint8(valueOffset + i));
       }
 
-      return count === 1
-        ? values[0]
-        : values;
+      return count === 1 ? values[0] : values;
     }
 
     case 9: {
       const values = [];
 
       for (let i = 0; i < count; i++) {
-        values.push(
-          view.getInt32(
-            valueOffset + i * 4,
-            littleEndian
-          )
-        );
+        values.push(view.getInt32(valueOffset + i * 4, littleEndian));
       }
 
-      return count === 1
-        ? values[0]
-        : values;
+      return count === 1 ? values[0] : values;
     }
 
     case 10: {
       const values = [];
 
       for (let i = 0; i < count; i++) {
-        const numerator = view.getInt32(
-          valueOffset + i * 8,
-          littleEndian
-        );
+        const numerator = view.getInt32(valueOffset + i * 8, littleEndian);
 
         const denominator = view.getInt32(
           valueOffset + i * 8 + 4,
           littleEndian
         );
 
-        values.push(
-          denominator === 0
-            ? null
-            : numerator / denominator
-        );
+        values.push(denominator === 0 ? null : numerator / denominator);
       }
 
-      return count === 1
-        ? values[0]
-        : values;
+      return count === 1 ? values[0] : values;
     }
 
     default:
@@ -407,54 +323,29 @@ function readValue(
    IFD Reader
 -------------------------------- */
 
-function readIFD(
-  view,
-  offset,
-  littleEndian,
-  tagMap,
-  tiffStart = 0
-) {
+function readIFD(view, offset, littleEndian, tagMap, tiffStart = 0) {
   const metadata = {};
 
-  if (
-    offset < 0 ||
-    offset + 2 > view.byteLength
-  ) {
+  if (offset < 0 || offset + 2 > view.byteLength) {
     return metadata;
   }
 
-  const entryCount = view.getUint16(
-    offset,
-    littleEndian
-  );
+  const entryCount = view.getUint16(offset, littleEndian);
 
   const entriesStart = offset + 2;
 
   for (let i = 0; i < entryCount; i++) {
-    const entryOffset =
-      entriesStart + i * 12;
+    const entryOffset = entriesStart + i * 12;
 
-    if (
-      entryOffset + 12 >
-      view.byteLength
-    ) {
+    if (entryOffset + 12 > view.byteLength) {
       break;
     }
 
-    const tag = view.getUint16(
-      entryOffset,
-      littleEndian
-    );
+    const tag = view.getUint16(entryOffset, littleEndian);
 
-    const type = view.getUint16(
-      entryOffset + 2,
-      littleEndian
-    );
+    const type = view.getUint16(entryOffset + 2, littleEndian);
 
-    const count = view.getUint32(
-      entryOffset + 4,
-      littleEndian
-    );
+    const count = view.getUint32(entryOffset + 4, littleEndian);
 
     const name = tagMap[tag];
 
@@ -488,77 +379,52 @@ function findExifSegment(view) {
     return -1;
   }
 
-  if (
-    view.getUint8(0) !== 0xff ||
-    view.getUint8(1) !== 0xd8
-  ) {
+  if (view.getUint8(0) !== 0xff || view.getUint8(1) !== 0xd8) {
     return -1;
   }
 
   let offset = 2;
 
-  while (
-    offset + 4 <=
-    view.byteLength
-  ) {
-    if (
-      view.getUint8(offset) !== 0xff
-    ) {
+  while (offset + 4 <= view.byteLength) {
+    if (view.getUint8(offset) !== 0xff) {
       offset++;
       continue;
     }
 
-    const marker =
-      view.getUint8(offset + 1);
+    const marker = view.getUint8(offset + 1);
 
     if (marker === 0xda) {
       break;
     }
 
-    if (
-      marker === 0xd8 ||
-      marker === 0xd9
-    ) {
+    if (marker === 0xd8 || marker === 0xd9) {
       offset += 2;
       continue;
     }
 
-    const segmentLength =
-      view.getUint16(
-        offset + 2,
-        false
-      );
+    const segmentLength = view.getUint16(offset + 2, false);
 
     if (segmentLength < 2) {
       break;
     }
 
     if (marker === 0xe1) {
-      const exifStart =
-        offset + 4;
+      const exifStart = offset + 4;
 
       if (
-        exifStart + 6 <=
-        view.byteLength &&
-        view.getUint8(exifStart) ===
-        0x45 &&
-        view.getUint8(exifStart + 1) ===
-        0x78 &&
-        view.getUint8(exifStart + 2) ===
-        0x69 &&
-        view.getUint8(exifStart + 3) ===
-        0x66 &&
-        view.getUint8(exifStart + 4) ===
-        0x00 &&
-        view.getUint8(exifStart + 5) ===
-        0x00
+        exifStart + 6 <= view.byteLength &&
+        view.getUint8(exifStart) === 0x45 &&
+        view.getUint8(exifStart + 1) === 0x78 &&
+        view.getUint8(exifStart + 2) === 0x69 &&
+        view.getUint8(exifStart + 3) === 0x66 &&
+        view.getUint8(exifStart + 4) === 0x00 &&
+        view.getUint8(exifStart + 5) === 0x00
       ) {
         return exifStart + 6;
       }
     }
 
-    offset +=
-      2 + segmentLength;
+    offset += 2 + segmentLength;
   }
 
   return -1;
@@ -569,18 +435,14 @@ function findExifSegment(view) {
 -------------------------------- */
 
 function parseTIFF(view, tiffStart) {
-  if (
-    tiffStart + 8 >
-    view.byteLength
-  ) {
+  if (tiffStart + 8 > view.byteLength) {
     return {};
   }
 
-  const byteOrder =
-    String.fromCharCode(
-      view.getUint8(tiffStart),
-      view.getUint8(tiffStart + 1)
-    );
+  const byteOrder = String.fromCharCode(
+    view.getUint8(tiffStart),
+    view.getUint8(tiffStart + 1)
+  );
 
   let littleEndian;
 
@@ -592,71 +454,44 @@ function parseTIFF(view, tiffStart) {
     return {};
   }
 
-  const magic = view.getUint16(
-    tiffStart + 2,
-    littleEndian
-  );
+  const magic = view.getUint16(tiffStart + 2, littleEndian);
 
   if (magic !== 42) {
     return {};
   }
 
-  const firstIFDOffset =
-    view.getUint32(
-      tiffStart + 4,
-      littleEndian
-    );
+  const firstIFDOffset = view.getUint32(tiffStart + 4, littleEndian);
 
-  const ifdOffset =
-    tiffStart + firstIFDOffset;
+  const ifdOffset = tiffStart + firstIFDOffset;
 
-  if (
-    ifdOffset < tiffStart ||
-    ifdOffset >= view.byteLength
-  ) {
+  if (ifdOffset < tiffStart || ifdOffset >= view.byteLength) {
     return {};
   }
 
-  const metadata = readIFD(
-    view,
-    ifdOffset,
-    littleEndian,
-    TAGS,
-    tiffStart
-  );
+  const metadata = readIFD(view, ifdOffset, littleEndian, TAGS, tiffStart);
 
   if (metadata.exifOffset) {
-    const exifMetadata =
-      readIFD(
-        view,
-        tiffStart +
-        metadata.exifOffset,
-        littleEndian,
-        TAGS,
-        tiffStart
-      );
-
-    Object.assign(
-      metadata,
-      exifMetadata
+    const exifMetadata = readIFD(
+      view,
+      tiffStart + metadata.exifOffset,
+      littleEndian,
+      TAGS,
+      tiffStart
     );
+
+    Object.assign(metadata, exifMetadata);
   }
 
   if (metadata.gpsOffset) {
-    const gpsMetadata =
-      readIFD(
-        view,
-        tiffStart +
-        metadata.gpsOffset,
-        littleEndian,
-        GPS_TAGS,
-        tiffStart
-      );
-
-    Object.assign(
-      metadata,
-      gpsMetadata
+    const gpsMetadata = readIFD(
+      view,
+      tiffStart + metadata.gpsOffset,
+      littleEndian,
+      GPS_TAGS,
+      tiffStart
     );
+
+    Object.assign(metadata, gpsMetadata);
   }
 
   return metadata;
@@ -746,11 +581,7 @@ function readPNGtEXt(view, start, length) {
   if (nullPos === -1) return null;
 
   const keyword = readLatin1(view, start, nullPos);
-  const text = readLatin1(
-    view,
-    start + nullPos + 1,
-    length - nullPos - 1
-  );
+  const text = readLatin1(view, start + nullPos + 1, length - nullPos - 1);
 
   if (!keyword) return null;
 
@@ -911,8 +742,7 @@ function parseWebP(view) {
       const b2 = view.getUint8(dataStart + 3);
       const b3 = view.getUint8(dataStart + 4);
       const width = 1 + (((b1 & 0x3f) << 8) | b0);
-      const height =
-        1 + (((b3 & 0x0f) << 10) | (b2 << 2) | ((b1 & 0xc0) >> 6));
+      const height = 1 + (((b3 & 0x0f) << 10) | (b2 << 2) | ((b1 & 0xc0) >> 6));
       dimensions = { width, height };
     } else if (fourCC === "EXIF") {
       let exifStart = dataStart;
@@ -945,7 +775,9 @@ function parseWebP(view) {
 function formatExposureTime(value) {
   const num = Number(value);
   if (!Number.isFinite(num) || num <= 0) return null;
-  return num >= 1 ? `${Number(num.toFixed(3))} s` : `1/${Math.round(1 / num)} s`;
+  return num >= 1
+    ? `${Number(num.toFixed(3))} s`
+    : `1/${Math.round(1 / num)} s`;
 }
 
 function formatFNumber(value) {
@@ -967,19 +799,14 @@ function formatFocalLength(value) {
 function normalizeMetadata(raw) {
   const metadata = {};
 
-  if (
-    !raw ||
-    typeof raw !== "object"
-  ) {
+  if (!raw || typeof raw !== "object") {
     return metadata;
   }
 
   const make = cleanString(raw.make);
   const model = cleanString(raw.model);
-  const lensModel =
-    cleanString(raw.lensModel);
-  const software =
-    cleanString(raw.software);
+  const lensModel = cleanString(raw.lensModel);
+  const software = cleanString(raw.software);
 
   if (make) {
     metadata.make = make;
@@ -997,107 +824,60 @@ function normalizeMetadata(raw) {
     metadata.software = software;
   }
 
-  if (
-    Number.isFinite(
-      Number(raw.exposureTime)
-    )
-  ) {
+  if (Number.isFinite(Number(raw.exposureTime))) {
     const formatted = formatExposureTime(raw.exposureTime);
     if (formatted) metadata.exposureTime = formatted;
   }
 
   const rawFNumber = raw.fNumber ?? raw.apertureValue;
-  if (
-    Number.isFinite(
-      Number(rawFNumber)
-    )
-  ) {
+  if (Number.isFinite(Number(rawFNumber))) {
     const formatted = formatFNumber(rawFNumber);
     if (formatted) metadata.fNumber = formatted;
   }
 
-  if (
-    Number.isFinite(
-      Number(raw.iso)
-    )
-  ) {
-    const value =
-      Number(raw.iso);
+  if (Number.isFinite(Number(raw.iso))) {
+    const value = Number(raw.iso);
 
-    if (
-      value > 0 &&
-      value <= 100000
-    ) {
+    if (value > 0 && value <= 100000) {
       metadata.iso = value;
     }
   }
 
-  if (
-    Number.isFinite(
-      Number(raw.focalLength)
-    )
-  ) {
+  if (Number.isFinite(Number(raw.focalLength))) {
     const formatted = formatFocalLength(raw.focalLength);
     if (formatted) metadata.focalLength = formatted;
   }
 
-  if (
-    raw.latitude &&
-    raw.latitudeRef
-  ) {
-    const latitude =
-      gpsToDecimal(
-        raw.latitude,
-        raw.latitudeRef
-      );
+  if (raw.latitude && raw.latitudeRef) {
+    const latitude = gpsToDecimal(raw.latitude, raw.latitudeRef);
 
     if (latitude !== null) {
-      metadata.latitude =
-        latitude;
+      metadata.latitude = latitude;
     }
   }
 
-  if (
-    raw.longitude &&
-    raw.longitudeRef
-  ) {
-    const longitude =
-      gpsToDecimal(
-        raw.longitude,
-        raw.longitudeRef
-      );
+  if (raw.longitude && raw.longitudeRef) {
+    const longitude = gpsToDecimal(raw.longitude, raw.longitudeRef);
 
     if (longitude !== null) {
-      metadata.longitude =
-        longitude;
+      metadata.longitude = longitude;
     }
   }
 
-  if (
-    Number.isFinite(
-      Number(raw.altitude)
-    )
-  ) {
-    let altitude =
-      Number(raw.altitude);
+  if (Number.isFinite(Number(raw.altitude))) {
+    let altitude = Number(raw.altitude);
 
-    if (
-      Number(raw.altitudeRef) === 1
-    ) {
+    if (Number(raw.altitudeRef) === 1) {
       altitude *= -1;
     }
 
-    metadata.altitude =
-      `${Number(altitude.toFixed(1))} m`;
+    metadata.altitude = `${Number(altitude.toFixed(1))} m`;
   }
 
-  const dateTaken =
-    cleanString(raw.dateTaken) ||
-    cleanString(raw.dateTime);
+  const dateTaken = cleanString(raw.dateTaken) || cleanString(raw.dateTime);
 
   if (dateTaken) {
-    metadata.dateTaken =
-      dateTaken;
+    metadata.dateTaken = dateTaken;
   }
 
   const orientationNames = {
@@ -1111,17 +891,11 @@ function normalizeMetadata(raw) {
     8: "Rotated 270° clockwise",
   };
 
-  if (
-    raw.orientation !== undefined
-  ) {
-    const orientation =
-      orientationNames[
-      raw.orientation
-      ];
+  if (raw.orientation !== undefined) {
+    const orientation = orientationNames[raw.orientation];
 
     if (orientation) {
-      metadata.orientation =
-        orientation;
+      metadata.orientation = orientation;
     }
   }
 
@@ -1149,7 +923,7 @@ function normalizeMetadata(raw) {
     "xmp",
   ];
 
-  passthroughKeys.forEach((key) => {
+  passthroughKeys.forEach(key => {
     const value = cleanString(raw[key]);
     if (value) {
       metadata[key] = value;
@@ -1165,30 +939,17 @@ function normalizeMetadata(raw) {
 
 async function parse(file) {
   if (!file) {
-    throw new Error(
-      "No image file provided."
-    );
+    throw new Error("No image file provided.");
   }
 
-  if (
-    typeof file.arrayBuffer !==
-    "function"
-  ) {
-    throw new Error(
-      "Invalid image file."
-    );
+  if (typeof file.arrayBuffer !== "function") {
+    throw new Error("Invalid image file.");
   }
 
-  const buffer =
-    await file.arrayBuffer();
+  const buffer = await file.arrayBuffer();
 
-  if (
-    !buffer ||
-    buffer.byteLength === 0
-  ) {
-    throw new Error(
-      "The image file is empty."
-    );
+  if (!buffer || buffer.byteLength === 0) {
+    throw new Error("The image file is empty.");
   }
 
   const view = new DataView(buffer);
@@ -1238,18 +999,14 @@ const ImageMetadataEngine = {
 };
 
 if (typeof globalThis !== "undefined") {
-  globalThis.ImageMetadataEngine =
-    ImageMetadataEngine;
+  globalThis.ImageMetadataEngine = ImageMetadataEngine;
 }
 
 /* --------------------------------
    Node.js API
 -------------------------------- */
 
-if (
-  typeof module !== "undefined" &&
-  module.exports
-) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     formatFileSize,
     gpsToDecimal,

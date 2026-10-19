@@ -16,14 +16,16 @@ All projects must use the `cradle-storage` plugin (via `Cradle.extensions`) or t
 
 ```javascript
 // Preferred: Using the Plugin Extension Model
-const storage = Cradle.extensions.use('cradle-storage', { namespace: 'my_project_' });
-storage.set('score', 100);
+const storage = Cradle.extensions.use("cradle-storage", {
+  namespace: "my_project_",
+});
+storage.set("score", 100);
 ```
 
 ```javascript
 // Alternative: Using the UI utility directly (if not using the plugin model)
-const store = window.CradleStorage.namespace('my_project_');
-store.set('score', 100);
+const store = window.CradleStorage.namespace("my_project_");
+store.set("score", 100);
 ```
 
 ## 2. Quota Handling & Fallback Behavior
@@ -41,10 +43,11 @@ Data on a user's machine can become corrupted, or a previous version of your min
 
 ```javascript
 // Good: Validates the parsed object shape
-const defaultSettings = { theme: 'dark', soundEnabled: true };
-const validateSettings = (s) => typeof s?.theme === 'string' && typeof s?.soundEnabled === 'boolean';
+const defaultSettings = { theme: "dark", soundEnabled: true };
+const validateSettings = s =>
+  typeof s?.theme === "string" && typeof s?.soundEnabled === "boolean";
 
-const settings = storage.get('settings', defaultSettings, validateSettings);
+const settings = storage.get("settings", defaultSettings, validateSettings);
 ```
 
 ## 4. When to use IndexedDB
@@ -52,11 +55,12 @@ const settings = storage.get('settings', defaultSettings, validateSettings);
 `localStorage` is synchronous and blockingly slow for large payloads. It is capped at around ~5MB total for the entire domain.
 
 You must step up to IndexedDB if your project:
+
 - Stores binary data, Blobs, or File objects.
 - Routinely saves payloads larger than 500KB.
 - Requires complex indexing or relational queries.
 
-*Note: Cradle does not currently provide a unified IndexedDB wrapper, but projects using `window.indexedDB` must explicitly handle `onupgradeneeded`, `onerror`, and quota limitations.*
+_Note: Cradle does not currently provide a unified IndexedDB wrapper, but projects using `window.indexedDB` must explicitly handle `onupgradeneeded`, `onerror`, and quota limitations._
 
 ## 5. Cross-Tab Synchronization (Conflict Resolution)
 
@@ -67,10 +71,10 @@ If a user has the same mini-project open in two different tabs, race conditions 
 
 ```javascript
 // Example: Syncing state across tabs
-window.addEventListener('storage', (event) => {
+window.addEventListener("storage", event => {
   // Ignore events not related to our namespace
-  if (!event.key || !event.key.startsWith('my_project_')) return;
-  
+  if (!event.key || !event.key.startsWith("my_project_")) return;
+
   // Reload the updated data into memory and refresh the UI
   refreshGameStateFromStorage();
 });

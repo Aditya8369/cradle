@@ -58,12 +58,12 @@ There is no build step — the browser loads the files directly.
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Page shell: hero, upload card, image preview, metadata groups, export button |
-| `metadataEngine.js` | EXIF/TIFF parsing, value formatting, GPS conversion, metadata normalisation |
-| `script.js` | File input, drag & drop, preview loading, results rendering, JSON export |
-| `style.css` | Dark theme, card layout, metadata grid, responsive design |
+| File                | Responsibility                                                               |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `index.html`        | Page shell: hero, upload card, image preview, metadata groups, export button |
+| `metadataEngine.js` | EXIF/TIFF parsing, value formatting, GPS conversion, metadata normalisation  |
+| `script.js`         | File input, drag & drop, preview loading, results rendering, JSON export     |
+| `style.css`         | Dark theme, card layout, metadata grid, responsive design                    |
 
 ---
 
@@ -104,13 +104,13 @@ User clicks Export JSON → a .json file downloads
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
+| Technology                              | Purpose                               |
+| --------------------------------------- | ------------------------------------- |
+| HTML5                                   | Page structure and semantic markup    |
 | CSS3 (Grid, Flexbox, Custom Properties) | Layout, dark theme, responsive design |
-| Vanilla JavaScript (ES6+, File API) | File handling and DOM updates |
-| ArrayBuffer / DataView | Reading raw binary image bytes |
-| Blob / URL API | Image preview and JSON download |
+| Vanilla JavaScript (ES6+, File API)     | File handling and DOM updates         |
+| ArrayBuffer / DataView                  | Reading raw binary image bytes        |
+| Blob / URL API                          | Image preview and JSON download       |
 
 ---
 

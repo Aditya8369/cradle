@@ -11,7 +11,7 @@ const NAVBAR_SOURCE = fs.readFileSync(
 
 function createElementFactory() {
   const elements = [];
-  
+
   function createElement(tagName = "div") {
     const attributes = new Map();
     const children = [];
@@ -79,7 +79,10 @@ function createElementFactory() {
       },
       querySelector(selector) {
         if (selector === ".cradle-navbar__drawer-link") {
-          return children.find(c => c.className && c.className.includes("cradle-navbar__drawer-link"));
+          return children.find(
+            c =>
+              c.className && c.className.includes("cradle-navbar__drawer-link")
+          );
         }
         return null;
       },
@@ -121,9 +124,9 @@ function loadNavbar(autoUpgradeElements = []) {
 
   const window = {
     document,
-    location: { pathname: "/" }
+    location: { pathname: "/" },
   };
-  
+
   const context = {
     window,
     document,
@@ -152,7 +155,7 @@ test("CradleNavbar.create creates navbar with logo and basic structure", () => {
   assert.ok(brand.classList.contains("cradle-navbar__brand"));
   assert.equal(brand.href, "/home");
   assert.equal(brand.getAttribute("aria-label"), "TestLogo");
-  
+
   const logoText = brand.children[0];
   assert.equal(logoText.textContent, "TestLogo");
 });
@@ -170,13 +173,13 @@ test("CradleNavbar.create creates navigation links with active state", () => {
   const ul = element.children[1];
   assert.ok(ul.classList.contains("cradle-navbar__links"));
   assert.equal(ul.getAttribute("role"), "list");
-  
+
   const li1 = ul.children[0];
   const a1 = li1.children[0];
   assert.equal(a1.textContent, "Home");
   assert.equal(a1.href, "/");
   assert.equal(a1.classList.contains("cradle-navbar__link--active"), false);
-  
+
   const li2 = ul.children[1];
   const a2 = li2.children[0];
   assert.equal(a2.textContent, "About");
@@ -188,10 +191,10 @@ test("CradleNavbar.create creates navigation links with active state", () => {
 test("CradleNavbar.create includes hamburger menu for responsive behavior", () => {
   const { navbar } = loadNavbar();
   const element = navbar.create({});
-  
+
   const actionsSlot = element.children[1];
   assert.ok(actionsSlot.classList.contains("cradle-navbar__actions"));
-  
+
   const burger = actionsSlot.children[0];
   assert.equal(burger.tagName, "BUTTON");
   assert.ok(burger.classList.contains("cradle-navbar__hamburger"));
@@ -203,14 +206,14 @@ test("CradleNavbar.create generates mobile drawer with accessible links", () => 
   const { navbar } = loadNavbar();
   const element = navbar.create({
     links: [{ label: "Contact", href: "/contact" }],
-    currentRoute: "/contact"
+    currentRoute: "/contact",
   });
-  
+
   const drawer = element._drawer;
   assert.ok(drawer.classList.contains("cradle-navbar__drawer"));
   assert.equal(drawer.getAttribute("role"), "menu");
   assert.equal(drawer.getAttribute("aria-hidden"), "true");
-  
+
   const link = drawer.children[0];
   assert.equal(link.textContent, "Contact");
   assert.equal(link.getAttribute("role"), "menuitem");

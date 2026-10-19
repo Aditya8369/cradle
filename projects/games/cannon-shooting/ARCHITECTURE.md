@@ -100,12 +100,12 @@ UI event bindings, HUD update controller, vanilla-JS animation loops.
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure for HUD, cannons, and controls |
-| CSS3 | Visual styling of cannons, HUD banner, road, and countdown |
-| Vanilla JavaScript | Game controller logic and event handlers |
-| jQuery 3.4.1 (CDN) | Animation loops and DOM interactions |
+| Technology         | Purpose                                                    |
+| ------------------ | ---------------------------------------------------------- |
+| HTML5              | Page structure for HUD, cannons, and controls              |
+| CSS3               | Visual styling of cannons, HUD banner, road, and countdown |
+| Vanilla JavaScript | Game controller logic and event handlers                   |
+| jQuery 3.4.1 (CDN) | Animation loops and DOM interactions                       |
 
 ---
 
@@ -139,9 +139,9 @@ UI event bindings, HUD update controller, vanilla-JS animation loops.
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|---|---|---|---|
-| jQuery | 3.4.1 | CDN (`<script>` tag) | DOM events and animation |
+| Dependency | Version | How loaded           | Purpose                  |
+| ---------- | ------- | -------------------- | ------------------------ |
+| jQuery     | 3.4.1   | CDN (`<script>` tag) | DOM events and animation |
 
 ---
 
@@ -151,8 +151,8 @@ Audio samples are loaded from external origins at runtime via the `HTMLAudioElem
 
 ### Trusted Origins
 
-| Origin | Purpose |
-|---|---|
+| Origin                   | Purpose                                  |
+| ------------------------ | ---------------------------------------- |
 | `https://soundbible.com` | Free sound effects (hit and fire sounds) |
 
 ### Pinned Assets

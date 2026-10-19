@@ -41,11 +41,11 @@ The project follows a unidirectional data flow centered around the `angleDeg` st
 
 ## Component Breakdown
 
-| File | Responsibility |
-|---|---|
-| `index.html` | Defines the canvas surface and the panels for displaying trig values and controls |
-| `script.js` | Manages the state, handles canvas drawing, calculates trig values, and manages user events |
-| `style.css` | Handles the layout, including the side panels and the "trig bars" visualization |
+| File         | Responsibility                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| `index.html` | Defines the canvas surface and the panels for displaying trig values and controls          |
+| `script.js`  | Manages the state, handles canvas drawing, calculates trig values, and manages user events |
+| `style.css`  | Handles the layout, including the side panels and the "trig bars" visualization            |
 
 ---
 
@@ -85,12 +85,12 @@ call updateValues()
 
 ## Technologies Used
 
-| Technology | Purpose |
-|---|---|
-| HTML5 | UI structure and canvas element |
-| CSS3 | Styling, layouts, and responsive design |
+| Technology        | Purpose                                                   |
+| ----------------- | --------------------------------------------------------- |
+| HTML5             | UI structure and canvas element                           |
+| CSS3              | Styling, layouts, and responsive design                   |
 | JavaScript (ES6+) | State management, math calculations, and canvas rendering |
-| Canvas 2D API | High-performance 2D graphics rendering |
+| Canvas 2D API     | High-performance 2D graphics rendering                    |
 
 ---
 

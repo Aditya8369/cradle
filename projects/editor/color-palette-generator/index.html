@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="canonical" href="https://facelessism.github.io/cradle/projects/projects/editor/color-palette-generator/index.html/" />
-     
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/projects/editor/color-palette-generator/index.html/"
+    />
+
     <title>Color Palette Generator</title>
-    <meta name="description" content="Color Palette Generator is an interactive browser-based tool for creating harmonious color palettes" />
+    <meta
+      name="description"
+      content="Color Palette Generator is an interactive browser-based tool for creating harmonious color palettes"
+    />
 
     <meta
       name="description"
@@ -20,10 +26,16 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
       rel="stylesheet"
     />
-      <meta property="og:title" content="Color Palette Generator" />
-      <meta property="og:url" content="https://facelessism.github.io/cradle/projects/projects/editor/color-palette-generator/index.html/" />
-    <meta property="og:description" content="Color Palette Generator is an interactive browser-based tool for creating harmonious color palettes" />
-</head>
+    <meta property="og:title" content="Color Palette Generator" />
+    <meta
+      property="og:url"
+      content="https://facelessism.github.io/cradle/projects/projects/editor/color-palette-generator/index.html/"
+    />
+    <meta
+      property="og:description"
+      content="Color Palette Generator is an interactive browser-based tool for creating harmonious color palettes"
+    />
+  </head>
   <body>
     <div class="glow-bg"></div>
 
@@ -45,7 +57,12 @@
           <div class="card control-card">
             <h2>🎯 Base Color</h2>
             <div class="color-picker-row">
-              <input type="color" id="baseColor" value="#38bdf8" />
+              <input
+                type="color"
+                id="baseColor"
+                value="#38bdf8"
+                aria-label="Base color"
+              />
               <div class="hex-input-group">
                 <span class="prefix">#</span>
                 <input
@@ -56,7 +73,11 @@
                   placeholder="hex"
                 />
               </div>
-              <button class="btn btn-random" id="randomBtn" title="Random color">
+              <button
+                class="btn btn-random"
+                id="randomBtn"
+                title="Random color"
+              >
                 🎲
               </button>
             </div>
@@ -114,17 +135,32 @@
             <div class="contrast-controls">
               <div class="contrast-pick">
                 <label>Background</label>
-                <input type="color" id="contrastBg" value="#ffffff" />
+                <input
+                  type="color"
+                  id="contrastBg"
+                  value="#ffffff"
+                  aria-label="Contrast background color"
+                />
               </div>
               <div class="contrast-pick">
                 <label>Foreground</label>
-                <input type="color" id="contrastFg" value="#38bdf8" />
+                <input
+                  type="color"
+                  id="contrastFg"
+                  value="#38bdf8"
+                  aria-label="Contrast foreground color"
+                />
               </div>
               <button class="btn btn-action" id="useFromPalette">
                 Use from palette
               </button>
             </div>
-            <div class="contrast-results" id="contrastResults" role="status" aria-live="polite">
+            <div
+              class="contrast-results"
+              id="contrastResults"
+              role="status"
+              aria-live="polite"
+            >
               <!-- Contrast ratio & pass/fail badges -->
             </div>
             <div class="contrast-preview" id="contrastPreview">
@@ -138,8 +174,12 @@
           <div class="card export-card">
             <h2>📦 Export Palette</h2>
             <div class="export-tabs">
-              <button class="btn btn-tab active" data-format="css">CSS Vars</button>
-              <button class="btn btn-tab" data-format="tailwind">Tailwind</button>
+              <button class="btn btn-tab active" data-format="css">
+                CSS Vars
+              </button>
+              <button class="btn btn-tab" data-format="tailwind">
+                Tailwind
+              </button>
               <button class="btn btn-tab" data-format="json">JSON</button>
               <button class="btn btn-tab" data-format="scss">SCSS</button>
             </div>

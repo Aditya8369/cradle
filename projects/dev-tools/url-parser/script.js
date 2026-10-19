@@ -3,7 +3,8 @@ const button = document.getElementById("parseBtn");
 const result = document.getElementById("result");
 
 // Pure helpers live in urlEngine.js (loaded first) so they can be unit-tested.
-const { detectURLType, detectFileType, escapeHTML, encodeURLComponentSafe } = URLEngine;
+const { detectURLType, detectFileType, escapeHTML, encodeURLComponentSafe } =
+  URLEngine;
 
 button.addEventListener("click", parseURL);
 
@@ -15,7 +16,10 @@ function parseURL() {
       throw new Error("Empty URL");
     }
 
-    if (typeof URLEngine !== "undefined" && typeof URLEngine.parseURLComponents === "function") {
+    if (
+      typeof URLEngine !== "undefined" &&
+      typeof URLEngine.parseURLComponents === "function"
+    ) {
       const { components, error } = URLEngine.parseURLComponents(value);
       if (error || !components) {
         throw new Error(error || "Invalid URL");
@@ -72,7 +76,9 @@ function parseURL() {
       Extension: extension,
       FileType: detectFileType(extension),
       Search: url.search ? encodeURLComponentSafe(url.search) : "None",
-      Fragment: url.hash ? encodeURLComponentSafe(url.hash.replace("#", "")) : "None",
+      Fragment: url.hash
+        ? encodeURLComponentSafe(url.hash.replace("#", ""))
+        : "None",
     };
 
     result.innerHTML = "";
@@ -91,7 +97,10 @@ function parseURL() {
       `;
 
       queryParams.forEach(param => {
-        createRow(encodeURLComponentSafe(param.key), encodeURLComponentSafe(param.value));
+        createRow(
+          encodeURLComponentSafe(param.key),
+          encodeURLComponentSafe(param.value)
+        );
       });
     }
   } catch (error) {
@@ -136,4 +145,3 @@ function createRow(label, value) {
 
   result.appendChild(div);
 }
-

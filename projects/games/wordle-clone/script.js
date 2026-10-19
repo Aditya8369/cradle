@@ -11,28 +11,27 @@ const MAX_ATTEMPTS = 6;
 */
 
 const WORDS = [
-    "CRANE",
-    "PLANT",
-    "LIGHT",
-    "HOUSE",
-    "WORLD",
-    "APPLE",
-    "TRAIN",
-    "BRAVE",
-    "SMILE",
-    "GRAPE",
-    "MOUSE",
-    "STONE",
-    "WATER",
-    "HEART",
-    "CLOUD",
-    "SPACE",
-    "GREEN",
-    "CHAIR",
-    "BRAIN",
-    "DREAM"
+  "CRANE",
+  "PLANT",
+  "LIGHT",
+  "HOUSE",
+  "WORLD",
+  "APPLE",
+  "TRAIN",
+  "BRAVE",
+  "SMILE",
+  "GRAPE",
+  "MOUSE",
+  "STONE",
+  "WATER",
+  "HEART",
+  "CLOUD",
+  "SPACE",
+  "GREEN",
+  "CHAIR",
+  "BRAIN",
+  "DREAM",
 ];
-
 
 /* =========================
    Game State
@@ -44,7 +43,6 @@ let currentRow = 0;
 
 let gameOver = false;
 
-
 /* =========================
    DOM Elements
 ========================= */
@@ -53,475 +51,343 @@ const rows = document.querySelectorAll(".row");
 
 const message = document.getElementById("message");
 
-const attemptCounter =
-    document.getElementById("attemptCounter");
+const attemptCounter = document.getElementById("attemptCounter");
 
-const gameStatus =
-    document.getElementById("gameStatus");
+const gameStatus = document.getElementById("gameStatus");
 
-const restartBtn =
-    document.getElementById("restartBtn");
+const restartBtn = document.getElementById("restartBtn");
 
-const themeBtn =
-    document.getElementById("themeBtn");
+const themeBtn = document.getElementById("themeBtn");
 
-const keyboardButtons =
-    document.querySelectorAll(".keyboard button");
-
+const keyboardButtons = document.querySelectorAll(".keyboard button");
 
 /* =========================
    Start Game
 ========================= */
 
 function startGame() {
+  answer = WORDS[Math.floor(Math.random() * WORDS.length)];
 
-    answer =
-        WORDS[Math.floor(Math.random() * WORDS.length)];
+  currentGuess = "";
+  currentRow = 0;
+  gameOver = false;
 
-    currentGuess = "";
-    currentRow = 0;
-    gameOver = false;
+  message.textContent = "";
 
-    message.textContent = "";
+  gameStatus.textContent = "Playing";
 
-    gameStatus.textContent = "Playing";
+  attemptCounter.textContent = `0 / ${MAX_ATTEMPTS}`;
 
-    attemptCounter.textContent =
-        `0 / ${MAX_ATTEMPTS}`;
+  clearBoard();
 
-    clearBoard();
-
-    resetKeyboard();
+  resetKeyboard();
 }
-
 
 /* =========================
    Clear Board
 ========================= */
 
 function clearBoard() {
+  document.querySelectorAll(".tile").forEach(tile => {
+    tile.textContent = "";
 
-    document.querySelectorAll(".tile").forEach(tile => {
-
-        tile.textContent = "";
-
-        tile.className = "tile";
-
-    });
+    tile.className = "tile";
+  });
 }
-
 
 /* =========================
    Reset Keyboard
 ========================= */
 
 function resetKeyboard() {
-
-    keyboardButtons.forEach(button => {
-
-        button.classList.remove(
-            "correct",
-            "present",
-            "absent"
-        );
-
-    });
+  keyboardButtons.forEach(button => {
+    button.classList.remove("correct", "present", "absent");
+  });
 }
-
 
 /* =========================
    Add Letter
 ========================= */
 
 function addLetter(letter) {
+  if (gameOver) return;
 
-    if (gameOver) return;
+  if (currentGuess.length >= WORD_LENGTH) {
+    return;
+  }
 
-    if (currentGuess.length >= WORD_LENGTH) {
-        return;
-    }
+  currentGuess += letter;
 
-    currentGuess += letter;
+  const tiles = rows[currentRow].querySelectorAll(".tile");
 
-    const tiles = rows[currentRow].querySelectorAll(".tile");
+  const index = currentGuess.length - 1;
 
-    const index = currentGuess.length - 1;
+  tiles[index].textContent = letter;
 
-    tiles[index].textContent = letter;
-
-    tiles[index].classList.add("filled");
+  tiles[index].classList.add("filled");
 }
-
 
 /* =========================
    Remove Letter
 ========================= */
 
 function removeLetter() {
+  if (gameOver) return;
 
-    if (gameOver) return;
+  if (currentGuess.length === 0) {
+    return;
+  }
 
-    if (currentGuess.length === 0) {
-        return;
-    }
+  const index = currentGuess.length - 1;
 
-    const index = currentGuess.length - 1;
+  const tiles = rows[currentRow].querySelectorAll(".tile");
 
-    const tiles =
-        rows[currentRow].querySelectorAll(".tile");
+  tiles[index].textContent = "";
 
-    tiles[index].textContent = "";
+  tiles[index].classList.remove("filled");
 
-    tiles[index].classList.remove("filled");
-
-    currentGuess =
-        currentGuess.slice(0, -1);
+  currentGuess = currentGuess.slice(0, -1);
 }
-
 
 /* =========================
    Submit Guess
 ========================= */
 
 function submitGuess() {
+  if (gameOver) return;
 
-    if (gameOver) return;
+  if (currentGuess.length !== WORD_LENGTH) {
+    showMessage("Enter a five-letter word.");
 
-    if (currentGuess.length !== WORD_LENGTH) {
+    return;
+  }
 
-        showMessage(
-            "Enter a five-letter word."
-        );
+  evaluateGuess();
 
-        return;
-    }
+  currentRow++;
 
-    evaluateGuess();
+  attemptCounter.textContent = `${currentRow} / ${MAX_ATTEMPTS}`;
 
-    currentRow++;
+  if (currentGuess === answer) {
+    endGame(true);
 
-    attemptCounter.textContent =
-        `${currentRow} / ${MAX_ATTEMPTS}`;
+    return;
+  }
 
-    if (currentGuess === answer) {
+  if (currentRow === MAX_ATTEMPTS) {
+    endGame(false);
 
-        endGame(true);
+    return;
+  }
 
-        return;
-    }
-
-    if (currentRow === MAX_ATTEMPTS) {
-
-        endGame(false);
-
-        return;
-    }
-
-    currentGuess = "";
+  currentGuess = "";
 }
-
 
 /* =========================
    Evaluate Guess
 ========================= */
 
 function evaluateGuess() {
+  const tiles = rows[currentRow].querySelectorAll(".tile");
 
-    const tiles =
-        rows[currentRow].querySelectorAll(".tile");
+  const letters = answer.split("");
 
-    const letters =
-        answer.split("");
+  const guess = currentGuess.split("");
 
-    const guess =
-        currentGuess.split("");
+  const result = Array(WORD_LENGTH).fill("absent");
 
-    const result =
-        Array(WORD_LENGTH).fill("absent");
-
-
-    /*
+  /*
       First pass:
       Find exact matches.
     */
 
-    guess.forEach((letter, index) => {
+  guess.forEach((letter, index) => {
+    if (letter === letters[index]) {
+      result[index] = "correct";
 
-        if (letter === letters[index]) {
+      letters[index] = null;
+    }
+  });
 
-            result[index] = "correct";
-
-            letters[index] = null;
-        }
-
-    });
-
-
-    /*
+  /*
       Second pass:
       Find letters in wrong positions.
     */
 
-    guess.forEach((letter, index) => {
+  guess.forEach((letter, index) => {
+    if (result[index] === "correct") {
+      return;
+    }
 
-        if (result[index] === "correct") {
-            return;
-        }
+    const foundIndex = letters.indexOf(letter);
 
-        const foundIndex =
-            letters.indexOf(letter);
+    if (foundIndex !== -1) {
+      result[index] = "present";
 
-        if (foundIndex !== -1) {
+      letters[foundIndex] = null;
+    }
+  });
 
-            result[index] = "present";
-
-            letters[foundIndex] = null;
-        }
-
-    });
-
-
-    /*
+  /*
       Apply tile results.
     */
 
-    result.forEach((status, index) => {
+  result.forEach((status, index) => {
+    setTimeout(() => {
+      tiles[index].classList.remove("filled");
 
-        setTimeout(() => {
+      tiles[index].classList.add(status);
 
-            tiles[index].classList.remove("filled");
-
-            tiles[index].classList.add(status);
-
-            updateKeyboard(
-                guess[index],
-                status
-            );
-
-        }, index * 100);
-
-    });
+      updateKeyboard(guess[index], status);
+    }, index * 100);
+  });
 }
-
 
 /* =========================
    Keyboard Status
 ========================= */
 
 function updateKeyboard(letter, status) {
+  const button = document.querySelector(`[data-key="${letter}"]`);
 
-    const button =
-        document.querySelector(
-            `[data-key="${letter}"]`
-        );
+  if (!button) return;
 
-    if (!button) return;
-
-
-    /*
+  /*
       Never downgrade a better result.
   
       correct > present > absent
     */
 
-    if (
-        button.classList.contains("correct")
-    ) {
-        return;
-    }
+  if (button.classList.contains("correct")) {
+    return;
+  }
 
-    if (
-        button.classList.contains("present") &&
-        status === "absent"
-    ) {
-        return;
-    }
+  if (button.classList.contains("present") && status === "absent") {
+    return;
+  }
 
-    button.classList.remove(
-        "correct",
-        "present",
-        "absent"
-    );
+  button.classList.remove("correct", "present", "absent");
 
-    button.classList.add(status);
+  button.classList.add(status);
 }
-
 
 /* =========================
    End Game
 ========================= */
 
 function endGame(won) {
+  gameOver = true;
 
-    gameOver = true;
+  if (won) {
+    gameStatus.textContent = "Won";
 
-    if (won) {
+    showMessage(`Nice! You found "${answer}".`);
+  } else {
+    gameStatus.textContent = "Game Over";
 
-        gameStatus.textContent = "Won";
-
-        showMessage(
-            `Nice! You found "${answer}".`
-        );
-
-    } else {
-
-        gameStatus.textContent = "Game Over";
-
-        showMessage(
-            `The word was "${answer}".`
-        );
-
-    }
-
+    showMessage(`The word was "${answer}".`);
+  }
 }
-
 
 /* =========================
    Message Helper
 ========================= */
 
 function showMessage(text) {
+  message.textContent = text;
 
-    message.textContent = text;
-
-    setTimeout(() => {
-
-        if (!gameOver) {
-            message.textContent = "";
-        }
-
-    }, 2000);
+  setTimeout(() => {
+    if (!gameOver) {
+      message.textContent = "";
+    }
+  }, 2000);
 }
-
 
 /* =========================
    Keyboard Click
 ========================= */
 
 keyboardButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const key = button.dataset.key;
 
-    button.addEventListener("click", () => {
-
-        const key =
-            button.dataset.key;
-
-        handleKey(key);
-
-    });
-
+    handleKey(key);
+  });
 });
-
 
 /* =========================
    Physical Keyboard
 ========================= */
 
-document.addEventListener(
-    "keydown",
-    event => {
+document.addEventListener("keydown", event => {
+  let key = event.key.toUpperCase();
 
-        let key =
-            event.key.toUpperCase();
+  if (key === "BACKSPACE") {
+    removeLetter();
 
-        if (key === "BACKSPACE") {
+    return;
+  }
 
-            removeLetter();
+  if (key === "ENTER") {
+    submitGuess();
 
-            return;
-        }
+    return;
+  }
 
-        if (key === "ENTER") {
-
-            submitGuess();
-
-            return;
-        }
-
-        if (/^[A-Z]$/.test(key)) {
-
-            addLetter(key);
-
-        }
-
-    }
-);
-
+  if (/^[A-Z]$/.test(key)) {
+    addLetter(key);
+  }
+});
 
 /* =========================
    Handle Keyboard Input
 ========================= */
 
 function handleKey(key) {
+  if (key === "ENTER") {
+    submitGuess();
 
-    if (key === "ENTER") {
+    return;
+  }
 
-        submitGuess();
+  if (key === "BACKSPACE") {
+    removeLetter();
 
-        return;
-    }
+    return;
+  }
 
-    if (key === "BACKSPACE") {
-
-        removeLetter();
-
-        return;
-    }
-
-    if (/^[A-Z]$/.test(key)) {
-
-        addLetter(key);
-
-    }
+  if (/^[A-Z]$/.test(key)) {
+    addLetter(key);
+  }
 }
-
 
 /* =========================
    Restart
 ========================= */
 
-restartBtn.addEventListener(
-    "click",
-    startGame
-);
-
+restartBtn.addEventListener("click", startGame);
 
 /* =========================
    Theme Toggle
 ========================= */
 
-themeBtn.addEventListener(
-    "click",
-    () => {
+themeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
 
-        document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
 
-        const isDark =
-            document.body.classList.contains("dark");
-
-        localStorage.setItem(
-            "cradle-wordle-theme",
-            isDark ? "dark" : "light"
-        );
-
-    }
-);
-
+  localStorage.setItem("cradle-wordle-theme", isDark ? "dark" : "light");
+});
 
 /* =========================
    Load Saved Theme
 ========================= */
 
-const savedTheme =
-    localStorage.getItem(
-        "cradle-wordle-theme"
-    );
+const savedTheme = localStorage.getItem("cradle-wordle-theme");
 
 if (savedTheme === "dark") {
-
-    document.body.classList.add("dark");
-
+  document.body.classList.add("dark");
 }
-
 
 /* =========================
    Initialize

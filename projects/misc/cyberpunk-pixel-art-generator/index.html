@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="canonical" href="https://facelessism.github.io/cradle/projects/projects/misc/cyberpunk-pixel-art-generator/index.html/" />
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/projects/misc/cyberpunk-pixel-art-generator/index.html/"
+    />
 
     <title>Cyberpunk Pixel Art Generator</title>
-    <meta name="description" content="The Cyberpunk Pixel Art Generator is a specialized canvas-based pixel art editor designed with a neon cyberpunk aesthetic. It provides a suite of professional d..." />
+    <meta
+      name="description"
+      content="The Cyberpunk Pixel Art Generator is a specialized canvas-based pixel art editor designed with a neon cyberpunk aesthetic. It provides a suite of professional d..."
+    />
 
     <meta
       name="description"
@@ -29,8 +35,11 @@
     <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="../../../src/components/ui/tokens.css" />
-      <meta property="og:description" content="The Cyberpunk Pixel Art Generator is a specialized canvas-based pixel art editor designed with a neon cyberpunk aesthetic. It provides a suite of professional d..." />
-</head>
+    <meta
+      property="og:description"
+      content="The Cyberpunk Pixel Art Generator is a specialized canvas-based pixel art editor designed with a neon cyberpunk aesthetic. It provides a suite of professional d..."
+    />
+  </head>
 
   <body>
     <main class="app-shell">
@@ -120,6 +129,7 @@
                 max="4"
                 value="1"
                 class="range-input"
+                aria-label="Brush size"
               />
               <span id="brushSizeLabel" class="range-label">1px</span>
             </div>
@@ -135,6 +145,7 @@
                 id="customColor"
                 value="#ff00ff"
                 class="color-picker"
+                aria-label="Custom drawing color"
               />
               <span id="colorHex" class="color-hex">#ff00ff</span>
             </div>
@@ -189,7 +200,13 @@
       </div>
 
       <!-- Hidden file input for import -->
-      <input type="file" id="fileInput" accept=".json" hidden />
+      <input
+        type="file"
+        id="fileInput"
+        accept=".json"
+        hidden
+        aria-label="Import pixel art from JSON file"
+      />
     </main>
 
     <script

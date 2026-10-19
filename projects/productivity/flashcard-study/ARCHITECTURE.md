@@ -50,11 +50,11 @@ graph TD
 
 ## Component Breakdown
 
-| File | Responsibility |
-|------|---------------|
-| `index.html` | Page structure: stats bar, deck grid, study view with flashcard, 3 modals (deck, card, detail), import/export buttons, footer |
-| `script.js` | All application logic: data persistence, deck/card CRUD, study mode with shuffle and scoring, flip animation, import/export, keyboard shortcuts |
-| `style.css` | Visual design: deck cards with progress bars, 3D flashcard flip, modals, responsive grid, Cradle token usage |
+| File         | Responsibility                                                                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.html` | Page structure: stats bar, deck grid, study view with flashcard, 3 modals (deck, card, detail), import/export buttons, footer                   |
+| `script.js`  | All application logic: data persistence, deck/card CRUD, study mode with shuffle and scoring, flip animation, import/export, keyboard shortcuts |
+| `style.css`  | Visual design: deck cards with progress bars, 3D flashcard flip, modals, responsive grid, Cradle token usage                                    |
 
 ---
 
@@ -102,16 +102,16 @@ Every action persists to localStorage
 
 ## Technologies Used
 
-| Technology | Purpose |
-|------------|---------|
-| HTML5 | Page structure, semantic markup, aria attributes |
-| CSS3 (Custom Properties, Grid, Flexbox, 3D transforms) | Layout, flip animation, responsive design |
-| Vanilla JavaScript (ES6+) | Application logic, DOM manipulation, state management |
-| localStorage API | Persistent storage for decks, cards, and session count |
-| Cradle `tokens.css` | Shared design token system |
-| Cradle `BackToHome.js` | Back-to-home navigation |
-| Font Awesome 6.x (CDN) | Icons |
-| Google Fonts (Space Grotesk, Inter) | Typography |
+| Technology                                             | Purpose                                                |
+| ------------------------------------------------------ | ------------------------------------------------------ |
+| HTML5                                                  | Page structure, semantic markup, aria attributes       |
+| CSS3 (Custom Properties, Grid, Flexbox, 3D transforms) | Layout, flip animation, responsive design              |
+| Vanilla JavaScript (ES6+)                              | Application logic, DOM manipulation, state management  |
+| localStorage API                                       | Persistent storage for decks, cards, and session count |
+| Cradle `tokens.css`                                    | Shared design token system                             |
+| Cradle `BackToHome.js`                                 | Back-to-home navigation                                |
+| Font Awesome 6.x (CDN)                                 | Icons                                                  |
+| Google Fonts (Space Grotesk, Inter)                    | Typography                                             |
 
 ---
 
@@ -167,12 +167,12 @@ Every action persists to localStorage
 
 ## Dependencies
 
-| Dependency | Version | How loaded | Purpose |
-|------------|---------|------------|---------|
-| Cradle `tokens.css` | — | Local `<link>` | Design tokens |
-| Cradle `BackToHome.js` | — | Local `<script>` | Navigation |
-| Font Awesome | 6.5.1 | CDN | Icons |
-| Google Fonts (Space Grotesk, Inter) | — | Google Fonts CDN | Typography |
+| Dependency                          | Version | How loaded       | Purpose       |
+| ----------------------------------- | ------- | ---------------- | ------------- |
+| Cradle `tokens.css`                 | —       | Local `<link>`   | Design tokens |
+| Cradle `BackToHome.js`              | —       | Local `<script>` | Navigation    |
+| Font Awesome                        | 6.5.1   | CDN              | Icons         |
+| Google Fonts (Space Grotesk, Inter) | —       | Google Fonts CDN | Typography    |
 
 ---
 
