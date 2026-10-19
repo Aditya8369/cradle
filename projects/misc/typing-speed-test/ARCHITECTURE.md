@@ -215,3 +215,9 @@ Results section shown; history entry saved to localStorage
 - **Third-Party Assets:**
   - Font Awesome 6.5.1 — [Font Awesome](https://fontawesome.com) (free icons)
   - Space Grotesk, Inter, JetBrains Mono — [Google Fonts](https://fonts.google.com) (OFL License)
+
+## References
+
+- [MDN: localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- [MDN: KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent)
+- [Cradle contribution guide](../../../CONTRIBUTING.md)

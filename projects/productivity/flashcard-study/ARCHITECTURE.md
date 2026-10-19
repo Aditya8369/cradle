@@ -212,3 +212,9 @@ Every action persists to localStorage
 - **Third-Party Assets:**
   - Font Awesome 6.5.1 — [Font Awesome](https://fontawesome.com) (free icons)
   - 'Space Grotesk' and 'Inter' fonts — [Google Fonts](https://fonts.google.com) (OFL License)
+
+## References
+
+- [MDN: localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- [MDN: CSS 3D transforms](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style)
+- [Cradle contribution guide](../../../CONTRIBUTING.md)
