@@ -1,8 +1,10 @@
-# Cradle ⟵⁠(⁠o⁠_⁠O⁠)
-
-[![Tests](https://github.com/Facelessism/cradle/actions/workflows/test.yml/badge.svg)](https://github.com/Facelessism/cradle/actions/workflows/test.yml)
+# Cradle ⟵⁠(⁠o⁠_⁠O⁠) [![Tests](https://github.com/Facelessism/cradle/actions/workflows/test.yml/badge.svg)](https://github.com/Facelessism/cradle/actions/workflows/test.yml)
 
 A personal collection of small ideas, experiments, and geeky projects I'm exploring and building.
+
+## Badges of Participation
+[![Nexus Spring of Code](https://img.shields.io/badge/Nexus%20Spring%20of%20Code-2026-blue)](https://nexusspringofcode.com)
+[![ECSoC26](https://img.shields.io/badge/ECSoC26-2026-green)](https://ecsoc26.org)
 
 ## What this repository contains
 
@@ -182,6 +184,9 @@ Before getting started, please read our [Contributing Guide](CONTRIBUTING.md) fo
 ## 📄 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+## Note
+This project is part of **Nexus Spring of Code 2026**.
 
 ## Very Important Note
 
