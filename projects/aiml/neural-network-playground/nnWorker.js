@@ -10,14 +10,20 @@ self.onmessage = function (e) {
   const { type, payload } = e.data;
   switch (type) {
     case "INIT_NETWORK": {
-      const { layers, activationName, lr } = payload;
+      const { layers, activationName, lr, weights, biases } = payload;
       net = new NeuralNetwork(layers, activationName, lr);
+      if (Array.isArray(weights) && Array.isArray(biases)) {
+        net.weights = weights;
+        net.biases = biases;
+      }
       self.postMessage({ type: "NETWORK_INITED" });
       break;
     }
     case "INIT_DATA": {
-      const { datasetType, numPoints, noise, customData } = payload;
-      if (datasetType === "custom") {
+      const { datasetType, numPoints, noise, customData, points } = payload;
+      if (Array.isArray(points)) {
+        dataset = points.map(p => [...p]);
+      } else if (datasetType === "custom") {
         dataset = customData.map(p => [...p]);
       } else {
         dataset = generateDataset(datasetType, numPoints, noise);
@@ -27,7 +33,10 @@ self.onmessage = function (e) {
       const inputs = dataset.map(d => [d[0], d[1]]);
       targets = dataset.map(d => d[2]);
 
-      self.postMessage({ type: "DATA_INITED", count: dataset.length });
+      self.postMessage({
+        type: "DATA_INITED",
+        payload: { count: dataset.length },
+      });
       break;
     }
     case "TRAIN_STEP": {

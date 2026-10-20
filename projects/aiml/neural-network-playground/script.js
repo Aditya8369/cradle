@@ -37,6 +37,12 @@ const lCtx = lossCanvas ? lossCanvas.getContext("2d") : null;
 // ── INITIALIZATION ───────────────────────────────────────────
 function initNetwork() {
   const layers = [2, ...state.hiddenLayers, 1];
+  state.net = new NeuralNetwork(
+    layers,
+    state.activationName,
+    state.learningRate
+  );
+
   if (state.worker) {
     state.worker.postMessage({
       type: "INIT_NETWORK",
@@ -44,15 +50,10 @@ function initNetwork() {
         layers,
         activationName: state.activationName,
         lr: state.learningRate,
+        weights: state.net.weights,
+        biases: state.net.biases,
       },
     });
-  } else {
-    // Fallback for first-time init before worker is ready
-    state.net = new NeuralNetwork(
-      layers,
-      state.activationName,
-      state.learningRate
-    );
   }
 
   state.epoch = 0;
@@ -75,6 +76,7 @@ function initData() {
         numPoints: state.numPoints,
         noise: state.noise,
         customData: state.customData,
+        points: state.data,
       },
     });
   }
@@ -86,6 +88,16 @@ function updateStats(epoch, loss, acc) {
     typeof loss === "number" ? loss.toFixed(4) : loss;
   $("accuracyValue").textContent =
     typeof acc === "number" ? (acc * 100).toFixed(1) + "%" : acc;
+}
+
+// ── EXPORT STATUS HELPERS ────────────────────────────────────
+function showExportError(message) {
+  $("exportStatusMessage").textContent = message;
+  $("exportStatus").style.display = "flex";
+}
+
+function hideExportError() {
+  $("exportStatus").style.display = "none";
 }
 
 // ── RENDERING: DECISION BOUNDARY ─────────────────────────────
@@ -318,7 +330,12 @@ function announceTrainingStatus(message) {
 }
 
 function trainStep() {
-  if (!state.training || !state.worker) return;
+  if (!state.training) return;
+
+  if (!state.worker) {
+    trainStepOnMainThread();
+    return;
+  }
 
   state.worker.postMessage({
     type: "TRAIN_STEP",
@@ -332,15 +349,62 @@ function trainStep() {
   // in the worker's response handler to prevent overlapping requests.
 }
 
+/**
+ * Compatibility path for browsers without Web Worker support. Runs a
+ * capped number of epochs per frame so the page stays responsive.
+ */
+function trainStepOnMainThread() {
+  if (!state.net || state.data.length === 0) {
+    pauseTraining();
+    announceTrainingStatus(
+      "Training stopped because the network or dataset is not ready."
+    );
+    return;
+  }
+
+  const inputs = state.data.map(point => [point[0], point[1]]);
+  const targets = state.data.map(point => point[2]);
+  const steps = Math.min(Math.max(state.speed, 1), 5);
+  let lastLoss = 0;
+  let lastAccuracy = 0;
+
+  for (let step = 0; step < steps; step++) {
+    const result = state.net.train(inputs, targets, state.batchSize);
+    lastLoss = result.loss;
+    lastAccuracy = result.accuracy;
+    state.epoch += 1;
+  }
+
+  if (
+    state.lossHistory.length === 0 ||
+    state.epoch % Math.max(1, Math.floor(state.speed / 5)) === 0
+  ) {
+    state.lossHistory.push(lastLoss);
+    if (state.lossHistory.length > 500) state.lossHistory.shift();
+  }
+
+  updateStats(state.epoch, lastLoss, lastAccuracy);
+  renderAll();
+
+  if (state.training) {
+    state.animId = requestAnimationFrame(trainStep);
+  }
+}
+
 function startTraining() {
   if (state.training) return;
   if (!state.net) initNetwork();
+  if (state.data.length === 0) initData();
   state.training = true;
   $("btnTrain").disabled = true;
   $("btnPause").disabled = false;
   document.body.classList.add("training-active");
   hideExportError();
-  announceTrainingStatus("Training started.");
+  announceTrainingStatus(
+    state.worker
+      ? "Training started."
+      : "Training started in compatibility mode. Web Workers are unavailable."
+  );
   trainStep();
 }
 
@@ -388,60 +452,136 @@ function renderLayerUI() {
   });
 }
 
-function setupEvents() {
-  // Initialize Web Worker
-  state.worker = new Worker("nnWorker.js");
+function createTrainingWorker() {
+  if (typeof Worker === "undefined") return null;
 
-  state.worker.onmessage = e => {
-    const { type, payload } = e.data;
+  try {
+    return new Worker("nnWorker.js");
+  } catch (error) {
+    console.warn(
+      "Neural network worker could not be created; using main-thread training.",
+      error
+    );
+    return null;
+  }
+}
 
-    switch (type) {
-      case "NETWORK_INITED":
-        console.log("Worker: Network initialized");
-        break;
+function syncWorkerState() {
+  if (!state.worker) return;
 
-      case "DATA_INITED":
-        console.log(`Worker: Data initialized with ${payload} points`);
-        break;
+  const layers = [2, ...state.hiddenLayers, 1];
+  state.worker.postMessage({
+    type: "INIT_NETWORK",
+    payload: {
+      layers,
+      activationName: state.activationName,
+      lr: state.learningRate,
+      weights: state.net ? state.net.weights : undefined,
+      biases: state.net ? state.net.biases : undefined,
+    },
+  });
+  state.worker.postMessage({
+    type: "INIT_DATA",
+    payload: {
+      datasetType: state.dataset,
+      numPoints: state.numPoints,
+      noise: state.noise,
+      customData: state.customData,
+      points: state.data,
+    },
+  });
+}
 
-      case "TRAIN_STEP_COMPLETE": {
-        const { loss, accuracy, epochs, weights, biases } = payload;
+function handleWorkerError(event) {
+  const message = event && event.message ? event.message : "unknown error";
+  console.error("Neural network worker error:", message);
 
-        state.epoch += epochs;
-        if (
-          state.lossHistory.length === 0 ||
-          state.epoch % Math.max(1, Math.floor(state.speed / 5)) === 0
-        ) {
-          state.lossHistory.push(loss);
-          if (state.lossHistory.length > 500) state.lossHistory.shift();
-        }
-
-        updateStats(state.epoch, loss, accuracy);
-
-        // Synchronize weights back to main thread for rendering
-        if (state.net) {
-          state.net.weights = weights;
-          state.net.biases = biases;
-        } else {
-          // Reconstruct NeuralNetwork object to keep .predict() and .layers available
-          const layers = [2, ...state.hiddenLayers, 1];
-          state.net = new NeuralNetwork(
-            layers,
-            state.activationName,
-            state.learningRate
-          );
-          state.net.weights = weights;
-          state.net.biases = biases;
-        }
-
-        renderAll();
-        if (state.training) {
-          state.animId = requestAnimationFrame(trainStep);
-        }
-        break;
-      }
+  if (state.worker) {
+    try {
+      state.worker.terminate();
+    } catch (error) {
+      console.warn("Failed to terminate the neural network worker.", error);
     }
-  };
+    state.worker = null;
+  }
+
+  if (!state.net) initNetwork();
+  if (!state.training) return;
+
+  if (state.animId) {
+    cancelAnimationFrame(state.animId);
+    state.animId = null;
+  }
+  announceTrainingStatus(
+    "Worker failed. Continuing training on the main thread."
+  );
+  trainStep();
+}
+
+function setupEvents() {
+  state.worker = createTrainingWorker();
+
+  if (state.worker) {
+    state.worker.onmessage = e => {
+      const { type, payload } = e.data;
+
+      switch (type) {
+        case "NETWORK_INITED":
+          console.log("Worker: Network initialized");
+          break;
+
+        case "DATA_INITED": {
+          const count =
+            payload && Number.isFinite(payload.count) ? payload.count : 0;
+          console.log(`Worker: Data initialized with ${count} points`);
+          break;
+        }
+
+        case "TRAIN_STEP_COMPLETE": {
+          const { loss, accuracy, epochs, weights, biases } = payload;
+
+          state.epoch += epochs;
+          if (
+            state.lossHistory.length === 0 ||
+            state.epoch % Math.max(1, Math.floor(state.speed / 5)) === 0
+          ) {
+            state.lossHistory.push(loss);
+            if (state.lossHistory.length > 500) state.lossHistory.shift();
+          }
+
+          updateStats(state.epoch, loss, accuracy);
+
+          // Synchronize weights back to main thread for rendering
+          if (state.net) {
+            state.net.weights = weights;
+            state.net.biases = biases;
+          } else {
+            // Reconstruct NeuralNetwork object to keep .predict() and .layers available
+            const layers = [2, ...state.hiddenLayers, 1];
+            state.net = new NeuralNetwork(
+              layers,
+              state.activationName,
+              state.learningRate
+            );
+            state.net.weights = weights;
+            state.net.biases = biases;
+          }
+
+          renderAll();
+          if (state.training) {
+            state.animId = requestAnimationFrame(trainStep);
+          }
+          break;
+        }
+      }
+    };
+    state.worker.onerror = handleWorkerError;
+    syncWorkerState();
+  } else {
+    announceTrainingStatus(
+      "Web Workers are unavailable. Training will run on the main thread at a reduced rate."
+    );
+  }
   $("btnTrain").addEventListener("click", startTraining);
   $("btnPause").addEventListener("click", pauseTraining);
   $("btnReset").addEventListener("click", resetAll);
@@ -615,16 +755,6 @@ function setupEvents() {
     };
     reader.readAsText(file);
   });
-
-  // ── EXPORT HELPERS ────────────────────────────────────────────
-  function showExportError(message) {
-    $("exportStatusMessage").textContent = message;
-    $("exportStatus").style.display = "flex";
-  }
-
-  function hideExportError() {
-    $("exportStatus").style.display = "none";
-  }
 
   // ── EXPORT JS ────────────────────────────────────────────────
   function exportJS() {
