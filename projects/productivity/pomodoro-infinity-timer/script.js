@@ -528,6 +528,7 @@ document.getElementById("ambientSound")?.addEventListener("change", e => {
 
 document.getElementById("volume")?.addEventListener("input", e => {
   config.volume = parseInt(e.target.value, 10);
+  e.target.setAttribute("aria-valuetext", `${config.volume} percent`);
   if (ambientGain) ambientGain.gain.value = (config.volume / 100) * 0.3;
   saveState();
 });

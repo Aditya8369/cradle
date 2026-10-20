@@ -240,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
   angleSlider.addEventListener("input", e => {
     angle = parseInt(e.target.value);
     angleInput.value = angle;
+    angleSlider.setAttribute("aria-valuetext", `${angle} degrees`);
     anglePresets.forEach(b =>
       b.classList.toggle("active", parseInt(b.dataset.angle) === angle)
     );
@@ -249,6 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
   angleInput.addEventListener("input", e => {
     angle = Math.min(360, Math.max(0, parseInt(e.target.value) || 0));
     angleSlider.value = angle;
+    angleSlider.setAttribute("aria-valuetext", `${angle} degrees`);
     anglePresets.forEach(b =>
       b.classList.toggle("active", parseInt(b.dataset.angle) === angle)
     );
@@ -259,6 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => {
       angle = parseInt(btn.dataset.angle);
       angleSlider.value = angle;
+      angleSlider.setAttribute("aria-valuetext", `${angle} degrees`);
       angleInput.value = angle;
       anglePresets.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");

@@ -247,6 +247,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (volumeControl) {
     volumeControl.addEventListener("input", event => {
       guitar.setVolume(Number(event.target.value));
+      event.target.setAttribute(
+        "aria-valuetext",
+        `${Math.round(Number(event.target.value) * 100)} percent`
+      );
     });
   }
 
