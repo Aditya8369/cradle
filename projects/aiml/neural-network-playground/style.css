@@ -346,21 +346,26 @@ body {
   gap: 8px;
   font-size: 0.75rem;
   color: var(--text-secondary);
+  min-width: 0;
 }
 
 .speed-control label {
   min-width: 36px;
+  flex-shrink: 0;
 }
 
 .speed-control input[type="range"] {
   flex: 1;
+  min-width: 0;
 }
 
 .speed-control span {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-muted);
-  min-width: 80px;
+  width: 90px;
+  flex-shrink: 0;
+  white-space: nowrap;
   text-align: right;
 }
 
