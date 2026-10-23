@@ -42,6 +42,8 @@ Cradle/
 ├── ARCHITECTURE.md            # Overall repository architecture overview
 ├── ARCHITECTURE_TEMPLATE.md   # Standardized template for mini projects
 ├── CONTRIBUTING.md            # Guidelines for repository contributors
+├── docs/
+│   └── MINI_CONTRACT.md       # Contract every mini-project must follow
 ├── README.md                  # Project overview documentation
 ├── STORAGE_POLICY.md          # Storage API and conflict-resolution strategy
 ├── THIRD_PARTY_POLICY.md      # Rules for loading external models and scripts
@@ -171,7 +173,7 @@ Every project in Cradle includes an `ARCHITECTURE.md` file that explains its fol
 ARCHITECTURE_TEMPLATE.md
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md#architecture-documentation) for full instructions on how to fill it in. For details on the repository's testing strategies and CI gates, refer to [TESTING.md](TESTING.md). For rules regarding external dependencies, refer to [THIRD_PARTY_POLICY.md](THIRD_PARTY_POLICY.md). For persistent data storage and conflict resolution policies, refer to [STORAGE_POLICY.md](STORAGE_POLICY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md#architecture-documentation) for full instructions on how to fill it in. For details on the repository's testing strategies and CI gates, refer to [TESTING.md](TESTING.md). For rules regarding external dependencies, refer to [THIRD_PARTY_POLICY.md](THIRD_PARTY_POLICY.md). For persistent data storage and conflict resolution policies, refer to [STORAGE_POLICY.md](STORAGE_POLICY.md). For the files, entrypoint, lifecycle, and API rules every mini must follow, see [docs/MINI_CONTRACT.md](docs/MINI_CONTRACT.md).
 
 ## 🔧 Troubleshooting
 

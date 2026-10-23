@@ -75,6 +75,8 @@ Example:
 projects/games/your-project-name/
 ```
 
+Every mini must follow the [Mini-Project Module Contract](docs/MINI_CONTRACT.md). Run `npm run validate:mini-contract` to check yours (add `-- --strict` to fail on errors).
+
 ### Recommended project structure
 
 A new project should usually live in its own folder with only the files it needs. A simple structure might look like this:
