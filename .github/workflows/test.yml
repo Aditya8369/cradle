@@ -19,5 +19,7 @@ jobs:
       - run: npm run check-format
       - run: npm run validate:architecture
       - run: npm run validate:projects-sync
+      # Warning mode: reports mini-contract problems but never fails the job.
+      - run: npm run validate:mini-contract
       - run: npm run validate:worker-integrity
       - run: npm test

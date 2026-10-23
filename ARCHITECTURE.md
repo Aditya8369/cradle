@@ -70,6 +70,8 @@ cradle/
 │   ├── memory-flip.test.js
 │   └── stone-paper-scissors.test.js
 │
+├── docs/
+│   └── MINI_CONTRACT.md          # Contract every mini-project must follow
 ├── ARCHITECTURE.md               # This file
 ├── ARCHITECTURE_TEMPLATE.md      # Template every project copies for its own ARCHITECTURE.md
 ├── STORAGE_POLICY.md             # Storage API and conflict-resolution strategy
@@ -291,6 +293,7 @@ None at runtime. The site uses only native browser APIs (DOM, `fetch`, IndexedDB
 ## References
 
 - [`README.md`](README.md) - project overview and getting-started instructions
+- [`docs/MINI_CONTRACT.md`](docs/MINI_CONTRACT.md) - required files, entrypoint, lifecycle, and browser API rules for every mini
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) - contribution workflow, including the architecture-documentation requirement for new projects
 - [`ARCHITECTURE_TEMPLATE.md`](ARCHITECTURE_TEMPLATE.md) - standardized template used for every per-project `ARCHITECTURE.md`
 - [`src/components/ui/README.md`](src/components/ui/README.md) - usage docs for the shared Cradle UI component library
