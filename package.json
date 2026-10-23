@@ -11,6 +11,7 @@
     "generate": "node scripts/generate-projects.js",
     "validate:architecture": "node scripts/validate-architecture-docs.js",
     "validate:mini-projects": "node scripts/validate-mini-projects.js",
+    "validate:mini-contract": "node scripts/validate-mini-contract.js",
     "validate:demo-html": "node scripts/validate-demo-html.js",
     "validate:worker-integrity": "node scripts/validate-worker-integrity.js",
     "validate:no-dynamic-eval": "node scripts/validate-no-dynamic-eval.js",
