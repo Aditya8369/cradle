@@ -208,3 +208,70 @@ html.light-theme thead tr.text-gray-400 th.text-purple-400 {
 html.light-theme thead tr.text-gray-400 th.text-emerald-400 {
   color: #047857 !important;
 }
+
+/* For Export to JSON button */
+.export-json-btn {
+  color: #e2e8f0;
+  background-color: #1e293b;
+  border-color: #475569;
+}
+
+.export-json-btn:hover {
+  background-color: #334155;
+  border-color: #64748b;
+}
+
+.light-theme .export-json-btn {
+  color: #1e293b;
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.light-theme .export-json-btn:hover {
+  background-color: #cbd5e1;
+  border-color: #64748b;
+}
+
+/* Improve comparison table readability in light mode */
+.comparison-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.light-theme .comparison-row {
+  border-color: #e2e8f0;
+}
+
+.light-theme .comparison-row:hover {
+  background-color: #f1f5f9;
+}
+
+.light-theme .comparison-name {
+  color: #1e293b;
+}
+
+.light-theme .comparison-row .text-blue-400 {
+  color: #1d4ed8;
+}
+
+.light-theme .comparison-row .text-gray-400 {
+  color: #475569;
+}
+
+.light-theme .comparison-row .text-cyan-400 {
+  color: #0e7490;
+}
+
+.light-theme .comparison-row .text-amber-400 {
+  color: #b45309;
+}
+
+.light-theme .comparison-row .text-purple-400 {
+  color: #7e22ce;
+}
+
+.light-theme .comparison-row .text-emerald-400 {
+  color: #047857;
+}
