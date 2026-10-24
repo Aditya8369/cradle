@@ -43,6 +43,7 @@ Cradle/
 ├── ARCHITECTURE_TEMPLATE.md   # Standardized template for mini projects
 ├── CONTRIBUTING.md            # Guidelines for repository contributors
 ├── docs/
+│   ├── ASSET_PIPELINE.md      # Asset naming, fingerprinting and caching
 │   └── MINI_CONTRACT.md       # Contract every mini-project must follow
 ├── README.md                  # Project overview documentation
 ├── STORAGE_POLICY.md          # Storage API and conflict-resolution strategy

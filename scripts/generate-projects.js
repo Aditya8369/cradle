@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const { execFileSync } = require("child_process");
 const { discoverProjects, titleCase } = require("./project-discovery");
 
@@ -80,6 +81,34 @@ function loadExistingDates(outputFile = OUTPUT_FILE) {
     // No existing data/projects.json yet, or it's malformed — start fresh.
   }
   return dates;
+}
+
+const THUMBNAIL_FILE = "thumbnail.svg";
+const HASH_LENGTH = 8;
+
+// Short content hash used to fingerprint a built asset (?v=<hash>). Line
+// endings are normalized first: git checks text files out with CRLF on some
+// Windows setups and LF everywhere else, and the same committed file must give
+// the same hash on every machine and on CI.
+function hashContent(content) {
+  const normalized = Buffer.from(content)
+    .toString("latin1")
+    .replace(/\r\n/g, "\n");
+  return crypto
+    .createHash("sha256")
+    .update(normalized, "latin1")
+    .digest("hex")
+    .slice(0, HASH_LENGTH);
+}
+
+// Hash of a project's thumbnail.svg, or null when the project has none.
+function getThumbnailHash(projectAbsPath) {
+  const thumbnailPath = path.join(projectAbsPath, THUMBNAIL_FILE);
+  try {
+    return hashContent(fs.readFileSync(thumbnailPath));
+  } catch {
+    return null;
+  }
 }
 
 const CATEGORY_STYLES = {
@@ -215,16 +244,10 @@ function escapeXml(unsafe) {
 }
 
 function generateSvgThumbnail(title, categoryName, projectAbsPath) {
-  const thumbnailPath = path.join(projectAbsPath, "thumbnail.svg");
-
-  if (fs.existsSync(thumbnailPath)) {
-    const thumbMtime = fs.statSync(thumbnailPath).mtimeMs;
-    const projMtime = fs.statSync(projectAbsPath).mtimeMs;
-    if (thumbMtime >= projMtime) {
-      return;
-    }
-  }
-
+  // The output depends only on title and category. File modification times
+  // are not used: git does not preserve them, so they differ between a laptop
+  // and CI. Callers decide whether to generate (the build only does it when
+  // the thumbnail is missing).
   const style = CATEGORY_STYLES[categoryName] || defaultStyle;
 
   // Word wrap for title
@@ -304,7 +327,7 @@ function generateSvgThumbnail(title, categoryName, projectAbsPath) {
   </g>
 </svg>`;
 
-  fs.writeFileSync(path.join(projectAbsPath, "thumbnail.svg"), svgContent);
+  fs.writeFileSync(path.join(projectAbsPath, THUMBNAIL_FILE), svgContent);
 }
 
 function buildProjectsRegistry({
@@ -391,12 +414,17 @@ function buildProjectsRegistry({
       }
     }
 
-    projects.push({
+    const entry = {
       title: title,
       category: categoryName,
       path: projectPathStr,
       dateAdded: dateAdded,
-    });
+    };
+    const thumbnailHash = getThumbnailHash(fullProjectPath);
+    if (thumbnailHash) {
+      entry.thumbnailHash = thumbnailHash;
+    }
+    projects.push(entry);
   }
 
   return { projects, errors };
@@ -548,6 +576,12 @@ function validateProjectsSync({
       );
     }
 
+    if (actual.thumbnailHash !== expected.thumbnailHash) {
+      issues.push(
+        `thumbnailHash mismatch for "${expected.path}": expected ${JSON.stringify(expected.thumbnailHash)}, found ${JSON.stringify(actual.thumbnailHash)}. Run "npm run generate".`
+      );
+    }
+
     if (actual.dateAdded !== expected.dateAdded) {
       issues.push(
         `dateAdded mismatch for "${expected.path}": expected ${JSON.stringify(expected.dateAdded)}, found ${JSON.stringify(actual.dateAdded)}.`
@@ -615,6 +649,8 @@ module.exports = {
   escapeXml,
   generateSvgThumbnail,
   getDateAdded,
+  hashContent,
+  getThumbnailHash,
   ensureFullHistory,
   loadExistingDates,
   buildProjectsRegistry,

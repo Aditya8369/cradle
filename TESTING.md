@@ -41,7 +41,7 @@ Accessibility is a first-class citizen.
 
 The `projects/` tree is the source of truth for the site. Structural drift is prevented via validation scripts that run globally:
 
-- `validate-projects-sync.js`: Ensures `data/projects.json` perfectly matches the disk state.
+- `validate-projects-sync.js`: Ensures `data/projects.json` perfectly matches the disk state, including each `thumbnailHash` (see [docs/ASSET_PIPELINE.md](docs/ASSET_PIPELINE.md)).
 - `validate-mini-projects.js`: Ensures every project has an `index.html`, `style.css`, `script.js`, and `thumbnail.svg`.
 - `validate-architecture-docs.js`: Ensures every project maintains an `ARCHITECTURE.md`.
 - `validate-mini-contract.js`: Reports mini-project contract problems (see [docs/MINI_CONTRACT.md](docs/MINI_CONTRACT.md)); warning mode by default, `--strict` fails on errors.

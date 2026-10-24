@@ -19,14 +19,15 @@ The words **MUST** and **SHOULD** are used as in RFC 2119. In the validator, MUS
 
 `scripts/project-discovery.js` treats every directory two levels below `projects/` as a mini. Nothing else is registered by hand.
 
-| Derived value | How it is derived                                                                                             |
-| :------------ | :------------------------------------------------------------------------------------------------------------ |
-| `category`    | The parent folder name (`aiml`, `dev-tools`, `games`, ...).                                                   |
-| `path`        | `projects/<category>/<slug>/` (with trailing slash).                                                          |
-| `title`       | The slug with `-`/`_` replaced by spaces and Title Cased; acronyms such as `ai`, `api`, `qr` are upper-cased. |
-| `dateAdded`   | Date of the first git commit touching the folder (kept from the previous registry if git history is missing). |
+| Derived value   | How it is derived                                                                                                                        |
+| :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `category`      | The parent folder name (`aiml`, `dev-tools`, `games`, ...).                                                                              |
+| `path`          | `projects/<category>/<slug>/` (with trailing slash).                                                                                     |
+| `title`         | The slug with `-`/`_` replaced by spaces and Title Cased; acronyms such as `ai`, `api`, `qr` are upper-cased.                            |
+| `dateAdded`     | Date of the first git commit touching the folder (kept from the previous registry if git history is missing).                            |
+| `thumbnailHash` | First 8 hex characters of the SHA-256 of `thumbnail.svg`; omitted if there is no thumbnail (see [ASSET_PIPELINE.md](ASSET_PIPELINE.md)). |
 
-`npm run generate` writes `title`, `category`, `path`, and `dateAdded` to `data/projects.json`. The registry has **no description field**: the landing page does not read one, so the text in `index.html` (`<title>`, `<meta name="description">`) and `ARCHITECTURE.md` is the only description a mini has.
+`npm run generate` writes `title`, `category`, `path`, `dateAdded`, and `thumbnailHash` to `data/projects.json`. The registry has **no description field**: the landing page does not read one, so the text in `index.html` (`<title>`, `<meta name="description">`) and `ARCHITECTURE.md` is the only description a mini has.
 
 Rules:
 

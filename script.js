@@ -3,6 +3,7 @@ import {
   getSearchableCategory,
 } from "./src/components/ui/utils/categoryFilter.js";
 import { filterProjects } from "./src/utils/projectSearch.js";
+import { getThumbnailUrl } from "./src/utils/assetUrl.js";
 import { createFilterWorker } from "./src/utils/filterWorker.js";
 
 const projectsGrid = document.getElementById("projects-grid");
@@ -419,7 +420,7 @@ function createProjectCard(project, options = {}) {
     subtitle: project.path,
     badge: project.category,
     isNew: isNewProject(project.dateAdded),
-    image: `${project.path}thumbnail.svg`,
+    image: getThumbnailUrl(project),
     footer: [openButton, copyButton],
     footerAlign: "left",
     className: recent ? "recent-project-card" : "",
