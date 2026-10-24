@@ -230,7 +230,7 @@ function renderDesignOutput() {
             <span class="text-xs uppercase tracking-wider bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md font-mono border border-blue-500/20">${d.architecture} Block Variant</span>
             <span class="text-xs uppercase tracking-wider bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-md font-mono border border-purple-500/20">${d.frequency.toFixed(2)} GHz</span>
           </div>
-          <h2 class="text-2xl lg:text-3xl font-bold text-white tracking-tight">${d.title} <span class="text-gray-500 font-mono text-lg font-normal">(${d.name})</span></h2>
+          <h2 class="design-result-title text-2xl lg:text-3xl font-bold tracking-tight">${d.title} <span class="text-gray-500 font-mono text-lg font-normal" title="${d.name}">(${d.name.length > 50 ? d.name.slice(0, 50) + "..." : d.name})</span></h2>
           <p class="text-gray-400 text-sm mt-1 max-w-2xl">${d.description}</p>
         </div>
         <div class="bg-gray-800/80 border border-gray-700 rounded-2xl p-3 text-center min-w-[100px] shadow-inner font-mono">
@@ -277,19 +277,19 @@ function renderDesignOutput() {
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-800/20 border border-gray-800 p-4 rounded-2xl">
         <div>
-          <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-gray-400">Compute Index</span><span class="text-gray-200 font-mono">${perfScore}/100</span></div>
+          <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-gray-400">Compute Index</span><span class="text-gray-400 font-mono">${perfScore}/100</span></div>
           <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div class="bar h-full bg-gradient-to-r from-blue-500 to-purple-500" style="width: ${perfScore}%"></div>
           </div>
         </div>
         <div>
-          <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-gray-400">Thermal Safety Buffer</span><span class="text-gray-200 font-mono">${powerScore}/100</span></div>
+          <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-gray-400">Thermal Safety Buffer</span><span class="text-gray-400 font-mono">${powerScore}/100</span></div>
           <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div class="bar h-full bg-gradient-to-r from-emerald-400 to-cyan-500" style="width: ${powerScore}%"></div>
           </div>
         </div>
         <div>
-          <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-gray-400">Wafer Allocation Score</span><span class="text-gray-200 font-mono">${areaScore}/100</span></div>
+          <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-gray-400">Wafer Allocation Score</span><span class="text-gray-400 font-mono">${areaScore}/100</span></div>
           <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div class="bar h-full bg-gradient-to-r from-amber-400 to-orange-500" style="width: ${areaScore}%"></div>
           </div>
@@ -297,7 +297,7 @@ function renderDesignOutput() {
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 pt-2">
-        <button data-action="export-json" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium py-3.5 px-4 rounded-xl transition border border-gray-700 text-sm flex items-center justify-center gap-2">
+        <button data-action="export-json" class="export-json-btn flex-1 font-medium py-3.5 px-4 rounded-xl transition border text-sm flex items-center justify-center gap-2">
           <i class="fas fa-file-code"></i> Export Design JSON
         </button>
         <button data-action="save-project" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3.5 px-4 rounded-xl transition shadow-md shadow-pink-900/10 text-sm flex items-center justify-center gap-2">
@@ -342,8 +342,10 @@ function drawCircuitDiagram(cores, architecture) {
   const w = canvas.width;
   const h = canvas.height;
 
+  const isLight = document.documentElement.classList.contains("light-theme");
+
   // Draw Background Grid
-  ctx.strokeStyle = "#111827";
+  ctx.strokeStyle = isLight ? "#cbd5e1" : "#111827";
   ctx.lineWidth = 1;
   const gridSize = 20;
   for (let x = 0; x < w; x += gridSize) {
@@ -362,7 +364,7 @@ function drawCircuitDiagram(cores, architecture) {
   // Draw Shared L3 Cache / NOC Bus Ring Border Box
   ctx.strokeStyle = "#1f2937";
   ctx.lineWidth = 2;
-  ctx.fillStyle = "#030712";
+  ctx.fillStyle = isLight ? "#f8fafc" : "#030712";
   ctx.fillRect(40, 30, w - 80, h - 60);
   ctx.strokeRect(40, 30, w - 80, h - 60);
 
@@ -396,7 +398,7 @@ function drawCircuitDiagram(cores, architecture) {
     if (architecture === "asic") coreColor = "#db2777";
 
     // Core body render
-    ctx.fillStyle = "rgba(17, 24, 39, 0.85)";
+    ctx.fillStyle = isLight ? "#334155" : "rgba(255, 255, 255, 0.4)";
     ctx.strokeStyle = coreColor;
     ctx.lineWidth = 1.5;
     ctx.fillRect(cx, cy, coreW, coreH);
@@ -443,11 +445,13 @@ function drawCircuitDiagram(cores, architecture) {
   if (cores > 32) {
     ctx.fillStyle = "rgba(168, 85, 247, 0.9)";
     ctx.font = "10px sans-serif";
+    ctx.textAlign = "center";
     ctx.fillText(
       `+ ${cores - 32} Additional Core Modules Clusterized Off-Screen Layer`,
-      130,
-      h - 68
+      w/2,
+      h - 20
     );
+    ctx.textAlign = "start";
   }
 }
 
@@ -581,7 +585,7 @@ function renderSavedProjectsList() {
     left.className = "truncate mr-2";
 
     const title = document.createElement("div");
-    title.className = "font-mono font-bold text-gray-200 text-xs truncate";
+    title.className = "font-mono font-bold text-gray-400 text-xs truncate";
     title.textContent = p.name;
 
     const meta = document.createElement("div");
@@ -621,10 +625,10 @@ function renderComparisonTable() {
 
   list.forEach(c => {
     const row = document.createElement("tr");
-    row.className = "hover:bg-gray-900/40 border-b border-gray-900 transition";
+    row.className = "comparison-row hover:bg-gray-900/40 border-b border-gray-900 transition";
 
     row.innerHTML = `
-      <td class="p-3 font-sans font-semibold text-white"></td>
+      <td class="comparison-name p-3 font-sans font-semibold text-white"></td>
       <td class="p-3 text-blue-400"></td>
       <td class="p-3 text-gray-400"></td>
       <td class="p-3 font-bold text-cyan-400"></td>
@@ -633,7 +637,8 @@ function renderComparisonTable() {
       <td class="p-3 text-emerald-400"></td>
     `;
 
-    row.children[0].textContent = c.name;
+    row.children[0].textContent = c.name.length > 20 ? c.name.slice(0, 20) + "..." : c.name;
+    row.children[0].title = c.name;
     row.children[1].textContent = `${c.node}nm`;
     row.children[2].textContent = c.frequency
       ? `${c.frequency.toFixed(2)} GHz`
