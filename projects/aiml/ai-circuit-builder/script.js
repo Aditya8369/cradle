@@ -448,7 +448,7 @@ function drawCircuitDiagram(cores, architecture) {
     ctx.textAlign = "center";
     ctx.fillText(
       `+ ${cores - 32} Additional Core Modules Clusterized Off-Screen Layer`,
-      w/2,
+      w / 2,
       h - 20
     );
     ctx.textAlign = "start";
@@ -625,7 +625,8 @@ function renderComparisonTable() {
 
   list.forEach(c => {
     const row = document.createElement("tr");
-    row.className = "comparison-row hover:bg-gray-900/40 border-b border-gray-900 transition";
+    row.className =
+      "comparison-row hover:bg-gray-900/40 border-b border-gray-900 transition";
 
     row.innerHTML = `
       <td class="comparison-name p-3 font-sans font-semibold text-white"></td>
@@ -637,7 +638,8 @@ function renderComparisonTable() {
       <td class="p-3 text-emerald-400"></td>
     `;
 
-    row.children[0].textContent = c.name.length > 20 ? c.name.slice(0, 20) + "..." : c.name;
+    row.children[0].textContent =
+      c.name.length > 20 ? c.name.slice(0, 20) + "..." : c.name;
     row.children[0].title = c.name;
     row.children[1].textContent = `${c.node}nm`;
     row.children[2].textContent = c.frequency
