@@ -86,6 +86,18 @@ export class Grid {
     }
   }
 
+  clearWalls() {
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const node = this.grid[r][c];
+        node.isWall = false;
+        if (node.element) {
+          node.element.classList.remove("wall");
+        }
+      }
+    }
+  }
+
   clearPath() {
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
@@ -95,20 +107,20 @@ export class Grid {
         node.distance = Infinity;
         node.totalDistance = Infinity;
         node.heuristic = 0;
-        node.element.classList.remove("visited", "path");
+        if (node.element) {
+          node.element.classList.remove("visited", "path");
+        }
       }
     }
   }
 
-  clearGrid() {
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.cols; c++) {
-        const node = this.grid[r][c];
-        node.isWall = false;
-        node.element.classList.remove("wall", "visited", "path");
-      }
-    }
+  clearBoard() {
+    this.clearWalls();
     this.clearPath();
+  }
+
+  clearGrid() {
+    this.clearBoard();
   }
 
   generateRandomMaze() {

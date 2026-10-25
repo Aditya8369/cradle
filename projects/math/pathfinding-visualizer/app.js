@@ -7,7 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = new Grid(ROWS, COLS, "grid-container");
 
   const btnVisualize = document.getElementById("btn-visualize");
-  const btnClearGrid = document.getElementById("btn-clear-grid");
+  const btnClearBoard =
+    document.getElementById("btn-clear-board") ||
+    document.getElementById("btn-clear-grid");
+  const btnClearWalls = document.getElementById("btn-clear-walls");
   const btnClearPath = document.getElementById("btn-clear-path");
   const btnGenerateMaze = document.getElementById("btn-generate-maze");
   const algorithmSelect = document.getElementById("algorithm-select");
@@ -15,24 +18,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusMessage = document.getElementById("status-message");
 
   let isVisualizing = false;
+  let animationSessionId = 0;
 
-  btnClearGrid.addEventListener("click", () => {
-    if (isVisualizing) return;
-    grid.clearGrid();
-    statusMessage.textContent = "Grid cleared.";
-  });
+  function stopVisualization() {
+    animationSessionId++;
+    isVisualizing = false;
+  }
 
-  btnClearPath.addEventListener("click", () => {
-    if (isVisualizing) return;
-    grid.clearPath();
-    statusMessage.textContent = "Path cleared.";
-  });
+  if (btnClearBoard) {
+    btnClearBoard.addEventListener("click", () => {
+      stopVisualization();
+      grid.clearBoard();
+      statusMessage.textContent = "Board cleared.";
+    });
+  }
 
-  btnGenerateMaze.addEventListener("click", () => {
-    if (isVisualizing) return;
-    grid.generateRandomMaze();
-    statusMessage.textContent = "Random maze generated.";
-  });
+  if (btnClearWalls) {
+    btnClearWalls.addEventListener("click", () => {
+      grid.clearWalls();
+      statusMessage.textContent = "Walls cleared.";
+    });
+  }
+
+  if (btnClearPath) {
+    btnClearPath.addEventListener("click", () => {
+      stopVisualization();
+      grid.clearPath();
+      statusMessage.textContent = "Path cleared.";
+    });
+  }
+
+  if (btnGenerateMaze) {
+    btnGenerateMaze.addEventListener("click", () => {
+      stopVisualization();
+      grid.generateRandomMaze();
+      statusMessage.textContent = "Random maze generated.";
+    });
+  }
 
   btnVisualize.addEventListener("click", async () => {
     if (isVisualizing) return;
@@ -40,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.clearPath();
     statusMessage.textContent = "Visualizing...";
 
+    const currentSession = ++animationSessionId;
     const algorithm = algorithmSelect.value;
     const speed = parseInt(speedSelect.value, 10);
     const startNode = grid.getStartNode();
@@ -61,8 +84,14 @@ document.addEventListener("DOMContentLoaded", () => {
     await animateAlgorithm(
       result.visitedNodesInOrder,
       result.shortestPathNodes,
-      speed
+      speed,
+      currentSession
     );
+
+    if (animationSessionId !== currentSession) {
+      return;
+    }
+
     isVisualizing = false;
 
     if (result.shortestPathNodes.length > 0) {
@@ -75,34 +104,36 @@ document.addEventListener("DOMContentLoaded", () => {
   async function animateAlgorithm(
     visitedNodesInOrder,
     shortestPathNodes,
-    speed
+    speed,
+    sessionId
   ) {
-    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-      if (i === visitedNodesInOrder.length) {
-        await sleep(10 * speed);
-        animateShortestPath(shortestPathNodes, speed);
-        return;
-      }
+    for (let i = 0; i < visitedNodesInOrder.length; i++) {
+      if (animationSessionId !== sessionId) return false;
       const node = visitedNodesInOrder[i];
       if (!node.isStart && !node.isEnd) {
         node.element.classList.add("visited");
       }
       await sleep(speed);
+      if (animationSessionId !== sessionId) return false;
     }
-  }
 
-  function animateShortestPath(shortestPathNodes, speed) {
-    for (let i = 0; i < shortestPathNodes.length; i++) {
-      setTimeout(
-        () => {
-          const node = shortestPathNodes[i];
-          if (!node.isStart && !node.isEnd) {
-            node.element.classList.add("path");
-          }
-        },
-        i * (speed / 2)
-      );
+    if (shortestPathNodes.length > 0) {
+      await sleep(Math.min(500, 5 * speed));
+      if (animationSessionId !== sessionId) return false;
+
+      const pathDelay = Math.max(15, Math.floor(speed / 2));
+      for (let i = 0; i < shortestPathNodes.length; i++) {
+        if (animationSessionId !== sessionId) return false;
+        const node = shortestPathNodes[i];
+        if (!node.isStart && !node.isEnd) {
+          node.element.classList.add("path");
+        }
+        await sleep(pathDelay);
+        if (animationSessionId !== sessionId) return false;
+      }
     }
+
+    return true;
   }
 
   function sleep(ms) {
