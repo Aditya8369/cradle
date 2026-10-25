@@ -134,3 +134,143 @@ test("AvatarEngine.validateSVG rejects malformed SVG content", () => {
     /is not a valid SVG/
   );
 });
+
+function createMockCanvas() {
+  const operations = [];
+  const state = {
+    imageSmoothingEnabled: true,
+    fillStyle: null,
+    globalAlpha: 1,
+  };
+
+  const ctx = {
+    get imageSmoothingEnabled() {
+      return state.imageSmoothingEnabled;
+    },
+    set imageSmoothingEnabled(val) {
+      state.imageSmoothingEnabled = val;
+    },
+    get fillStyle() {
+      return state.fillStyle;
+    },
+    set fillStyle(val) {
+      state.fillStyle = val;
+    },
+    get globalAlpha() {
+      return state.globalAlpha;
+    },
+    set globalAlpha(val) {
+      state.globalAlpha = val;
+    },
+    clearRect(x, y, w, h) {
+      operations.push({ op: "clearRect", x, y, w, h });
+    },
+    save() {
+      operations.push({ op: "save" });
+    },
+    restore() {
+      operations.push({ op: "restore" });
+    },
+    fillRect(x, y, w, h) {
+      operations.push({
+        op: "fillRect",
+        x,
+        y,
+        w,
+        h,
+        fill: state.fillStyle,
+        alpha: state.globalAlpha,
+      });
+    },
+  };
+
+  return {
+    width: 200,
+    height: 200,
+    getContext(type) {
+      return type === "2d" ? ctx : null;
+    },
+    getOperations() {
+      return operations;
+    },
+    getState() {
+      return state;
+    },
+  };
+}
+
+test("AvatarEngine.renderSvgToCanvas draws rects from generated SVG markup to canvas", () => {
+  const svgMarkup = AvatarEngine.generateAvatarSVG();
+  const canvas = createMockCanvas();
+
+  const success = AvatarEngine.renderSvgToCanvas(svgMarkup, canvas);
+  assert.equal(success, true);
+  assert.equal(canvas.getState().imageSmoothingEnabled, false);
+
+  const ops = canvas.getOperations();
+  const clearOps = ops.filter(o => o.op === "clearRect");
+  const fillOps = ops.filter(o => o.op === "fillRect");
+
+  assert.equal(clearOps.length, 1);
+  assert.ok(
+    fillOps.length > 50,
+    "Expected multiple pixel rects to be drawn on canvas"
+  );
+  // Check that the background rect covers full canvas size
+  assert.deepEqual(
+    { x: fillOps[0].x, y: fillOps[0].y, w: fillOps[0].w, h: fillOps[0].h },
+    { x: 0, y: 0, w: 200, h: 200 }
+  );
+});
+
+test("AvatarEngine.renderSvgToCanvas draws rects from DOM SVGElement-like object", () => {
+  const canvas = createMockCanvas();
+  const mockSvgElement = {
+    querySelectorAll(selector) {
+      if (selector === "rect") {
+        return [
+          {
+            getAttribute(attr) {
+              const attrs = {
+                x: "10",
+                y: "20",
+                width: "12.5",
+                height: "12.5",
+                fill: "#ff0000",
+                opacity: "0.8",
+              };
+              return attrs[attr] || null;
+            },
+          },
+        ];
+      }
+      return [];
+    },
+  };
+
+  const success = AvatarEngine.renderSvgToCanvas(mockSvgElement, canvas);
+  assert.equal(success, true);
+
+  const fillOps = canvas.getOperations().filter(o => o.op === "fillRect");
+  assert.equal(fillOps.length, 1);
+  assert.equal(fillOps[0].x, 10);
+  assert.equal(fillOps[0].y, 20);
+  assert.equal(fillOps[0].w, 12.5);
+  assert.equal(fillOps[0].h, 12.5);
+  assert.equal(fillOps[0].fill, "#ff0000");
+  assert.equal(fillOps[0].alpha, 0.8);
+});
+
+test("AvatarEngine.renderSvgToCanvas returns false when no rects are present", () => {
+  const canvas = createMockCanvas();
+  const emptySvg = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+
+  const success = AvatarEngine.renderSvgToCanvas(emptySvg, canvas);
+  assert.equal(success, false);
+});
+
+test("AvatarEngine.renderSvgToCanvas throws if invalid canvas provided", () => {
+  assert.throws(() => {
+    AvatarEngine.renderSvgToCanvas("<svg></svg>", null);
+  }, /Invalid canvas element/);
+});
