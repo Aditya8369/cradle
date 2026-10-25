@@ -299,6 +299,15 @@ h1 {
 
 #cameraVideo {
   display: none;
+  transition: transform 0.2s ease;
+}
+
+#cameraVideo.mirror-front {
+  transform: scaleX(-1);
+}
+
+#cameraVideo.mirror-android-front {
+  transform: scale(-1, -1);
 }
 
 .empty-preview {

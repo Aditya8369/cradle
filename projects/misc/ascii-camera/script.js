@@ -30,6 +30,9 @@
     asciiOutput: document.getElementById("asciiOutput"),
     cameraBtn: document.getElementById("cameraBtn"),
     stopCameraBtn: document.getElementById("stopCameraBtn"),
+    toggleCameraBtn:
+      document.getElementById("toggleCameraBtn") ||
+      document.getElementById("switchCameraBtn"),
     imageUpload: document.getElementById("imageUpload"),
     densitySelect: document.getElementById("densitySelect"),
     columnRange: document.getElementById("columnRange"),
@@ -68,6 +71,7 @@
   const state = {
     stream: null,
     mode: "empty",
+    facingMode: "user",
     sourceImage: null,
     animationId: null,
     lastFrameAt: 0,
@@ -125,8 +129,37 @@
     }
   }
 
+  function isAndroidDevice() {
+    return /Android/i.test(
+      (typeof navigator !== "undefined" &&
+        (navigator.userAgent || navigator.vendor)) ||
+        ""
+    );
+  }
+
+  function updateVideoTransform() {
+    if (!els.video) {
+      return;
+    }
+
+    els.video.classList.remove("mirror-front", "mirror-android-front");
+
+    if (state.mode === "camera") {
+      const isFront = state.facingMode === "user";
+      const isAndroid = isAndroidDevice();
+
+      if (isFront) {
+        if (isAndroid) {
+          els.video.classList.add("mirror-android-front");
+        } else {
+          els.video.classList.add("mirror-front");
+        }
+      }
+    }
+  }
+
   function setEmptyState() {
-    stopCamera();
+    stopCamera(true);
 
     state.mode = "empty";
     state.sourceImage = null;
@@ -147,19 +180,28 @@
 
   async function startCamera() {
     try {
-      stopCamera();
+      stopCamera(false);
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("Camera access is not supported by this browser.");
       }
 
+      const requestedFacing = state.facingMode || "user";
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 640 },
           height: { ideal: 480 },
-          facingMode: "user",
+          facingMode: { ideal: requestedFacing },
         },
       });
+
+      const videoTrack = stream.getVideoTracks && stream.getVideoTracks()[0];
+      if (videoTrack && typeof videoTrack.getSettings === "function") {
+        const settings = videoTrack.getSettings();
+        if (settings.facingMode) {
+          state.facingMode = settings.facingMode;
+        }
+      }
 
       state.stream = stream;
       state.mode = "camera";
@@ -168,22 +210,29 @@
       els.video.srcObject = stream;
       await els.video.play();
 
+      updateVideoTransform();
+
       els.video.style.display = "block";
       els.sourceCanvas.style.display = "none";
       els.emptyPreview.style.display = "none";
 
       els.cameraBtn.disabled = true;
       els.stopCameraBtn.disabled = false;
+      if (els.toggleCameraBtn) {
+        els.toggleCameraBtn.disabled = false;
+      }
 
+      const cameraLabel =
+        state.facingMode === "environment" ? "Rear Camera" : "Front Camera";
       setStatus(
         "Camera Active",
-        "Live Streaming",
-        "Streaming live webcam feed."
+        `${cameraLabel} • Live`,
+        `Streaming live ${cameraLabel.toLowerCase()} feed.`
       );
 
       scheduleNextFrame();
     } catch (err) {
-      stopCamera();
+      stopCamera(true);
 
       state.mode = "empty";
       state.sourceImage = null;
@@ -195,6 +244,9 @@
 
       els.cameraBtn.disabled = false;
       els.stopCameraBtn.disabled = true;
+      if (els.toggleCameraBtn) {
+        els.toggleCameraBtn.disabled = true;
+      }
 
       let message =
         "Camera access was denied. You can upload an image instead.";
@@ -224,7 +276,7 @@
     }
   }
 
-  function stopCamera() {
+  function stopCamera(resetFacing = true) {
     if (state.stream) {
       state.stream.getTracks().forEach(track => track.stop());
       state.stream = null;
@@ -235,8 +287,26 @@
       state.animationId = null;
     }
 
+    if (resetFacing) {
+      state.facingMode = "user";
+    }
+
+    updateVideoTransform();
+
     els.cameraBtn.disabled = false;
     els.stopCameraBtn.disabled = true;
+    if (els.toggleCameraBtn) {
+      els.toggleCameraBtn.disabled = true;
+    }
+  }
+
+  async function toggleCamera() {
+    if (state.mode !== "camera") {
+      return;
+    }
+
+    state.facingMode = state.facingMode === "user" ? "environment" : "user";
+    await startCamera();
   }
 
   function scheduleNextFrame() {
@@ -284,7 +354,28 @@
     els.analysisCanvas.height = rows;
 
     if (state.mode === "camera") {
+      const isFront = state.facingMode === "user";
+      const isAndroid = isAndroidDevice();
+      const transform =
+        engine && typeof engine.getCameraTransform === "function"
+          ? engine.getCameraTransform({ isFront, isAndroid })
+          : {
+              scaleX: isFront ? -1 : 1,
+              scaleY: isFront && isAndroid ? -1 : 1,
+            };
+
+      analysisCtx.save();
+      const tx = transform.scaleX < 0 ? cols : 0;
+      const ty = transform.scaleY < 0 ? rows : 0;
+
+      if (tx !== 0 || ty !== 0) {
+        analysisCtx.translate(tx, ty);
+      }
+      if (transform.scaleX !== 1 || transform.scaleY !== 1) {
+        analysisCtx.scale(transform.scaleX, transform.scaleY);
+      }
       analysisCtx.drawImage(els.video, 0, 0, cols, rows);
+      analysisCtx.restore();
     } else {
       analysisCtx.drawImage(state.sourceImage, 0, 0, cols, rows);
     }
@@ -470,6 +561,10 @@
 
     if (els.stopCameraBtn) {
       els.stopCameraBtn.addEventListener("click", setEmptyState);
+    }
+
+    if (els.toggleCameraBtn) {
+      els.toggleCameraBtn.addEventListener("click", toggleCamera);
     }
 
     if (els.imageUpload) {

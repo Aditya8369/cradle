@@ -50,3 +50,35 @@ test("ASCIIExporter formats Plain Text, HTML, and SVG payloads", () => {
   assert.ok(svg.includes('<svg xmlns="http://www.w3.org/2000/svg"'));
   assert.ok(svg.includes("<text x="));
 });
+
+test("ASCIIEngine handles camera transforms for front/rear and Android orientation", () => {
+  // Rear camera (any platform) - no flip or mirror
+  const rear = engine.getCameraTransform({ isFront: false, isAndroid: true });
+  assert.strictEqual(rear.scaleX, 1);
+  assert.strictEqual(rear.scaleY, 1);
+  assert.strictEqual(rear.cssTransform, "none");
+  assert.strictEqual(rear.isMirrored, false);
+  assert.strictEqual(rear.isInverted, false);
+
+  // Desktop front camera - horizontally mirrored for selfie, right-side up
+  const desktopFront = engine.getCameraTransform({
+    isFront: true,
+    isAndroid: false,
+  });
+  assert.strictEqual(desktopFront.scaleX, -1);
+  assert.strictEqual(desktopFront.scaleY, 1);
+  assert.strictEqual(desktopFront.cssTransform, "scaleX(-1)");
+  assert.strictEqual(desktopFront.isMirrored, true);
+  assert.strictEqual(desktopFront.isInverted, false);
+
+  // Android front camera - horizontally mirrored and vertically inverted to correct native orientation
+  const androidFront = engine.getCameraTransform({
+    isFront: true,
+    isAndroid: true,
+  });
+  assert.strictEqual(androidFront.scaleX, -1);
+  assert.strictEqual(androidFront.scaleY, -1);
+  assert.strictEqual(androidFront.cssTransform, "scale(-1, -1)");
+  assert.strictEqual(androidFront.isMirrored, true);
+  assert.strictEqual(androidFront.isInverted, true);
+});

@@ -80,6 +80,8 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 ## Key Features
 
 - Live webcam capture via `getUserMedia` with an FPS-limited render loop
+- Front and rear camera switching with automatic selfie mirroring and native orientation correction
+- Android Chrome front-camera compensation to ensure right-side up rendering
 - Image upload and an embedded sample logo source
 - Five density palettes including block, binary, and minimal characters
 - Optional Sobel edge detection plus invert, contrast, and brightness controls
@@ -108,6 +110,7 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 - `getLuminance()` / `mapLuminanceToChar()` — pixel brightness to character mapping
 - `applySobelEdgeDetection()` — 3x3 gradient convolution for edge contours
 - `adjustPixel()` — contrast and brightness adjustment
+- `getCameraTransform()` — computes canvas scale factors and CSS transforms for front/rear camera streams and Android orientation compensation
 
 ### `asciiExporter.js`
 
@@ -116,8 +119,9 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 
 ### `script.js`
 
-- `startCamera()` / `stopCamera()` — webcam lifecycle management
-- `scheduleNextFrame()` / `processCurrentFrame()` — FPS-limited render loop
+- `startCamera()` / `stopCamera()` / `toggleCamera()` — webcam lifecycle management and front/rear switching
+- `updateVideoTransform()` / `isAndroidDevice()` — manages mirroring and native orientation transforms
+- `scheduleNextFrame()` / `processCurrentFrame()` — FPS-limited render loop with orientation-corrected canvas downsampling
 - `loadUploadedImage()` / `loadSample()` — alternate input sources
 - `setupEvents()` — binds all controls, toggles, and export buttons
 
