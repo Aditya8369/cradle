@@ -797,24 +797,37 @@ if (shortcutsOverlay) {
 }
 
 // Keyboard Shortcuts Listeners
+function isInteractiveElement(element) {
+  if (!element) return false;
+  const tagName = element.tagName ? element.tagName.toUpperCase() : "";
+  return (
+    tagName === "INPUT" ||
+    tagName === "TEXTAREA" ||
+    tagName === "SELECT" ||
+    Boolean(element.isContentEditable) ||
+    element.getAttribute?.("contenteditable") === "true" ||
+    Boolean(
+      element.closest?.("input, textarea, select, [contenteditable='true']")
+    )
+  );
+}
+
 document.addEventListener("keydown", e => {
-  const activeEl = document.activeElement;
   const isInputActive =
-    activeEl &&
-    (activeEl.tagName === "INPUT" ||
-      activeEl.tagName === "TEXTAREA" ||
-      activeEl.isContentEditable);
+    isInteractiveElement(document.activeElement) ||
+    isInteractiveElement(e.target);
 
   // Focus Search Bar
   if (
     (e.ctrlKey && e.key.toLowerCase() === "k") ||
-    (e.key === "/" && !isInputActive)
+    (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey && !isInputActive)
   ) {
     e.preventDefault();
     if (searchInput) {
       searchInput.focus();
       searchInput.select();
     }
+    return;
   }
 
   // Close Modal or Clear search
@@ -824,18 +837,31 @@ document.addEventListener("keydown", e => {
       (shortcutsModal.classList.contains("visible") ||
         shortcutsModal.getAttribute("aria-hidden") === "false")
     ) {
+      e.preventDefault();
       closeShortcutsModal();
-    } else {
+    } else if (!isInputActive) {
       clearFilters();
     }
+    return;
   }
 
   // Toggle Theme
-  if (e.key.toLowerCase() === "t" && !isInputActive) {
+  if (
+    e.key.toLowerCase() === "t" &&
+    !e.ctrlKey &&
+    !e.metaKey &&
+    !e.altKey &&
+    !isInputActive
+  ) {
     e.preventDefault();
     const themeToggleEl = document.getElementById("themeToggle");
     if (themeToggleEl) {
       themeToggleEl.click();
+    } else if (
+      window.CradleThemeToggle &&
+      typeof window.CradleThemeToggle.toggleTheme === "function"
+    ) {
+      window.CradleThemeToggle.toggleTheme();
     } else if (typeof window.toggleTheme === "function") {
       window.toggleTheme();
     } else {
@@ -849,10 +875,17 @@ document.addEventListener("keydown", e => {
         localStorage.setItem("theme", "light");
       }
     }
+    return;
   }
 
   // Toggle Shortcuts Panel
-  if (e.key === "?" && !isInputActive) {
+  if (
+    e.key === "?" &&
+    !e.ctrlKey &&
+    !e.metaKey &&
+    !e.altKey &&
+    !isInputActive
+  ) {
     e.preventDefault();
     if (shortcutsModal) {
       const isVisible =
@@ -870,21 +903,4 @@ document.addEventListener("keydown", e => {
 document.addEventListener("DOMContentLoaded", () => {
   renderRecentProjects();
   loadProjects();
-});
-
-document.addEventListener("keydown", event => {
-  // "/" shortcut
-  if (
-    event.key === "/" &&
-    !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)
-  ) {
-    event.preventDefault();
-    // Open/focus search
-  }
-
-  // Ctrl + K
-  if (event.ctrlKey && event.key.toLowerCase() === "k") {
-    event.preventDefault();
-    // Open/focus search
-  }
 });
