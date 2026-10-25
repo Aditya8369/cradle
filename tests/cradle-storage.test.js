@@ -100,3 +100,22 @@ test("namespace raw helpers round-trip strings", () => {
   assert.equal(store.getRaw("theme"), "light");
   assert.equal(store.getRaw("nope", "dark"), "dark");
 });
+
+test("storage gracefully handles QuotaExceededError on writes", () => {
+  localStorage.clear();
+  localStorage.simulateQuotaExceeded(true);
+
+  // set and setRaw should return false instead of throwing unhandled exceptions
+  assert.equal(storage.set("cradle_quota_test", { highscore: 100 }), false);
+  assert.equal(storage.setRaw("cradle_quota_raw", "data"), false);
+});
+
+test("storage gracefully returns fallback values when localStorage throws SecurityError", () => {
+  localStorage.clear();
+  localStorage.simulateSecurityError(true);
+
+  // get, getRaw, and remove should safely fall back and return false
+  assert.equal(storage.get("cradle_sec_test", "fallback"), "fallback");
+  assert.equal(storage.getRaw("cradle_sec_raw", "default"), "default");
+  assert.equal(storage.remove("cradle_sec_key"), false);
+});
