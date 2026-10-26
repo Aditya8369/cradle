@@ -1,0 +1,35 @@
+name: Dependency Vulnerability Scan
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    # Run weekly every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-scan:
+    name: Production Dependency Vulnerability Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Application Dependencies
+        run: npm ci --prefer-offline || npm install
+
+      - name: Run Production Dependency Vulnerability Scan
+        run: npm run audit:deps

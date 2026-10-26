@@ -73,6 +73,10 @@ For a PR to be merged into `main`, the pipeline **MUST** pass the following stag
 
 - **Unit Execution**: `npm test` runs the full `node:test` suite for project logic and UI utilities.
 
+### Gate 5: Dependency Security Audit
+
+- **Production Dependency Vulnerability Scan**: `npm run audit:deps` (`scripts/audit-dependencies.js`) enforces the repository's High-Severity Dependency Policy across production dependencies. High and Critical severity findings fail CI immediately, producing actionable Pull Request step summaries and annotations.
+
 If any of these gates fail, the CI pipeline halts and marks the commit as failed.
 
 ---

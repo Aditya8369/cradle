@@ -81,6 +81,29 @@ pip install -r requirements.txt
 
 ---
 
+### Dependency vulnerability scan fails in CI
+
+**Symptom:** The CI check `Production Dependency Vulnerability Audit` or `npm run audit:deps` fails with an exit code 1 and lists High or Critical findings.
+
+**Fixes:**
+
+- Run the production dependency audit locally to inspect the report:
+
+```bash
+npm run audit:deps
+```
+
+- Attempt automated non-breaking fixes:
+
+```bash
+npm audit fix --omit=dev
+```
+
+- If an issue involves a transitive dependency or breaking change, update the top-level package version in `package.json` to require a patched release.
+- Merging pull requests with unresolved High or Critical vulnerabilities in production dependencies is prohibited under the repository security policy (see [SECURITY.md](SECURITY.md)).
+
+---
+
 ### Local server not starting
 
 **Symptom:** `python -m http.server` command not found or fails immediately.
