@@ -14,6 +14,7 @@ If your issue is not listed here, please check the [GitHub Issues page](https://
 - [Git & GitHub Issues](#git--github-issues)
 - [Documentation Issues](#documentation-issues)
 - [Browser Compatibility Tips](#browser-compatibility-tips)
+- [HTTPS and HSTS Deployment Guidance](#https-and-hsts-deployment-guidance)
 - [Best Practices Before Opening an Issue](#best-practices-before-opening-an-issue)
 - [Quick Troubleshooting Checklist](#quick-troubleshooting-checklist)
 - [Useful Commands](#useful-commands)
@@ -380,6 +381,225 @@ All Cradle projects are designed to run in modern browsers. If something looks b
 
 ---
 
+## HTTPS and HSTS Deployment Guidance
+
+Production deployments of Cradle and its web applications must enforce secure communication using HTTPS and HTTP Strict Transport Security (HSTS). This ensures that browsers interact with the application exclusively over encrypted TLS connections and prevents protocol downgrade attacks.
+
+### Why HTTPS & HSTS Are Required
+
+- **Prevent SSL-Stripping and Downgrade Attacks:** In a standard setup, the first user request to `http://` is redirected via HTTP 301/302 to `https://`. Attackers performing a man-in-the-middle (MITM) attack on an untrusted network (e.g., public Wi-Fi) can intercept this initial request and downgrade communication to plain HTTP (`sslstrip`). HSTS tells the browser to automatically convert all requests to `https://` internally before sending any network packet.
+- **Secure Context Web APIs:** Many modern web APIs utilized across Cradle projects (such as the Clipboard API `navigator.clipboard`, Web Cryptography `crypto.subtle`, Service Workers, and Geolocation) require a [Secure Context](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts) (HTTPS or `localhost`).
+- **Eliminate Mixed-Content Insecurities:** Assets like scripts, stylesheets, fonts, and API requests must be served securely. Browsers block insecure active content (`http://` scripts) on HTTPS pages.
+- **Enforce Strict Certificate Validation:** When HSTS is active on a domain, modern browsers strictly prohibit users from bypassing SSL/TLS certificate warnings, preventing users from inadvertently accepting fraudulent or expired certificates.
+
+### HSTS Production Requirements
+
+When deploying Cradle to a production web server, reverse proxy, or custom domain:
+
+1. **Serve All Content Over HTTPS:** Ensure all web assets and HTML entry points are accessible via TLS with a trusted, CA-signed certificate (e.g., Let's Encrypt).
+2. **Redirect HTTP to HTTPS:** Permanently redirect all incoming HTTP (port 80) traffic to HTTPS (port 443) using HTTP status code 301 or 308.
+3. **Send the `Strict-Transport-Security` Header:** Include the header on all HTTPS responses (including error pages). Do not serve this header over unencrypted HTTP.
+4. **Use a Long `max-age`:** Set `max-age` to at least 1 year (`31536000` seconds), with a recommended production duration of 2 years (`63072000` seconds).
+5. **Protect All Subdomains:** Include `includeSubDomains` if all subdomains (such as `api.`, `assets.`, `www.`) support HTTPS.
+6. **Enable HSTS Preloading:** Use the `preload` directive once verified and register your domain with the global browser [HSTS Preload List](https://hstspreload.org/).
+
+### Recommended HSTS Header
+
+For production domains with full HTTPS coverage:
+
+```http
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+```
+
+#### Directive Reference
+
+| Directive | Description | Recommended Production Value |
+| --- | --- | --- |
+| `max-age=<seconds>` | Time (in seconds) the browser caches the policy and forces HTTPS. | `63072000` (2 years) or `31536000` (1 year) |
+| `includeSubDomains` | Applies the HSTS policy to all existing and future subdomains. | Enabled (ensure all subdomains support HTTPS first) |
+| `preload` | Signals consent to include the domain in browser-bundled preload lists. | Enabled when permanently committed to HTTPS |
+
+> [!WARNING]
+> Do not enable `preload` or long `max-age` values until you have confirmed that your domain and all subdomains serve valid TLS certificates. Once preloaded into browsers, removing the policy can take months.
+
+### Staged Rollout Strategy
+
+To prevent accidental lockouts during initial deployment, adopt a phased rollout:
+
+1. **Stage 1 (Initial Validation):** Test basic HTTPS redirect and short-lived caching:
+   ```http
+   Strict-Transport-Security: max-age=300
+   ```
+2. **Stage 2 (Subdomain Testing):** Expand to subdomains for 1 day:
+   ```http
+   Strict-Transport-Security: max-age=86400; includeSubDomains
+   ```
+3. **Stage 3 (Production Staging):** Increase cache duration to 1 year:
+   ```http
+   Strict-Transport-Security: max-age=31536000; includeSubDomains
+   ```
+4. **Stage 4 (Full Preload Eligibility):** Set 2 years, add `preload`, and submit to [hstspreload.org](https://hstspreload.org/):
+   ```http
+   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+   ```
+
+### Recommended Production Server Configurations
+
+#### 1. Nginx
+
+In your Nginx configuration (e.g., `/etc/nginx/sites-available/cradle.conf`):
+
+```nginx
+# Redirect all HTTP requests to HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name example.com www.example.com;
+    return 301 https://$host$request_uri;
+}
+
+# Production HTTPS server
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name example.com www.example.com;
+
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Enforce HSTS (use 'always' so the header is sent even on error responses)
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    # Additional security headers
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    root /var/www/cradle;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+#### 2. Apache HTTP Server (`.htaccess` or VirtualHost)
+
+Ensure `mod_headers` and `mod_rewrite` are active in your Apache configuration:
+
+```apache
+# Redirect HTTP to HTTPS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Enforce HSTS header on HTTPS
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+</IfModule>
+```
+
+#### 3. Caddy Server
+
+Caddy provisions automatic HTTPS by default. Add the HSTS header to your `Caddyfile`:
+
+```caddy
+example.com, www.example.com {
+    root * /var/www/cradle
+    file_server
+
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+}
+```
+
+#### 4. GitHub Pages (Custom Domains)
+
+For repositories hosted on GitHub Pages:
+
+- Open **Repository Settings** → **Pages**.
+- Ensure your custom domain is configured and DNS records (`CNAME` / `A`) are verified.
+- Check the **Enforce HTTPS** checkbox. GitHub Pages automatically provisions a TLS certificate and redirects HTTP to HTTPS.
+- *Note:* If using a custom apex domain behind Cloudflare CDN in front of GitHub Pages, configure HSTS directly on Cloudflare.
+
+#### 5. Cloudflare (CDN / Reverse Proxy)
+
+When routing traffic through Cloudflare:
+
+1. Navigate to **SSL/TLS** → **Edge Certificates**.
+2. Turn on **Always Use HTTPS** to automatically redirect HTTP traffic.
+3. Under **HTTP Strict Transport Security (HSTS)**, click **Change HSTS settings**.
+4. Configure the parameters:
+   - **Enable HSTS:** Yes
+   - **Max-Age Header:** 12 months (or 24 months)
+   - **Apply HSTS policy to subdomains (`includeSubDomains`):** Yes
+   - **Preload:** Yes
+5. Save the configuration.
+
+#### 6. Static Hosting Providers (Vercel & Netlify)
+
+- **Netlify (`_headers` file in repo root):**
+  ```text
+  /*
+    Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+    X-Content-Type-Options: nosniff
+  ```
+- **Vercel (`vercel.json` in repo root):**
+  ```json
+  {
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "Strict-Transport-Security",
+            "value": "max-age=63072000; includeSubDomains; preload"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+### Troubleshooting HSTS Issues
+
+#### Browser certificate warning cannot be bypassed
+- **Symptom:** The browser displays `NET::ERR_CERT_COMMON_NAME_INVALID`, `SEC_ERROR_EXPIRED_CERTIFICATE`, or `SSL_ERROR_BAD_CERT_DOMAIN`, and the "Advanced → Proceed" button is absent.
+- **Cause:** HSTS disallows manual certificate bypasses by design to protect users from spoofing.
+- **Fix:**
+  - Verify that the server's TLS certificate is valid, not expired, and matches the domain name.
+  - For local development, test using `localhost` or standard HTTP local servers. Do not emit HSTS headers during development.
+  - To clear a cached HSTS policy during testing:
+    - **Chrome / Edge / Chromium:** Navigate to `chrome://net-internals/#hsts`, go to **Delete domain security policies**, enter the domain, and click **Delete**.
+    - **Firefox:** Clear history and cookies for the domain (or remove the domain entry in `SiteSecurityServiceState.txt` within the Firefox profile directory).
+    - **Safari:** Close Safari, clear cache, and remove `~/Library/Cookies/HSTS.plist` if necessary.
+
+#### Mixed content blocked in projects
+- **Symptom:** Console displays `Mixed Content: The page at 'https://...' was loaded over HTTPS, but requested an insecure resource 'http://...'`. Scripts or stylesheets fail to load.
+- **Cause:** Project files reference dependencies, external fonts, or APIs using insecure `http://` URLs.
+- **Fix:** Update all external asset URLs to `https://` (e.g., `https://fonts.googleapis.com`, `https://cdnjs.cloudflare.com`) and use relative paths for local assets.
+
+#### Subdomain lockout
+- **Symptom:** An auxiliary or internal subdomain (e.g., `staging.example.com` or `dev.example.com`) becomes unreachable with SSL errors.
+- **Cause:** `includeSubDomains` was set on the apex domain before all subdomains were configured with valid TLS certificates.
+- **Fix:** Either provision valid TLS certificates on all subdomains or remove `includeSubDomains` from the header during testing until all subdomains are HTTPS-ready.
+
+---
+
 ## Best Practices Before Opening an Issue
 
 Before filing a new issue, please go through these steps:
@@ -480,3 +700,5 @@ npm test
 - [README.md](README.md) — project overview and getting started guide
 - [CONTRIBUTING.md](CONTRIBUTING.md) — contribution workflow, branch naming, and PR guidelines
 - [GitHub Issues](https://github.com/Facelessism/cradle/issues) — report bugs or request features
+- [MDN Web Docs: Strict-Transport-Security](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) — official HSTS documentation and directives
+- [HSTS Preload Submission](https://hstspreload.org/) — automated Chrome, Firefox, and Safari preload list submission
