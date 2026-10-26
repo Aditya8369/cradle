@@ -326,3 +326,107 @@ test("hasDangerousKeys detects prototype-pollution keys in worker payloads", () 
   assert.equal(hasDangerousKeys({ constructor: {} }), true);
   assert.equal(hasDangerousKeys({ a: [{ b: { prototype: {} } }] }), true);
 });
+
+/* ──── En Passant Tests ────────────────────────────────────────────── */
+
+test("getLegalMoves generates en passant move when target matches eligible square", () => {
+  const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+
+  // White king and Black king to prevent check issues
+  board[7][4] = createPiece("king", WHITE);
+  board[0][4] = createPiece("king", BLACK);
+
+  // White pawn on e5 (row 3, col 4)
+  board[3][4] = createPiece("pawn", WHITE);
+  // Black pawn on d5 (row 3, col 3) after advancing from d7
+  board[3][3] = createPiece("pawn", BLACK);
+
+  // enPassantTarget for d6 is row 2, col 3
+  const epTarget = { row: 2, col: 3, pawnRow: 3, pawnCol: 3 };
+
+  const moves = getLegalMoves(board, 3, 4, WHITE, epTarget);
+  const epMove = moves.find(
+    m => m.to.row === 2 && m.to.col === 3 && m.enPassant
+  );
+
+  assert.ok(epMove, "Expected en passant move to (2, 3)");
+  assert.equal(epMove.capture, true);
+  assert.equal(epMove.enPassant, true);
+});
+
+test("applyMove clears the captured pawn during White en passant", () => {
+  const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+
+  board[3][4] = createPiece("pawn", WHITE);
+  board[3][3] = createPiece("pawn", BLACK);
+
+  const move = {
+    from: { row: 3, col: 4 },
+    to: { row: 2, col: 3 },
+    enPassant: true,
+    capture: true,
+  };
+
+  applyMove(board, move);
+
+  assert.equal(board[3][4], null, "Original square (3, 4) should be empty");
+  assert.equal(
+    board[3][3],
+    null,
+    "Captured black pawn at (3, 3) must be removed"
+  );
+  assert.ok(board[2][3], "Capturing white pawn must be at (2, 3)");
+  assert.equal(board[2][3].type, "pawn");
+  assert.equal(board[2][3].color, WHITE);
+});
+
+test("applyMove automatically recognizes diagonal pawn move to empty square as en passant", () => {
+  const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+
+  board[3][4] = createPiece("pawn", WHITE);
+  board[3][3] = createPiece("pawn", BLACK);
+
+  // Move without explicit enPassant flag
+  const move = {
+    from: { row: 3, col: 4 },
+    to: { row: 2, col: 3 },
+  };
+
+  applyMove(board, move);
+
+  assert.equal(board[3][4], null);
+  assert.equal(
+    board[3][3],
+    null,
+    "Captured black pawn at (3, 3) must be removed by automatic en passant detection"
+  );
+  assert.equal(board[2][3].color, WHITE);
+});
+
+test("applyMove clears the captured pawn during Black en passant", () => {
+  const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+
+  // Black pawn on d4 (row 4, col 3)
+  board[4][3] = createPiece("pawn", BLACK);
+  // White pawn on e4 (row 4, col 4) after e2-e4
+  board[4][4] = createPiece("pawn", WHITE);
+
+  const move = {
+    from: { row: 4, col: 3 },
+    to: { row: 5, col: 4 },
+    enPassant: true,
+    capture: true,
+  };
+
+  applyMove(board, move);
+
+  assert.equal(board[4][3], null);
+  assert.equal(
+    board[4][4],
+    null,
+    "Captured white pawn at (4, 4) must be removed"
+  );
+  assert.ok(board[5][4]);
+  assert.equal(board[5][4].type, "pawn");
+  assert.equal(board[5][4].color, BLACK);
+});
