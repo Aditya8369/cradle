@@ -78,6 +78,12 @@ function render() {
       .map(move => `${move.to.row},${move.to.col}`)
   );
 
+  legalTargets.forEach(move => {
+    if (move.enPassant && move.from && move.to) {
+      captureKeys.add(`${move.from.row},${move.to.col}`);
+    }
+  });
+
   const checkedKing = findKing(board, turn);
   const turnInCheck =
     checkedKing &&
@@ -180,9 +186,21 @@ function handleSquareClick(row, col) {
   const piece = board[row][col];
 
   if (selected) {
-    const chosenMove = legalTargets.find(
+    let chosenMove = legalTargets.find(
       move => move.to && move.to.row === row && move.to.col === col
     );
+
+    // If user clicked directly on the enemy pawn being captured via en passant
+    if (!chosenMove) {
+      chosenMove = legalTargets.find(
+        move =>
+          move.enPassant &&
+          move.from &&
+          move.to &&
+          move.from.row === row &&
+          move.to.col === col
+      );
+    }
 
     if (chosenMove) {
       makeMove(chosenMove);
@@ -318,7 +336,21 @@ function completeMove(move, movingPiece) {
     notation: buildNotation(move),
   };
 
-  const captured = move.enPassant
+  const isEnPassant =
+    Boolean(move.enPassant) ||
+    Boolean(
+      movingPiece &&
+      movingPiece.type === "pawn" &&
+      move.from.col !== move.to.col &&
+      !board[move.to.row][move.to.col]
+    );
+
+  if (isEnPassant) {
+    move.enPassant = true;
+    move.capture = true;
+  }
+
+  const captured = isEnPassant
     ? board[move.from.row][move.to.col]
     : board[move.to.row][move.to.col];
 

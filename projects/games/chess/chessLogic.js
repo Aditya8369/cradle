@@ -237,7 +237,16 @@ function applyMove(position, chosenMove, promoteTo) {
   const piece = position[chosenMove.from.row][chosenMove.from.col];
   position[chosenMove.from.row][chosenMove.from.col] = null;
 
-  if (chosenMove.enPassant) {
+  const isEnPassant =
+    Boolean(chosenMove.enPassant) ||
+    Boolean(
+      piece &&
+      piece.type === "pawn" &&
+      chosenMove.from.col !== chosenMove.to.col &&
+      !position[chosenMove.to.row][chosenMove.to.col]
+    );
+
+  if (isEnPassant) {
     position[chosenMove.from.row][chosenMove.to.col] = null;
   }
 
