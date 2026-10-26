@@ -194,29 +194,112 @@ randomizeBtn.addEventListener("click", () => {
 });
 
 // ---- DOWNLOAD AS PNG ----
+function exportCanvas(canvas) {
+  const fileName = "my-pixel-avatar.png";
+
+  if (canvas.toBlob) {
+    canvas.toBlob(blob => {
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 1000);
+        return;
+      }
+      fallbackDownload();
+    }, "image/png");
+    return;
+  }
+
+  fallbackDownload();
+
+  function fallbackDownload() {
+    const pngUrl = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.download = fileName;
+    link.href = pngUrl;
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 100);
+  }
+}
+
 downloadBtn.addEventListener("click", () => {
-  const svgData = new XMLSerializer().serializeToString(svg);
+  const canvas = document.createElement("canvas");
+  canvas.width = CANVAS_SIZE;
+  canvas.height = CANVAS_SIZE;
+
+  // Direct 2D canvas drawing ensures synchronous, untainted export across all browsers including Safari iOS 17
+  let rendered = false;
+  if (typeof AvatarEngine !== "undefined" && AvatarEngine.renderSvgToCanvas) {
+    rendered = AvatarEngine.renderSvgToCanvas(svg, canvas);
+  } else {
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.imageSmoothingEnabled = false;
+      const rects = svg.querySelectorAll("rect");
+      if (rects && rects.length > 0) {
+        rects.forEach(rect => {
+          const x = parseFloat(rect.getAttribute("x") || 0);
+          const y = parseFloat(rect.getAttribute("y") || 0);
+          const width = parseFloat(rect.getAttribute("width") || canvas.width);
+          const height = parseFloat(
+            rect.getAttribute("height") || canvas.height
+          );
+          const fill = rect.getAttribute("fill") || "#000000";
+          const opacity = parseFloat(rect.getAttribute("opacity") || 1);
+
+          ctx.save();
+          ctx.globalAlpha = isNaN(opacity) ? 1 : opacity;
+          ctx.fillStyle = fill;
+          ctx.fillRect(x, y, width, height);
+          ctx.restore();
+        });
+        rendered = true;
+      }
+    }
+  }
+
+  if (rendered) {
+    exportCanvas(canvas);
+    return;
+  }
+
+  // Fallback for custom imported SVG elements containing non-rect paths
+  let svgData = new XMLSerializer().serializeToString(svg);
+  if (!svgData.includes("width=")) {
+    svgData = svgData.replace("<svg", `<svg width="${CANVAS_SIZE}"`);
+  }
+  if (!svgData.includes("height=")) {
+    svgData = svgData.replace("<svg", `<svg height="${CANVAS_SIZE}"`);
+  }
+  if (!svgData.includes("xmlns=")) {
+    svgData = svgData.replace(
+      "<svg",
+      `<svg xmlns="http://www.w3.org/2000/svg"`
+    );
+  }
+
   const img = new Image();
-  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
+  const dataUrl =
+    "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
 
   img.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = CANVAS_SIZE;
-    canvas.height = CANVAS_SIZE;
     const ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, 0, 0);
-    URL.revokeObjectURL(url);
-
-    const pngUrl = canvas.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.download = "my-pixel-avatar.png";
-    link.href = pngUrl;
-    link.click();
+    exportCanvas(canvas);
   };
 
-  img.src = url;
+  img.src = dataUrl;
 });
 
 // ---- FILE IMPORT AND VALIDATION ----

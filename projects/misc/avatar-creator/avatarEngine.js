@@ -260,6 +260,78 @@
     return true;
   }
 
+  /**
+   * Render SVG rect elements directly to a 2D canvas context.
+   * Avoids SVG Image loading / Blob URL canvas taint issues in Safari on iOS.
+   */
+  function renderSvgToCanvas(svgSource, canvas) {
+    if (!canvas || typeof canvas.getContext !== "function") {
+      throw new Error("Invalid canvas element provided.");
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return false;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if ("imageSmoothingEnabled" in ctx) {
+      ctx.imageSmoothingEnabled = false;
+    }
+
+    // 1. If svgSource is a DOM element (or element-like object)
+    if (svgSource && typeof svgSource.querySelectorAll === "function") {
+      const rects = svgSource.querySelectorAll("rect");
+      if (rects && rects.length > 0) {
+        rects.forEach(rect => {
+          const x = parseFloat(rect.getAttribute("x") || 0);
+          const y = parseFloat(rect.getAttribute("y") || 0);
+          const width = parseFloat(rect.getAttribute("width") || canvas.width);
+          const height = parseFloat(
+            rect.getAttribute("height") || canvas.height
+          );
+          const fill = rect.getAttribute("fill") || "#000000";
+          const opacity = parseFloat(rect.getAttribute("opacity") || 1);
+
+          ctx.save();
+          ctx.globalAlpha = isNaN(opacity) ? 1 : opacity;
+          ctx.fillStyle = fill;
+          ctx.fillRect(x, y, width, height);
+          ctx.restore();
+        });
+        return true;
+      }
+    }
+
+    // 2. If svgSource is an SVG string
+    if (typeof svgSource === "string") {
+      const rectRegex = /<rect\b([^>]*)\/?>/gi;
+      let match;
+      let found = false;
+      while ((match = rectRegex.exec(svgSource)) !== null) {
+        found = true;
+        const attrs = match[1];
+        const getAttr = name => {
+          const m = new RegExp(`${name}="([^"]*)"`, "i").exec(attrs);
+          return m ? m[1] : null;
+        };
+        const x = parseFloat(getAttr("x") || 0);
+        const y = parseFloat(getAttr("y") || 0);
+        const width = parseFloat(getAttr("width") || canvas.width);
+        const height = parseFloat(getAttr("height") || canvas.height);
+        const fill = getAttr("fill") || "#000000";
+        const opacity = parseFloat(getAttr("opacity") || 1);
+
+        ctx.save();
+        ctx.globalAlpha = isNaN(opacity) ? 1 : opacity;
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, width, height);
+        ctx.restore();
+      }
+      if (found) return true;
+    }
+
+    return false;
+  }
+
   return {
     GRID_SIZE,
     CANVAS_SIZE,
@@ -267,5 +339,6 @@
     generateAvatarSVG,
     generateRandomOptions,
     validateSVG,
+    renderSvgToCanvas,
   };
 });
