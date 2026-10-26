@@ -101,3 +101,45 @@ To protect users against clickjacking (UI redressing) attacks, the following pol
 3. **Repository Guardrails:** Repository validation tooling (`scripts/validate-no-dynamic-eval.js` and `scripts/validate-demo-html.js`) ensures that:
    - Shipped pages do not dynamically construct unvalidated `<iframe>` elements or embed arbitrary external targets without security review.
    - If an `<iframe>` is ever introduced for an isolated sandbox or interactive preview, it must use explicit `sandbox` attributes (e.g. `sandbox="allow-scripts"`) and never embed `javascript:` or untrusted `data:` URIs.
+
+## Production Dependency Vulnerability Policy
+
+**Production dependencies must be free of known High and Critical security vulnerabilities.**
+
+While Cradle's mini-projects are largely dependency-free, any dependencies specified for production runtime must adhere to strict supply chain security standards.
+
+### 1. Centralized CI Scanning
+
+Dependency scanning is centralized and enforced automatically on all pull requests and pushes to protected branches via GitHub Actions (`.github/workflows/dependency-scan.yml` and `.github/workflows/test.yml`).
+
+- Scans focus specifically on production dependencies (`--omit=dev`).
+- Automated checks execute `npm run audit:deps` (`scripts/audit-dependencies.js`).
+
+### 2. Policy for High-Severity Findings
+
+- **Zero Tolerance for High & Critical Findings:** Any finding with a Common Vulnerability Scoring System (CVSS) rating of **High** (CVSS 7.0–8.9) or **Critical** (CVSS 9.0–10.0) in production dependencies will immediately fail the CI check.
+- **Mandatory PR Gate:** Pull requests introducing or containing High or Critical production dependency vulnerabilities cannot be merged.
+- **Remediation SLAs:**
+  - **Critical Vulnerabilities:** Immediate triage; patched, replaced, or removed within **48 hours**.
+  - **High Vulnerabilities:** Remediated or mitigated within **7 days**.
+  - **Moderate / Low Vulnerabilities:** Reviewed and addressed during regular dependency maintenance cycles.
+
+### 3. Pull Request Visibility & Reporting
+
+When a dependency check fails:
+
+- A detailed markdown audit report is appended directly to the GitHub Actions **Step Summary** (`$GITHUB_STEP_SUMMARY`), presenting a structured breakdown of affected packages, severity ratings, advisory links, and vulnerable version ranges.
+- GitHub Actions inline `::error` annotations are emitted, highlighting failing packages in the pull request conversation and checks tabs.
+
+### 4. Contributor Remediation Workflow
+
+Before submitting a pull request, contributors should verify dependencies locally:
+
+```bash
+npm run audit:deps
+```
+
+If vulnerabilities are flagged:
+1. Attempt non-breaking automated fixes with `npm audit fix --omit=dev`.
+2. For breaking updates or transitive issues, update the top-level package version in `package.json` to require a secure release.
+3. If no upstream patch exists, replace the dependency with an actively maintained alternative.
