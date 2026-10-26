@@ -137,10 +137,47 @@
     };
   }
 
+  /**
+   * Determine video and canvas transformation parameters based on camera facing mode and OS.
+   * Handles Android Chrome front-camera native orientation metadata inversion and selfie mirroring.
+   */
+  function getCameraTransform(options = {}) {
+    const { isFront = false, isAndroid = false } = options;
+
+    if (!isFront) {
+      return {
+        scaleX: 1,
+        scaleY: 1,
+        cssTransform: "none",
+        isMirrored: false,
+        isInverted: false,
+      };
+    }
+
+    if (isAndroid) {
+      return {
+        scaleX: -1,
+        scaleY: -1,
+        cssTransform: "scale(-1, -1)",
+        isMirrored: true,
+        isInverted: true,
+      };
+    }
+
+    return {
+      scaleX: -1,
+      scaleY: 1,
+      cssTransform: "scaleX(-1)",
+      isMirrored: true,
+      isInverted: false,
+    };
+  }
+
   exports.PALETTES = PALETTES;
   exports.getLuminance = getLuminance;
   exports.mapLuminanceToChar = mapLuminanceToChar;
   exports.adjustPixel = adjustPixel;
   exports.applySobelEdgeDetection = applySobelEdgeDetection;
   exports.renderImageDataToASCII = renderImageDataToASCII;
+  exports.getCameraTransform = getCameraTransform;
 })(typeof exports === "undefined" ? (window.ASCIIEngine = {}) : exports);
