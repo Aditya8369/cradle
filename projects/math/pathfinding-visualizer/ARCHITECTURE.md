@@ -47,13 +47,13 @@ Because the algorithm functions mutate `isVisited`, `distance`, and `previousNod
 
 ## Component Breakdown
 
-| Component       | Responsibility                                                                                                         |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `Grid`          | Creates the node array and DOM cells, connects mouse and touch-style drag handlers, and exposes start and end lookups. |
-| `algorithms.js` | Implements BFS with a queue, Dijkstra with a distance-sorted list, and A* with a heuristic and open set.               |
-| `app.js`        | Reads the selected algorithm and speed, resets visual state, runs the algorithm, and animates the result.              |
-| `index.html`    | Provides the algorithm selector, speed selector, generate, clear path, and clear grid buttons, plus the legend.        |
-| `style.css`     | Defines the grid layout, wall and visited colors, path animation, and responsive cell sizing.                          |
+| Component       | Responsibility                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `Grid`          | Creates the node array and DOM cells, connects mouse and touch-style drag handlers, and exposes start and end lookups.             |
+| `algorithms.js` | Implements BFS with a queue, Dijkstra with a distance-sorted list, and A* with a heuristic and open set.                           |
+| `app.js`        | Reads the selected algorithm and speed, resets visual state, runs the algorithm, and animates the result.                          |
+| `index.html`    | Provides the algorithm selector, speed selector, generate, clear path, clear walls only, and clear board buttons, plus the legend. |
+| `style.css`     | Defines the grid layout, wall and visited colors, path animation, and responsive cell sizing.                                      |
 
 ## Data Flow / Execution Flow
 
@@ -64,8 +64,8 @@ Because the algorithm functions mutate `isVisited`, `distance`, and `previousNod
 5. `app.js` clears the previous visualization, snapshots the start and end nodes, and calls the selected algorithm.
 6. The algorithm returns `{ visitedNodesInOrder, shortestPathNodes }`. If the end node was never reached, the shortest path is empty.
 7. `animateAlgorithm()` awaits a short delay between visited nodes, adding the `.visited` class in order.
-8. `animateShortestPath()` then adds the `.path` class along the reconstructed route.
-9. Clear Path removes only visit and path classes, preserving walls. Clear Grid removes walls and restores the default start and end positions.
+8. The shortest path nodes are then animated, adding the `.path` class along the reconstructed route.
+9. Clear Board cancels any ongoing animation and resets all walls, visited, and path nodes. Clear Walls Only removes only walls, while Clear Path removes visited and path classes preserving walls.
 
 ## Key Features
 
@@ -90,7 +90,7 @@ Because the algorithm functions mutate `isVisited`, `distance`, and `previousNod
 
 ### `index.html`
 
-- Declares the control bar: algorithm select, speed select, generate maze, clear path, and clear grid.
+- Declares the control bar: algorithm select, speed select, generate maze, clear path, clear walls only, and clear board.
 - Hosts the grid container and the status message.
 - Includes the legend that explains wall, visited, path, start, and end colors.
 - Loads `app.js` as a module.
@@ -98,10 +98,10 @@ Because the algorithm functions mutate `isVisited`, `distance`, and `previousNod
 ### `grid.js`
 
 - **`Grid`** - stores rows, columns, container id, the node matrix, and the drag state.
-- **`createGrid()`** - builds cells, assigns `dataset.r` and `dataset.c`, and attaches the start and end markers.
-- **`attachEventListeners()`** - handles mousedown, mouseover while dragging, and document mouseup.
-- **`toggleWall()`** - flips a node between wall and floor while protecting the endpoints.
-- **`resetGrid()` / `clearPath()`** - restore walls or remove only the visualization classes.
+- **`initGrid()`** - builds cells, assigns `dataset.r` and `dataset.c`, and attaches the start and end markers.
+- **`setupEventListeners()`** - handles mousedown, mouseover while dragging, and document mouseup.
+- **`handleCellInteraction()`** - flips a node between wall and floor while protecting the endpoints.
+- **`clearBoard()` / `clearWalls()` / `clearPath()`** - resets full board, walls only, or visited/path visualization state.
 - **`getStartNode()` / `getEndNode()`** - locate the endpoints without scanning the DOM.
 
 ### `algorithms.js`
