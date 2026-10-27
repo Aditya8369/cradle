@@ -21,6 +21,8 @@
     "audit:deps": "node scripts/audit-dependencies.js",
     "healthcheck": "npm run check-format && npm run validate:projects-sync && npm run validate:mini-projects && npm run validate:demo-html && npm run validate:worker-integrity && npm run validate:no-dynamic-eval && npm run validate:architecture && npm run validate:a11y-labels && npm run check:links && npm run detect:duplicates -- --fail-on-dup && npm run audit:deps && npm test",
     "validate:a11y-labels": "node scripts/validate-accessible-labels.js",
+    "release:checksums": "node scripts/release-integrity.js --generate",
+    "verify:release-integrity": "node scripts/release-integrity.js --verify",
     "test": "node --test",
     "dev": "npm run generate && live-server",
     "build": "npm run generate",

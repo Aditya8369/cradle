@@ -145,6 +145,20 @@ If vulnerabilities are flagged:
 2. For breaking updates or transitive issues, update the top-level package version in `package.json` to require a secure release.
 3. If no upstream patch exists, replace the dependency with an actively maintained alternative.
 
+## Distributed Release Asset Integrity Policy
+
+**All official release assets, archives, and distributed packages must be published with cryptographic checksums.**
+
+To guarantee that downloaded release artifacts have not been tampered with or corrupted:
+
+1. **Mandatory Digest Manifests:** Every release bundle (`.tar.gz`, `.zip`, standalone distributions) must be accompanied by `SHA256SUMS`, `SHA512SUMS`, and a structured `release-integrity.json` manifest.
+2. **Standard Format:** Checksums are formatted using standard GNU coreutils syntax (`<hash>  <filename>`), enabling verification via `sha256sum -c SHA256SUMS` or `shasum -a 256 -c SHA256SUMS`.
+3. **Consumer Verification Support:** Consumers can verify downloads using the built-in CLI command:
+   ```bash
+   npm run verify:release-integrity -- SHA256SUMS
+   ```
+4. **Out-of-Band Verification:** Maintainers should include the SHA-256 digests directly in release notes so consumers can verify integrity without relying solely on the downloaded manifest file. See [RELEASE_INTEGRITY.md](RELEASE_INTEGRITY.md) for full instructions.
+
 ## Production Deployment Security Checklist
 
 Before releasing Cradle or deploying to any public or staging host (GitHub Pages, Cloudflare, Netlify, Caddy, Nginx), verify all baseline security controls against the [Secure Deployment Checklist](SECURE_DEPLOYMENT_CHECKLIST.md). The checklist covers:
@@ -156,3 +170,4 @@ Before releasing Cradle or deploying to any public or staging host (GitHub Pages
 - **Security Headers:** `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, and `Permissions-Policy`.
 - **Dependency & Worker Integrity:** CI audit gates, lockfile enforcement, and same-origin worker hash verification.
 - **Pre-Flight Sign-Off:** Verification matrix and test commands before going live.
+
