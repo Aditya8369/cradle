@@ -228,12 +228,14 @@ body {
   border: none;
   border-radius: 5px;
 }
-.stop-pos-group {
+.stop-pos-group,
+.stop-opacity-group {
   display: flex;
   align-items: center;
   gap: 0.2rem;
 }
-.stop-pos {
+.stop-pos,
+.stop-opacity {
   width: 3.2rem;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--card-border);
@@ -245,7 +247,8 @@ body {
   text-align: center;
   outline: none;
 }
-.stop-pos:focus {
+.stop-pos:focus,
+.stop-opacity:focus {
   border-color: var(--accent);
 }
 .stop-pos-unit {
@@ -303,11 +306,36 @@ body {
 .preview-header h2 {
   margin-bottom: 0;
 }
-.preview-box {
+.preview-actions,
+.code-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.preview-wrapper {
   width: 100%;
   aspect-ratio: 16/9;
   border-radius: 14px;
   border: 1px solid var(--card-border);
+  position: relative;
+  overflow: hidden;
+  background-color: #0f172a;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.08) 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
+}
+.preview-box {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
   transition: background 0.15s ease;
 }
 
@@ -335,7 +363,9 @@ body {
   max-height: 260px;
   overflow-y: auto;
 }
-.btn-copy {
+.btn-copy,
+.btn-download,
+.btn-export {
   position: relative;
   z-index: 2;
 }

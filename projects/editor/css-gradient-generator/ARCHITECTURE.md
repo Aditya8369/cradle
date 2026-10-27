@@ -72,9 +72,11 @@ codeBlock.textContent is updated for the user to copy
 ## Key Features
 
 - Three gradient types: linear, radial, conic
-- Add / remove / reorder color stops with inline hex picker and position input
+- Add / remove / reorder color stops with inline hex picker, opacity percentage input, and position input
+- Full alpha transparency support with checkered background preview
+- Transparent PNG export via Canvas 2D `toDataURL('image/png')` preserving the alpha channel
 - Angle slider with numeric input and directional preset buttons
-- 12 curated gradient presets applied with one click
+- Curated gradient presets applied with one click
 - Randomize button for instant inspiration
 - Live preview box with smooth CSS transitions
 - Generated CSS block with one-click copy
@@ -84,13 +86,13 @@ codeBlock.textContent is updated for the user to copy
 
 ## Technologies Used
 
-| Technology               | Purpose                             |
-| ------------------------ | ----------------------------------- |
-| HTML5                    | Page structure and semantic markup  |
-| CSS3 (Grid, Flexbox)     | Layout and responsive design        |
-| Vanilla JavaScript       | Gradient logic, stop management, UI |
-| Google Fonts (Outfit)    | UI typography                       |
-| Google Fonts (Fira Code) | Monospace code display              |
+| Technology               | Purpose                                                        |
+| ------------------------ | -------------------------------------------------------------- |
+| HTML5 / Canvas 2D        | Page structure, semantic markup, and transparent PNG rendering |
+| CSS3 (Grid, Flexbox)     | Layout and responsive design                                   |
+| Vanilla JavaScript       | Gradient logic, stop management, UI, and PNG export            |
+| Google Fonts (Outfit)    | UI typography                                                  |
+| Google Fonts (Fira Code) | Monospace code display                                         |
 
 ---
 
@@ -99,18 +101,22 @@ codeBlock.textContent is updated for the user to copy
 ### `index.html`
 
 - Defines the layout and the three-pane structure (controls, preview, output).
-- Provides input hooks for angle, type, and stop management.
+- Provides input hooks for angle, type, stop management, and PNG export.
 
 ### `script.js`
 
+- `parseColorToRgba()`: Converts color values and opacity percentages into valid rgba color strings.
 - `buildGradientCSS()`: The core engine that converts state (type, angle, stops) into a valid CSS string.
-- `renderStops()`: Dynamically builds the UI for the color stops list.
+- `renderGradientToCanvas()`: Draws the gradient directly onto a transparent Canvas 2D buffer without white fill.
+- `exportPNG()` / `downloadGradientPNG()`: Exports the gradient as a transparent PNG data URL and triggers browser file download.
+- `renderStops()`: Dynamically builds the UI for color stops with color, opacity, and position inputs.
 - `update()`: Synchronizes the current state with the preview and code block.
 - `renderPresets()`: Implements the one-click preset application logic.
 
 ### `style.css`
 
-- Handles the styling of the stop rows and the angle card.
+- Handles the styling of the stop rows, opacity inputs, action buttons, and angle card.
+- Provides a checkered transparency background under the preview box.
 - Implements the "active" state for gradient type buttons.
 - Ensures the preview box is centered and responsive.
 
@@ -118,6 +124,7 @@ codeBlock.textContent is updated for the user to copy
 
 ## Design Decisions
 
+- **Preserving full alpha channel transparency** — canvas export ensures no white background is painted; it initializes with `clearRect()` and exports via `toDataURL('image/png')` to guarantee 0% opacity stops render as completely transparent pixels.
 - **Sorted stops for CSS output** — color stops are sorted by position before generating
   the CSS string to guarantee a valid gradient, regardless of the order the user adds them.
 - **Angle card hidden for radial** — the angle/direction controls are hidden when radial
@@ -137,7 +144,7 @@ None (uses native browser APIs).
 
 - Add support for multi-stop linear gradients with complex angles.
 - Implement a visual "color stop" slider for repositioning colors.
-- Add export options for other formats (e.g., SVG, Canvas).
+- Add SVG export option alongside PNG.
 
 ---
 

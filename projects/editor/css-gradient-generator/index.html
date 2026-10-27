@@ -157,17 +157,37 @@
             <div class="card preview-card">
               <div class="preview-header">
                 <h2>👁️ Live Preview</h2>
-                <button class="btn btn-action" id="randomizeBtn">
-                  🎲 Randomize
-                </button>
+                <div class="preview-actions">
+                  <button class="btn btn-action" id="randomizeBtn">
+                    🎲 Randomize
+                  </button>
+                  <button
+                    class="btn btn-action btn-download"
+                    id="downloadBtn"
+                    title="Download PNG with transparency"
+                  >
+                    📥 Download PNG
+                  </button>
+                </div>
               </div>
-              <div class="preview-box" id="previewBox"></div>
+              <div class="preview-wrapper">
+                <div class="preview-box" id="previewBox"></div>
+              </div>
             </div>
 
             <div class="card code-card">
               <div class="code-header">
                 <h2>📋 Generated CSS</h2>
-                <button class="btn btn-copy" id="copyBtn">📋 Copy</button>
+                <div class="code-actions">
+                  <button class="btn btn-copy" id="copyBtn">📋 Copy</button>
+                  <button
+                    class="btn btn-action btn-export"
+                    id="exportBtn"
+                    title="Export transparent PNG"
+                  >
+                    📥 Export PNG
+                  </button>
+                </div>
               </div>
               <pre class="code-block" id="codeBlock"></pre>
             </div>
