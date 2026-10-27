@@ -48,6 +48,68 @@ let allProjects = [];
 let selectedCategory = "all";
 let activeSuggestionIndex = -1;
 let currentSuggestions = [];
+
+const SEARCH_QUERY_PARAM = "q";
+const CATEGORY_QUERY_PARAM = "category";
+
+function restoreFiltersFromUrl() {
+  if (typeof window === "undefined" || !window.location) return;
+  const params = new URLSearchParams(window.location.search);
+  const query = params.get(SEARCH_QUERY_PARAM);
+  const category = params.get(CATEGORY_QUERY_PARAM);
+
+  if (query && searchInput) {
+    searchInput.value = query;
+    updateClearSearchButton();
+  }
+
+  if (category) {
+    selectedCategory = category;
+  }
+}
+
+function updateUrlFilterState() {
+  if (typeof window === "undefined" || !window.location || !window.history)
+    return;
+  const params = new URLSearchParams(window.location.search);
+  const query = searchInput ? searchInput.value.trim() : "";
+
+  if (query) {
+    params.set(SEARCH_QUERY_PARAM, query);
+  } else {
+    params.delete(SEARCH_QUERY_PARAM);
+  }
+
+  if (selectedCategory && selectedCategory !== "all") {
+    params.set(CATEGORY_QUERY_PARAM, selectedCategory);
+  } else {
+    params.delete(CATEGORY_QUERY_PARAM);
+  }
+
+  const queryString = params.toString();
+  const nextUrl = `${window.location.pathname}${
+    queryString ? `?${queryString}` : ""
+  }${window.location.hash || ""}`;
+
+  const currentUrl = `${window.location.pathname}${window.location.search}${
+    window.location.hash || ""
+  }`;
+
+  if (
+    nextUrl !== currentUrl &&
+    typeof window.history.replaceState === "function"
+  ) {
+    window.history.replaceState(null, "", nextUrl);
+  }
+}
+
+function validateSelectedCategory() {
+  const categories = new Set(allProjects.map(project => project.category));
+
+  if (selectedCategory !== "all" && !categories.has(selectedCategory)) {
+    selectedCategory = "all";
+  }
+}
 const copyStatus = document.getElementById("copy-status");
 const RECENT_PROJECTS_KEY = "cradle:recent-projects";
 const RECENT_PROJECTS_COLLAPSED_KEY = "cradle:recent-projects-collapsed";
@@ -224,13 +286,15 @@ async function loadProjects() {
       if (cachedProjects && cachedProjects.length > 0) {
         allProjects = cachedProjects;
 
+        validateSelectedCategory();
         renderCategories();
-        renderProjects(allProjects);
+        applyFilters();
         if (loadStatus)
           loadStatus.textContent = `${allProjects.length} projects loaded.`;
 
         fetchAndCacheProjects(db)
           .then(() => {
+            validateSelectedCategory();
             renderCategories();
             applyFilters();
           })
@@ -244,8 +308,9 @@ async function loadProjects() {
 
     await fetchAndCacheProjects(db);
 
+    validateSelectedCategory();
     renderCategories();
-    renderProjects(allProjects);
+    applyFilters();
     if (loadStatus)
       loadStatus.textContent = `${allProjects.length} projects loaded.`;
   } catch (error) {
@@ -273,7 +338,7 @@ function renderCategories() {
       ariaLabel: `${label} projects`,
       onClick: () => {
         selectedCategory = category;
-        debouncedApplyFilters();
+        applyFilters();
         renderCategories();
         searchInput.focus();
       },
@@ -478,8 +543,14 @@ function getSearchSuggestions(query) {
   const normalizedQuery = query.toLowerCase().trim();
   if (!normalizedQuery) return [];
 
-  const categories = [...new Set(allProjects.map(project => project.category))];
-  const categorySuggestions = categories
+  const availableCategories =
+    selectedCategory === "all"
+      ? [...new Set(allProjects.map(project => project.category))]
+      : [selectedCategory];
+
+  const categorySuggestions = (
+    selectedCategory === "all" ? availableCategories : []
+  )
     .filter(category =>
       getSearchableCategory(category).includes(normalizedQuery)
     )
@@ -491,8 +562,18 @@ function getSearchSuggestions(query) {
       category,
     }));
 
-  const projectSuggestions = allProjects
-    .filter(project => project.title.toLowerCase().includes(normalizedQuery))
+  const availableProjects =
+    selectedCategory === "all"
+      ? allProjects
+      : allProjects.filter(project => project.category === selectedCategory);
+
+  const projectSuggestions = availableProjects
+    .filter(
+      project =>
+        project.title.toLowerCase().includes(normalizedQuery) ||
+        (project.description &&
+          project.description.toLowerCase().includes(normalizedQuery))
+    )
     .slice(0, 6)
     .map(project => ({
       type: "project",
@@ -589,15 +670,19 @@ function selectSearchSuggestion(index) {
 
   if (suggestion.type === "category") {
     selectedCategory = suggestion.category;
-    searchInput.value = "";
   } else {
-    selectedCategory = "all";
+    if (suggestion.project && suggestion.project.category) {
+      if (selectedCategory === "all") {
+        selectedCategory = suggestion.project.category;
+      }
+    }
     searchInput.value = suggestion.label;
   }
 
   renderCategories();
   applyFilters();
   hideSearchSuggestions();
+  updateClearSearchButton();
   searchInput.focus();
 }
 
@@ -665,6 +750,7 @@ function applyFilters() {
   if (filterWorker) {
     if (filterWorker.postMessage({ allProjects, selectedCategory, query })) {
       updateClearButtonVisibility(query);
+      updateUrlFilterState();
       return;
     }
   }
@@ -673,6 +759,7 @@ function applyFilters() {
 
   renderProjects(sortProjectList(filtered));
   updateClearButtonVisibility(query);
+  updateUrlFilterState();
 }
 
 function updateClearButtonVisibility(query) {
@@ -690,6 +777,7 @@ function clearFilters() {
   applyFilters();
   renderCategories();
   hideSearchSuggestions();
+  updateClearSearchButton();
   searchInput.focus();
 }
 
@@ -901,6 +989,7 @@ document.addEventListener("keydown", e => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  restoreFiltersFromUrl();
   renderRecentProjects();
   loadProjects();
 });
