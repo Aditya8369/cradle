@@ -140,6 +140,19 @@ npm run audit:deps
 ```
 
 If vulnerabilities are flagged:
+
 1. Attempt non-breaking automated fixes with `npm audit fix --omit=dev`.
 2. For breaking updates or transitive issues, update the top-level package version in `package.json` to require a secure release.
 3. If no upstream patch exists, replace the dependency with an actively maintained alternative.
+
+## Production Deployment Security Checklist
+
+Before releasing Cradle or deploying to any public or staging host (GitHub Pages, Cloudflare, Netlify, Caddy, Nginx), verify all baseline security controls against the [Secure Deployment Checklist](SECURE_DEPLOYMENT_CHECKLIST.md). The checklist covers:
+
+- **HTTPS & TLS configuration:** Strict redirect, TLS 1.2/1.3 enforcement, and zero mixed content.
+- **HSTS:** Header setup, staged rollout, and preload list submission (`hstspreload.org`).
+- **CSP (Content Security Policy):** Least-privilege directives matching Cradle's script, font, and model sources.
+- **Subresource Integrity (SRI):** Mandatory cryptographic hashes on third-party CDN assets.
+- **Security Headers:** `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, and `Permissions-Policy`.
+- **Dependency & Worker Integrity:** CI audit gates, lockfile enforcement, and same-origin worker hash verification.
+- **Pre-Flight Sign-Off:** Verification matrix and test commands before going live.
