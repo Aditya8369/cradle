@@ -28,13 +28,13 @@ function initGame() {
 
   // Try loading saved state
   const saved = loadGameState(currentSize);
-  if (saved) {
+  if (saved && !saved.over) {
     state = saved;
   } else {
     state = createInitialState(currentSize);
   }
 
-  // Load best score
+  // Load best score for the active grid size
   state.bestScore = getBestScore(currentSize);
 
   // Update board grid layout
@@ -46,10 +46,17 @@ function initGame() {
 function renderBoard() {
   boardElement.innerHTML = "";
 
+  const theme = themeSelect ? themeSelect.value : "classic";
   state.board.forEach(row => {
     row.forEach(value => {
       const tile = document.createElement("div");
       tile.className = `tile ${value ? `tile--${value}` : "tile--empty"}`;
+      if (window.GameThemeEngine && value) {
+        tile.style.backgroundColor = window.GameThemeEngine.getTileColor(
+          value,
+          theme
+        );
+      }
       tile.textContent = value || "";
       boardElement.appendChild(tile);
     });
@@ -103,6 +110,7 @@ function restartGame() {
   if (undoManager) undoManager.clear();
   clearGameState(currentSize);
   state = createInitialState(currentSize);
+  state.bestScore = getBestScore(currentSize);
   renderBoard();
 }
 
@@ -129,5 +137,34 @@ function handleKeydown(event) {
 
 restartButton.addEventListener("click", restartGame);
 document.addEventListener("keydown", handleKeydown);
+
+if (undoButton) {
+  undoButton.addEventListener("click", handleUndo);
+}
+
+if (gridSizeSelect) {
+  gridSizeSelect.addEventListener("change", () => {
+    if (state && !state.over) {
+      saveGameState(currentSize, state);
+    }
+    initGame();
+  });
+}
+
+if (themeSelect) {
+  themeSelect.addEventListener("change", () => {
+    renderBoard();
+  });
+}
+
+// Synchronize state across tabs if score changes elsewhere
+window.addEventListener("storage", event => {
+  if (!event.key || !event.key.startsWith("cradle_2048_")) return;
+  const updatedBest = getBestScore(currentSize);
+  if (state && updatedBest > state.bestScore) {
+    state.bestScore = updatedBest;
+    bestScoreElement.textContent = state.bestScore;
+  }
+});
 
 initGame();
