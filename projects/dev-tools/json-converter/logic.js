@@ -19,6 +19,17 @@
  *   { valid: false, error: { message, line, column } }
  */
 function parseJSON(text) {
+  if (typeof text !== "string") {
+    return {
+      valid: false,
+      error: {
+        message: "JSON input must be a string",
+        line: 1,
+        column: 1,
+      },
+    };
+  }
+
   try {
     const value = JSON.parse(text);
 
@@ -116,15 +127,29 @@ function quoteYaml(str) {
 /**
  * Serialize a JavaScript value to YAML.
  */
-function toYaml(obj, indent) {
+function toYaml(obj, indent, seen) {
   if (indent === undefined) {
     indent = 0;
+  }
+  if (seen === undefined) {
+    seen = new Set();
+  }
+
+  if (indent > 64) {
+    return "~";
   }
 
   const pad = "  ".repeat(indent);
 
   if (obj === null || obj === undefined) {
     return "~";
+  }
+
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      return "~";
+    }
+    seen.add(obj);
   }
 
   if (typeof obj === "boolean") {
@@ -148,7 +173,7 @@ function toYaml(obj, indent) {
       "\n" +
       obj
         .map(item => {
-          const value = toYaml(item, indent + 1);
+          const value = toYaml(item, indent + 1, seen);
 
           if (typeof item === "object" && item !== null) {
             const lines = value.split("\n");
@@ -178,7 +203,7 @@ function toYaml(obj, indent) {
       "\n" +
       keys
         .map(key => {
-          const value = toYaml(obj[key], indent + 1);
+          const value = toYaml(obj[key], indent + 1, seen);
 
           const needsKeyQuote = /[:\-#\[\]{},"'!&*?|>%@`\n\r\s]/.test(key);
 
@@ -232,7 +257,7 @@ function escapeCsv(value) {
  * becomes:
  * { "a.b": 1 }
  */
-function flattenObj(obj, prefix, result) {
+function flattenObj(obj, prefix, result, seen, depth) {
   if (prefix === undefined) {
     prefix = "";
   }
@@ -241,9 +266,30 @@ function flattenObj(obj, prefix, result) {
     result = {};
   }
 
+  if (seen === undefined) {
+    seen = new Set();
+  }
+
+  if (depth === undefined) {
+    depth = 0;
+  }
+
+  if (depth > 64) {
+    result[prefix || "value"] = String(obj ?? "");
+    return result;
+  }
+
   if (obj === null || obj === undefined) {
     result[prefix || "value"] = "";
     return result;
+  }
+
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      result[prefix || "value"] = "[Circular]";
+      return result;
+    }
+    seen.add(obj);
   }
 
   if (typeof obj !== "object" || Array.isArray(obj)) {
@@ -261,7 +307,7 @@ function flattenObj(obj, prefix, result) {
   for (const key of keys) {
     const newPrefix = prefix ? `${prefix}.${key}` : key;
 
-    flattenObj(obj[key], newPrefix, result);
+    flattenObj(obj[key], newPrefix, result, seen, depth + 1);
   }
 
   return result;
@@ -348,7 +394,7 @@ function sanitizeXmlName(name) {
  * @param {string} rootName
  * @param {number} indent
  */
-function toXml(obj, rootName, indent) {
+function toXml(obj, rootName, indent, seen) {
   if (rootName === undefined) {
     rootName = "root";
   }
@@ -357,12 +403,27 @@ function toXml(obj, rootName, indent) {
     indent = 0;
   }
 
+  if (seen === undefined) {
+    seen = new Set();
+  }
+
+  if (indent > 64) {
+    return `${"  ".repeat(indent)}<${rootName}/>`;
+  }
+
   const pad = "  ".repeat(indent);
 
   const name = isValidXmlName(rootName) ? rootName : sanitizeXmlName(rootName);
 
   if (obj === null || obj === undefined) {
     return `${pad}<${name}/>`;
+  }
+
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      return `${pad}<${name}/>`;
+    }
+    seen.add(obj);
   }
 
   if (
@@ -380,7 +441,9 @@ function toXml(obj, rootName, indent) {
 
     const itemName = name.replace(/s$/, "") || "item";
 
-    const items = obj.map(item => toXml(item, itemName, indent + 1)).join("\n");
+    const items = obj
+      .map(item => toXml(item, itemName, indent + 1, seen))
+      .join("\n");
 
     return `${pad}<${name}>\n` + `${items}\n` + `${pad}</${name}>`;
   }
@@ -396,7 +459,7 @@ function toXml(obj, rootName, indent) {
       .map(key => {
         const childName = isValidXmlName(key) ? key : sanitizeXmlName(key);
 
-        return toXml(obj[key], childName, indent + 1);
+        return toXml(obj[key], childName, indent + 1, seen);
       })
       .join("\n");
 
