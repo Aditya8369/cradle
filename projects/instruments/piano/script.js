@@ -1,7 +1,11 @@
-const keys = document.querySelectorAll(".key");
-const status = document.getElementById("status");
+const doc = typeof document !== "undefined" ? document : null;
+const win = typeof window !== "undefined" ? window : null;
+
+const keys = doc ? doc.querySelectorAll(".key") : [];
+const status = doc ? doc.getElementById("status") : null;
 
 let audioContext = null;
+let masterBus = null;
 
 const activeNotes = new Map();
 const activePointers = new Map();
@@ -23,21 +27,57 @@ const KEY_CODES = {
   KeyK: "C5",
 };
 
+const engine =
+  typeof PianoEngine !== "undefined"
+    ? PianoEngine
+    : typeof require === "function"
+      ? require("./pianoEngine.js")
+      : null;
+
 function getAudioContext() {
   if (!audioContext) {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioContext = new AudioContext();
+    const AudioCtx =
+      (win && (win.AudioContext || win.webkitAudioContext)) ||
+      (typeof globalThis !== "undefined" &&
+        (globalThis.AudioContext || globalThis.webkitAudioContext));
+    if (AudioCtx) {
+      audioContext = new AudioCtx();
+    }
   }
 
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
+  if (audioContext && audioContext.state === "suspended") {
+    audioContext.resume().catch(() => {});
   }
 
   return audioContext;
 }
 
+function getMasterBus(context) {
+  if (!context) return null;
+  if (!masterBus) {
+    try {
+      const compressor = context.createDynamicsCompressor();
+      compressor.threshold.setValueAtTime(-6, context.currentTime);
+      compressor.knee.setValueAtTime(6, context.currentTime);
+      compressor.ratio.setValueAtTime(4, context.currentTime);
+      compressor.attack.setValueAtTime(0.003, context.currentTime);
+      compressor.release.setValueAtTime(0.1, context.currentTime);
+
+      const gain = context.createGain();
+      gain.gain.setValueAtTime(0.75, context.currentTime);
+
+      compressor.connect(gain);
+      gain.connect(context.destination);
+      masterBus = compressor;
+    } catch {
+      masterBus = context.destination;
+    }
+  }
+  return masterBus;
+}
+
 function getKeyElement(note) {
-  return [...keys].find(key => key.dataset.note === note);
+  return [...keys].find(key => key.dataset && key.dataset.note === note);
 }
 
 function setKeyPressed(key, pressed) {
@@ -45,11 +85,15 @@ function setKeyPressed(key, pressed) {
     return;
   }
 
-  key.classList.toggle("active", pressed);
-  key.setAttribute("aria-pressed", String(pressed));
+  if (key.classList) {
+    key.classList.toggle("active", pressed);
+  }
+  if (key.setAttribute) {
+    key.setAttribute("aria-pressed", String(pressed));
+  }
 }
 
-function createHammerNoise(context, time) {
+function createHammerNoise(context, time, destination) {
   const duration = 0.035;
   const bufferSize = Math.floor(context.sampleRate * duration);
   const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
@@ -73,13 +117,13 @@ function createHammerNoise(context, time) {
 
   source.connect(filter);
   filter.connect(gain);
-  gain.connect(context.destination);
+  gain.connect(destination || context.destination);
 
   source.start(time);
   source.stop(time + duration);
 }
 
-function createPianoVoice(context, frequency, time) {
+function createPianoVoice(context, frequency, time, destination) {
   const masterGain = context.createGain();
   const fundamental = context.createOscillator();
   const second = context.createOscillator();
@@ -110,7 +154,7 @@ function createPianoVoice(context, frequency, time) {
   fundamentalGain.connect(masterGain);
   harmonicGain.connect(masterGain);
 
-  masterGain.connect(context.destination);
+  masterGain.connect(destination || context.destination);
 
   fundamental.start(time);
   second.start(time);
@@ -125,21 +169,23 @@ function createPianoVoice(context, frequency, time) {
 }
 
 function playNote(note) {
-  if (!PianoEngine.isValidNote(note) || activeNotes.has(note)) {
+  const isValid = engine ? engine.isValidNote(note) : true;
+  if (!isValid || activeNotes.has(note)) {
     return;
   }
 
   const context = getAudioContext();
+  if (!context) return;
+
   const time = context.currentTime;
-  const frequency = PianoEngine.getFrequency(note);
+  const frequency = engine ? engine.getFrequency(note) : 440;
   const key = getKeyElement(note);
+  const bus = getMasterBus(context);
 
-  const voice = createPianoVoice(context, frequency, time);
-
-  createHammerNoise(context, time);
+  const voice = createPianoVoice(context, frequency, time, bus);
+  createHammerNoise(context, time, bus);
 
   activeNotes.set(note, voice);
-
   setKeyPressed(key, true);
 
   if (status) {
@@ -154,27 +200,37 @@ function stopNote(note) {
     return;
   }
 
-  const context = getAudioContext();
-  const time = context.currentTime;
-
-  voice.masterGain.gain.cancelScheduledValues(time);
-  voice.masterGain.gain.setValueAtTime(
-    Math.max(voice.masterGain.gain.value, 0.0001),
-    time
-  );
-
-  voice.masterGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.4);
-
-  const stopTime = time + 0.45;
-
-  voice.fundamental.stop(stopTime);
-  voice.second.stop(stopTime);
-  voice.third.stop(stopTime);
-
   activeNotes.delete(note);
 
-  const key = getKeyElement(note);
+  const context = getAudioContext();
+  if (context) {
+    const time = context.currentTime;
 
+    try {
+      voice.masterGain.gain.cancelScheduledValues(time);
+      voice.masterGain.gain.setValueAtTime(
+        Math.max(voice.masterGain.gain.value || 0.0001, 0.0001),
+        time
+      );
+      voice.masterGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.4);
+
+      const stopTime = time + 0.45;
+      voice.fundamental.stop(stopTime);
+      voice.second.stop(stopTime);
+      voice.third.stop(stopTime);
+
+      setTimeout(() => {
+        try {
+          voice.fundamental.disconnect();
+          voice.second.disconnect();
+          voice.third.disconnect();
+          voice.masterGain.disconnect();
+        } catch {}
+      }, 500);
+    } catch {}
+  }
+
+  const key = getKeyElement(note);
   setKeyPressed(key, false);
 
   if (activeNotes.size === 0 && status) {
@@ -183,7 +239,7 @@ function stopNote(note) {
 }
 
 function pressKey(key) {
-  if (!key) {
+  if (!key || !key.dataset) {
     return;
   }
 
@@ -191,112 +247,214 @@ function pressKey(key) {
 }
 
 function releaseKey(key) {
-  if (!key) {
+  if (!key || !key.dataset) {
     return;
   }
 
   stopNote(key.dataset.note);
 }
 
-keys.forEach(key => {
-  setKeyPressed(key, false);
+if (keys && keys.length) {
+  keys.forEach(key => {
+    setKeyPressed(key, false);
 
-  key.addEventListener("pointerdown", event => {
-    event.preventDefault();
+    key.addEventListener("pointerdown", event => {
+      if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+      }
 
-    activePointers.set(event.pointerId, key);
+      activePointers.set(event.pointerId, key);
 
-    if (key.setPointerCapture) {
-      key.setPointerCapture(event.pointerId);
-    }
+      if (key.setPointerCapture) {
+        key.setPointerCapture(event.pointerId);
+      }
 
-    pressKey(key);
-  });
+      pressKey(key);
+    });
 
-  key.addEventListener("pointerup", event => {
-    event.preventDefault();
+    key.addEventListener("pointerup", event => {
+      if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+      }
 
-    const pressedKey = activePointers.get(event.pointerId);
-
-    if (pressedKey) {
-      releaseKey(pressedKey);
-    }
-
-    activePointers.delete(event.pointerId);
-  });
-
-  key.addEventListener("pointercancel", event => {
-    event.preventDefault();
-
-    const pressedKey = activePointers.get(event.pointerId);
-
-    if (pressedKey) {
-      releaseKey(pressedKey);
-    }
-
-    activePointers.delete(event.pointerId);
-  });
-
-  key.addEventListener("lostpointercapture", event => {
-    const pressedKey = activePointers.get(event.pointerId);
-
-    if (pressedKey) {
-      releaseKey(pressedKey);
+      const pressedKey = activePointers.get(event.pointerId);
       activePointers.delete(event.pointerId);
-    }
+
+      if (pressedKey && pressedKey.dataset) {
+        const note = pressedKey.dataset.note;
+        const isHeldByKeyboard = [...pressedKeyboardKeys].some(
+          code => KEY_CODES[code] === note
+        );
+        const isHeldByPointer = [...activePointers.values()].some(
+          k => k === pressedKey
+        );
+
+        if (!isHeldByKeyboard && !isHeldByPointer) {
+          releaseKey(pressedKey);
+        }
+      }
+    });
+
+    key.addEventListener("pointercancel", event => {
+      if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+      }
+
+      const pressedKey = activePointers.get(event.pointerId);
+      activePointers.delete(event.pointerId);
+
+      if (pressedKey && pressedKey.dataset) {
+        const note = pressedKey.dataset.note;
+        const isHeldByKeyboard = [...pressedKeyboardKeys].some(
+          code => KEY_CODES[code] === note
+        );
+        const isHeldByPointer = [...activePointers.values()].some(
+          k => k === pressedKey
+        );
+
+        if (!isHeldByKeyboard && !isHeldByPointer) {
+          releaseKey(pressedKey);
+        }
+      }
+    });
+
+    key.addEventListener("lostpointercapture", event => {
+      const pressedKey = activePointers.get(event.pointerId);
+      if (pressedKey && pressedKey.dataset) {
+        activePointers.delete(event.pointerId);
+        const note = pressedKey.dataset.note;
+        const isHeldByKeyboard = [...pressedKeyboardKeys].some(
+          code => KEY_CODES[code] === note
+        );
+        const isHeldByPointer = [...activePointers.values()].some(
+          k => k === pressedKey
+        );
+
+        if (!isHeldByKeyboard && !isHeldByPointer) {
+          releaseKey(pressedKey);
+        }
+      }
+    });
   });
-});
+}
 
-document.addEventListener("keydown", event => {
-  const note = KEY_CODES[event.code];
-
-  if (!note || pressedKeyboardKeys.has(event.code)) {
+function handleKeydown(event) {
+  // Ignore auto-repeated events from holding keys
+  if (event.repeat || event.ctrlKey || event.altKey || event.metaKey) {
     return;
   }
 
-  event.preventDefault();
-
-  pressedKeyboardKeys.add(event.code);
-
-  const key = getKeyElement(note);
-
-  pressKey(key);
-});
-
-document.addEventListener("keyup", event => {
   const note = KEY_CODES[event.code];
-
   if (!note) {
     return;
   }
 
-  event.preventDefault();
-
-  pressedKeyboardKeys.delete(event.code);
-
-  const key = getKeyElement(note);
-
-  releaseKey(key);
-});
-
-window.addEventListener("blur", () => {
-  pressedKeyboardKeys.clear();
-  activePointers.clear();
-
-  [...activeNotes.keys()].forEach(note => {
-    stopNote(note);
-  });
-});
-
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) {
+  // Deduplicate if physical key is already tracked as pressed or note is already actively playing
+  if (pressedKeyboardKeys.has(event.code) || activeNotes.has(note)) {
     return;
   }
 
-  pressedKeyboardKeys.clear();
-  activePointers.clear();
+  if (typeof event.preventDefault === "function") {
+    event.preventDefault();
+  }
 
-  [...activeNotes.keys()].forEach(note => {
-    stopNote(note);
+  pressedKeyboardKeys.add(event.code);
+  const key = getKeyElement(note);
+  pressKey(key);
+}
+
+function handleKeyup(event) {
+  const note = KEY_CODES[event.code];
+  if (!note) {
+    return;
+  }
+
+  if (typeof event.preventDefault === "function") {
+    event.preventDefault();
+  }
+
+  pressedKeyboardKeys.delete(event.code);
+
+  // Only release the note if no other physical key or pointer is holding it
+  const isHeldByKeyboard = [...pressedKeyboardKeys].some(
+    code => KEY_CODES[code] === note
+  );
+  const isHeldByPointer = [...activePointers.values()].some(
+    k => k && k.dataset && k.dataset.note === note
+  );
+
+  if (!isHeldByKeyboard && !isHeldByPointer) {
+    const key = getKeyElement(note);
+    releaseKey(key);
+  }
+}
+
+if (doc) {
+  doc.addEventListener("keydown", handleKeydown);
+  doc.addEventListener("keyup", handleKeyup);
+
+  doc.addEventListener("visibilitychange", () => {
+    if (!doc.hidden) {
+      return;
+    }
+
+    pressedKeyboardKeys.clear();
+    activePointers.clear();
+
+    [...activeNotes.keys()].forEach(note => {
+      stopNote(note);
+    });
   });
-});
+}
+
+if (win) {
+  win.addEventListener("blur", () => {
+    pressedKeyboardKeys.clear();
+    activePointers.clear();
+
+    [...activeNotes.keys()].forEach(note => {
+      stopNote(note);
+    });
+  });
+
+  win.addEventListener("pagehide", () => {
+    pressedKeyboardKeys.clear();
+    activePointers.clear();
+
+    [...activeNotes.keys()].forEach(note => {
+      stopNote(note);
+    });
+
+    if (audioContext && audioContext.state !== "closed") {
+      try {
+        audioContext.suspend().catch(() => {});
+      } catch {}
+    }
+  });
+
+  win.PianoStudio = {
+    playNote,
+    stopNote,
+    pressKey,
+    releaseKey,
+    handleKeydown,
+    handleKeyup,
+    getActiveNotes: () => activeNotes,
+    getPressedKeyboardKeys: () => pressedKeyboardKeys,
+    getActivePointers: () => activePointers,
+  };
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    playNote,
+    stopNote,
+    pressKey,
+    releaseKey,
+    handleKeydown,
+    handleKeyup,
+    getActiveNotes: () => activeNotes,
+    getPressedKeyboardKeys: () => pressedKeyboardKeys,
+    getActivePointers: () => activePointers,
+  };
+}
