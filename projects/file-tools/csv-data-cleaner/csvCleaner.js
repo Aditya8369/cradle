@@ -133,25 +133,44 @@
     return normalized;
   }
 
-  function trimCells(dataset) {
+  function ensureValidDataset(dataset) {
+    if (!dataset || typeof dataset !== "object") {
+      return { headers: [], rows: [], warnings: [] };
+    }
+    return {
+      headers: Array.isArray(dataset.headers) ? dataset.headers : [],
+      rows: Array.isArray(dataset.rows)
+        ? dataset.rows.map(r => (Array.isArray(r) ? r : []))
+        : [],
+      warnings: Array.isArray(dataset.warnings) ? dataset.warnings : [],
+    };
+  }
+
+  function trimCells(inputDataset) {
+    const dataset = ensureValidDataset(inputDataset);
     return {
       headers: dataset.headers.map(header => String(header).trim()),
       rows: dataset.rows.map(row => row.map(cell => String(cell).trim())),
+      warnings: dataset.warnings.slice(),
     };
   }
 
   function isEmptyRow(row) {
+    if (!Array.isArray(row)) return true;
     return row.every(cell => String(cell).trim() === "");
   }
 
-  function removeEmptyRows(dataset) {
+  function removeEmptyRows(inputDataset) {
+    const dataset = ensureValidDataset(inputDataset);
     return {
       headers: dataset.headers.slice(),
       rows: dataset.rows.filter(row => !isEmptyRow(row)),
+      warnings: dataset.warnings.slice(),
     };
   }
 
-  function removeDuplicateRows(dataset) {
+  function removeDuplicateRows(inputDataset) {
+    const dataset = ensureValidDataset(inputDataset);
     const seen = new Set();
     const rows = [];
 
@@ -166,10 +185,12 @@
     return {
       headers: dataset.headers.slice(),
       rows,
+      warnings: dataset.warnings.slice(),
     };
   }
 
-  function detectMissingValues(dataset) {
+  function detectMissingValues(inputDataset) {
+    const dataset = ensureValidDataset(inputDataset);
     const missing = [];
 
     dataset.rows.forEach((row, rowIndex) => {
@@ -187,13 +208,15 @@
     return missing;
   }
 
-  function cleanDataset(dataset, options = {}) {
+  function cleanDataset(inputDataset, options = {}) {
+    const dataset = ensureValidDataset(inputDataset);
     const beforeRows = dataset.rows.length;
     let cleaned = {
       headers: dataset.headers.slice(),
       rows: dataset.rows.map(row =>
         normalizeRowLength(row, dataset.headers.length)
       ),
+      warnings: dataset.warnings.slice(),
     };
 
     if (options.trimSpaces !== false) {
@@ -239,7 +262,8 @@
     return text;
   }
 
-  function exportCsv(dataset) {
+  function exportCsv(inputDataset) {
+    const dataset = ensureValidDataset(inputDataset);
     const lines = [
       dataset.headers.map(escapeCsvCell).join(","),
       ...dataset.rows.map(row =>

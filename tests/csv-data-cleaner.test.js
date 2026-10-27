@@ -153,3 +153,33 @@ test("parseCsv detects column count mismatch warnings", () => {
     /Row 4 has an unexpected number of columns/
   );
 });
+
+test("fuzz testing: parseCsv survives randomized, malformed, and adversarial inputs", () => {
+  const malformedInputs = [
+    'a,b,c\n"unclosed quote,1,2',
+    '"""triple quotes""","unmatched"',
+    ",".repeat(200),
+    "\r\r\n\n\r",
+    'a,b\n"quote\nwith\nnewline",c',
+    ' "spaced" , "quote" \n "1" , "2" ',
+    "\0\x01\x02\t\n\r",
+    'header1\n""\n"""',
+  ];
+
+  for (const input of malformedInputs) {
+    try {
+      const parsed = CsvCleaner.parseCsv(input);
+      assert.ok(Array.isArray(parsed.headers));
+      assert.ok(Array.isArray(parsed.rows));
+    } catch (err) {
+      assert.ok(err instanceof Error);
+      assert.ok(typeof err.message === "string");
+    }
+  }
+
+  // Non-string inputs throw descriptive error instead of crashing
+  const nonStringInputs = [null, undefined, 123, {}, [], () => {}];
+  for (const input of nonStringInputs) {
+    assert.throws(() => CsvCleaner.parseCsv(input), /CSV input must be a string/);
+  }
+});

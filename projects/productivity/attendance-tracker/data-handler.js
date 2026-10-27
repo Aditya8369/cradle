@@ -51,6 +51,7 @@ function exportToCSV(subjects) {
 }
 
 function parseCSV(csvText) {
+  if (typeof csvText !== "string") return [];
   const lines = csvText.trim().split("\n");
   if (lines.length <= 1) return [];
 

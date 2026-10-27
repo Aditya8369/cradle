@@ -29,8 +29,10 @@
   /** Safely compile RegExp instance or return error */
   function compileRegex(pattern, flags = "g") {
     try {
+      const safePattern =
+        typeof pattern === "string" ? pattern : String(pattern ?? "");
       const cleanFlags = sanitizeFlags(flags);
-      const regex = new RegExp(pattern, cleanFlags);
+      const regex = new RegExp(safePattern, cleanFlags);
       return { regex, error: null };
     } catch (err) {
       return { regex: null, error: err.message };
@@ -127,16 +129,20 @@
   }
 
   /** Execute match substitution / replacement */
-  function executeReplace(pattern, flags, inputStr, replacement) {
+  function executeReplace(pattern, flags, inputStr = "", replacement = "") {
+    const safeInput =
+      typeof inputStr === "string" ? inputStr : String(inputStr ?? "");
+    const safeReplacement =
+      typeof replacement === "string" ? replacement : String(replacement ?? "");
     const { regex, error } = compileRegex(pattern, flags);
     if (error || !regex) {
-      return { output: inputStr, error: error || "Invalid Regex" };
+      return { output: safeInput, error: error || "Invalid Regex" };
     }
     try {
-      const output = inputStr.replace(regex, replacement);
+      const output = safeInput.replace(regex, safeReplacement);
       return { output, error: null };
     } catch (err) {
-      return { output: inputStr, error: err.message };
+      return { output: safeInput, error: err.message };
     }
   }
 
