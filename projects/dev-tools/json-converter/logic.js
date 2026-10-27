@@ -139,7 +139,21 @@ function toYaml(obj, indent, seen) {
     return "~";
   }
 
+/**
+ * Serialize a JavaScript value to YAML.
+ */
+function toYaml(
+  obj,
+  indent = 0,
+  depth = 0,
+  maxDepth = MAX_CONVERTER_DEPTH,
+  seen = new Set()
+) {
   const pad = "  ".repeat(indent);
+
+  if (depth > maxDepth) {
+    return "[Depth limit exceeded]";
+  }
 
   if (obj === null || obj === undefined) {
     return "~";
@@ -162,6 +176,13 @@ function toYaml(obj, indent, seen) {
 
   if (typeof obj === "string") {
     return obj === "" ? "''" : quoteYaml(obj);
+  }
+
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      return "[Circular reference]";
+    }
+    seen.add(obj);
   }
 
   if (Array.isArray(obj)) {
@@ -297,6 +318,12 @@ function flattenObj(obj, prefix, result, seen, depth) {
     return result;
   }
 
+  if (seen.has(obj)) {
+    result[prefix || "value"] = "[Circular reference]";
+    return result;
+  }
+  seen.add(obj);
+
   const keys = Object.keys(obj);
 
   if (keys.length === 0) {
@@ -393,6 +420,9 @@ function sanitizeXmlName(name) {
  * @param {*} obj
  * @param {string} rootName
  * @param {number} indent
+ * @param {number} depth
+ * @param {number} maxDepth
+ * @param {Set} seen
  */
 function toXml(obj, rootName, indent, seen) {
   if (rootName === undefined) {
@@ -412,8 +442,11 @@ function toXml(obj, rootName, indent, seen) {
   }
 
   const pad = "  ".repeat(indent);
-
   const name = isValidXmlName(rootName) ? rootName : sanitizeXmlName(rootName);
+
+  if (depth > maxDepth) {
+    return `${pad}<${name}>[Depth limit exceeded]</${name}>`;
+  }
 
   if (obj === null || obj === undefined) {
     return `${pad}<${name}/>`;
@@ -432,6 +465,13 @@ function toXml(obj, rootName, indent, seen) {
     typeof obj === "boolean"
   ) {
     return `${pad}<${name}>` + escapeXml(String(obj)) + `</${name}>`;
+  }
+
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      return `${pad}<${name}>[Circular reference]</${name}>`;
+    }
+    seen.add(obj);
   }
 
   if (Array.isArray(obj)) {

@@ -12,11 +12,11 @@
     },
     {
       "url": "projects/games/chess/ai-worker.js",
-      "sha256": "1d487e11652f81f8ab913357e1eb216d57ec05b7eb2141875c853dede421bf0a"
+      "sha256": "1b78afc437fd0612c0d17417413b38793a92cde6001495a6f533ff01af4cb28a"
     },
     {
       "url": "projects/games/chess/chessLogic.js",
-      "sha256": "6dc4a2c03ee9599dabcae7e9cc2ebe8ada75dfc992b00c04d767c9f6211ae63c"
+      "sha256": "286adeff0606fdca0b0734280d4833dce04a3c24d54a343637da812893a02ea6"
     },
     {
       "url": "scripts/worker.js",

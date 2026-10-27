@@ -50,12 +50,18 @@ function bfs(nodes, edges, startId) {
   return steps;
 }
 
-function dfs(nodes, edges, startId) {
+const MAX_DFS_DEPTH = 1000;
+
+function dfs(nodes, edges, startId, maxDepth = MAX_DFS_DEPTH) {
+  if (!Array.isArray(nodes) || !Array.isArray(edges) || !startId) {
+    return [];
+  }
   const adj = buildAdjacency(nodes, edges);
   const steps = [];
   const visited = new Set();
 
-  function visit(nodeId, parent) {
+  function visit(nodeId, parent, depth = 0) {
+    if (depth >= maxDepth) return;
     visited.add(nodeId);
     if (parent)
       steps.push({ type: "frontier-edge", edge: { from: parent, to: nodeId } });
@@ -65,11 +71,11 @@ function dfs(nodes, edges, startId) {
       .slice()
       .sort((a, b) => a.to.localeCompare(b.to));
     for (const { to } of neighbors) {
-      if (!visited.has(to)) visit(to, nodeId);
+      if (!visited.has(to)) visit(to, nodeId, depth + 1);
     }
   }
 
-  visit(startId, null);
+  visit(startId, null, 0);
   return steps;
 }
 

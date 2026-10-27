@@ -151,20 +151,30 @@ function clearStats() {
   statPath.textContent = "—";
 }
 
-function countKeys(obj) {
+const MAX_TREE_DEPTH = 100;
+
+function countKeys(obj, depth = 0, maxDepth = MAX_TREE_DEPTH, seen = new Set()) {
+  if (depth >= maxDepth) return 0;
   if (obj === null || typeof obj !== "object") return 0;
+  if (seen.has(obj)) return 0;
+  seen.add(obj);
+
   let count = Array.isArray(obj) ? obj.length : Object.keys(obj).length;
   const values = Array.isArray(obj) ? obj : Object.values(obj);
-  for (const v of values) count += countKeys(v);
+  for (const v of values) count += countKeys(v, depth + 1, maxDepth, seen);
   return count;
 }
 
-function getDepth(obj, depth = 0) {
+function getDepth(obj, depth = 0, maxDepth = MAX_TREE_DEPTH, seen = new Set()) {
+  if (depth >= maxDepth) return depth;
   if (obj === null || typeof obj !== "object") return depth;
+  if (seen.has(obj)) return depth;
+  seen.add(obj);
+
   let max = depth;
   const values = Array.isArray(obj) ? obj : Object.values(obj);
   for (const v of values) {
-    max = Math.max(max, getDepth(v, depth + 1));
+    max = Math.max(max, getDepth(v, depth + 1, maxDepth, seen));
   }
   return max;
 }
@@ -177,13 +187,35 @@ function renderTree() {
   treeContainer.appendChild(fragment);
 }
 
-function renderNode(parent, data, key, path, isArray, depth) {
+function renderNode(
+  parent,
+  data,
+  key,
+  path,
+  isArray,
+  depth,
+  maxDepth = MAX_TREE_DEPTH,
+  seen = new Set()
+) {
+  if (depth >= maxDepth) {
+    const line = createLeafLine(key, "[Depth limit reached]", path, isArray);
+    parent.appendChild(line);
+    return;
+  }
+
   if (data === null || typeof data !== "object") {
     // Leaf node
     const line = createLeafLine(key, data, path, isArray);
     parent.appendChild(line);
     return;
   }
+
+  if (seen.has(data)) {
+    const line = createLeafLine(key, "[Circular reference]", path, isArray);
+    parent.appendChild(line);
+    return;
+  }
+  seen.add(data);
 
   const entries = Array.isArray(data)
     ? data.map((v, i) => [i, v])
@@ -259,7 +291,7 @@ function renderNode(parent, data, key, path, isArray, depth) {
   if (!isCollapsed) {
     for (const [k, v] of entries) {
       const childPath = isArray ? `${path}[${k}]` : `${path}.${k}`;
-      renderNode(container, v, k, childPath, isArray, depth + 1);
+      renderNode(container, v, k, childPath, isArray, depth + 1, maxDepth, seen);
     }
 
     const closeLine = document.createElement("div");
@@ -373,13 +405,24 @@ function searchTree(query) {
   }
 }
 
-function findMatches(data, path, query) {
+function findMatches(
+  data,
+  path,
+  query,
+  depth = 0,
+  maxDepth = MAX_TREE_DEPTH,
+  seen = new Set()
+) {
+  if (depth >= maxDepth) return;
   if (data === null || typeof data !== "object") {
     if (String(data).toLowerCase().includes(query)) {
       searchMatches.push(path);
     }
     return;
   }
+
+  if (seen.has(data)) return;
+  seen.add(data);
 
   const entries = Array.isArray(data)
     ? data.map((v, i) => [i, v])
@@ -390,7 +433,7 @@ function findMatches(data, path, query) {
     if (String(k).toLowerCase().includes(query)) {
       searchMatches.push(childPath);
     }
-    findMatches(v, childPath, query);
+    findMatches(v, childPath, query, depth + 1, maxDepth, seen);
   }
 }
 
@@ -445,15 +488,25 @@ function collapseAll() {
   renderTree();
 }
 
-function collapseRecursive(data, path) {
+function collapseRecursive(
+  data,
+  path,
+  depth = 0,
+  maxDepth = MAX_TREE_DEPTH,
+  seen = new Set()
+) {
+  if (depth >= maxDepth) return;
   if (data === null || typeof data !== "object") return;
+  if (seen.has(data)) return;
+  seen.add(data);
+
   collapsedPaths.add(path);
   const entries = Array.isArray(data)
     ? data.map((v, i) => [i, v])
     : Object.entries(data);
   for (const [k, v] of entries) {
     const childPath = isArray(data) ? `${path}[${k}]` : `${path}.${k}`;
-    collapseRecursive(v, childPath);
+    collapseRecursive(v, childPath, depth + 1, maxDepth, seen);
   }
 }
 

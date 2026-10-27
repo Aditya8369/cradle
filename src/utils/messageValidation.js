@@ -19,17 +19,29 @@ function isWholeNumber(value) {
 /** Own property names that can be abused for prototype pollution. */
 const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
+export const DEFAULT_MAX_RECURSION_DEPTH = 64;
+
 /**
- * Whether any own key anywhere in the (acyclic) value can be used to pollute
+ * Whether any own key anywhere in the value can be used to pollute
  * shared prototypes. Prototype-pollution payloads almost always carry
  * `__proto__`, `constructor`, or `prototype` as names; rejecting them at the
- * boundary blocks the attack even before any merge happens. Recursion is
- * bounded by the acyclic, structured-cloned data that arrives via postMessage.
+ * boundary blocks the attack even before any merge happens. Traversal enforces
+ * a maximum depth and cycle detection to defend against attacker-controlled
+ * deeply nested or circular payloads. Exceeding safe bounds fails closed (returns true).
  */
-export function hasDangerousKeys(value) {
+export function hasDangerousKeys(
+  value,
+  depth = 0,
+  maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
+  seen = new Set()
+) {
+  if (depth > maxDepth) return true;
   if (value === null || typeof value !== "object") return false;
+  if (seen.has(value)) return true;
+  seen.add(value);
+
   if (Array.isArray(value)) {
-    return value.some(hasDangerousKeys);
+    return value.some(item => hasDangerousKeys(item, depth + 1, maxDepth, seen));
   }
   for (const key of Reflect.ownKeys(value)) {
     if (typeof key === "string" && DANGEROUS_KEYS.has(key)) return true;
@@ -37,7 +49,7 @@ export function hasDangerousKeys(value) {
     if (
       typeof child === "object" &&
       child !== null &&
-      hasDangerousKeys(child)
+      hasDangerousKeys(child, depth + 1, maxDepth, seen)
     ) {
       return true;
     }
@@ -50,19 +62,37 @@ export function hasDangerousKeys(value) {
  * from a parsed structure (worker payloads, JSON). Returns a produce-free copy
  * built with ordinary prototype objects, but assigned one key at a time so a
  * stray `__proto__` can never trigger the base prototype's setter.
+ * Enforces depth and cycle limits; safe bounds violations fail gracefully.
  */
-export function sanitizeState(value) {
-  if (Array.isArray(value)) {
-    return value.map(sanitizeState);
+export function sanitizeState(
+  value,
+  depth = 0,
+  maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
+  seen = new Set()
+) {
+  if (depth >= maxDepth) {
+    return Array.isArray(value)
+      ? []
+      : value !== null && typeof value === "object"
+        ? {}
+        : value;
   }
   if (value === null || typeof value !== "object") {
     return value;
+  }
+  if (seen.has(value)) {
+    return Array.isArray(value) ? [] : {};
+  }
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeState(item, depth + 1, maxDepth, seen));
   }
   const result = {};
   for (const key of Object.keys(value)) {
     if (DANGEROUS_KEYS.has(key)) continue;
     Object.defineProperty(result, key, {
-      value: sanitizeState(value[key]),
+      value: sanitizeState(value[key], depth + 1, maxDepth, seen),
       enumerable: true,
       writable: true,
       configurable: true,
@@ -176,7 +206,8 @@ export function isChessSearchRequest(payload) {
   if (!isWholeNumber(payload.searchId)) return false;
   if (!isChessBoard(payload.board)) return false;
   if (payload.color !== "white" && payload.color !== "black") return false;
-  if (!isWholeNumber(payload.depth) || payload.depth < 1) return false;
+  if (!isWholeNumber(payload.depth) || payload.depth < 1 || payload.depth > 16)
+    return false;
   if (
     payload.enPassantTarget !== null &&
     payload.enPassantTarget !== undefined &&
