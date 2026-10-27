@@ -59,12 +59,12 @@ The project splits pure logic from DOM wiring. `morseEngine.js` is UMD-wrapped: 
 
 ## Component Breakdown
 
-| File             | Responsibility                                                                   |
-| ---------------- | -------------------------------------------------------------------------------- |
-| `index.html`     | Two-pane editor layout, toolbar, and playback speed slider                       |
-| `morseEngine.js` | Morse dictionary, text encode/decode, WPM timing math, audio sequence generation |
-| `script.js`      | UI binding, encode/decode handlers, copy/clear, Web Audio playback               |
-| `style.css`      | Dark theme styling and responsive layout                                         |
+| File             | Responsibility                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `index.html`     | Two-pane editor layout, toolbar, and playback speed slider                                           |
+| `morseEngine.js` | Morse dictionary, text encode/decode, WPM timing math, audio sequence generation                     |
+| `script.js`      | UI binding, encode/decode handlers, copy/clear, Web Audio playback, and audio teardown on navigation |
+| `style.css`      | Dark theme styling and responsive layout                                                             |
 
 ## Data Flow / Execution Flow
 
@@ -83,6 +83,7 @@ Result written to the output textarea
         ↓
 User clicks Play → script.js synthesizes beeps (dit = 1 unit, dah = 3 units)
 with proportional pauses at the selected speed via the Web Audio API
+(Audio automatically stops and suspends on page navigation or tab hide)
 ```
 
 ## Key Features
@@ -90,6 +91,7 @@ with proportional pauses at the selected speed via the Web Audio API
 - Encode text into Morse code
 - Decode Morse code into text
 - Play Morse code as audio
+- Audio teardown on navigation, pagehide, and visibility change
 - Adjustable playback speed
 - Copy output
 - Clear and swap input/output
@@ -116,6 +118,7 @@ with proportional pauses at the selected speed via the Web Audio API
 - `encodeText()` — uses `MorseEngine.textToMorse` (falling back to a local `MORSE` map) and writes the result to the output.
 - `decodeText()` — uses `MorseEngine.morseToText` (with a local `REVERSE` map fallback) and writes decoded text.
 - `playMorse()` — iterates over the output symbols and plays dit/dah beeps with proportional pauses.
+- `stopAudio()` — halts active playback, disconnects and stops running oscillators and gain nodes, cancels scheduled audio ramps, clears pending timeouts, resets UI state, and suspends the AudioContext upon page navigation, `pagehide`, `beforeunload`, or when `document.hidden` is true.
 - `beep(ctx, duration)` — plays a 650 Hz sine tone via an oscillator and gain node.
 - `clearFields()` and `copyOutput()` — clear both editors and copy the output via the Clipboard API with "Copied!" feedback.
 - The speed slider updates the displayed millisecond value live.
@@ -130,6 +133,7 @@ with proportional pauses at the selected speed via the Web Audio API
 - **Engine/UI separation** — all translation and timing logic lives in `morseEngine.js` (UMD-wrapped for Node.js tests) while `script.js` only binds the DOM.
 - **Web Audio API synthesis** — tones are generated with an oscillator rather than pre-recorded audio files, keeping the project dependency-free.
 - **Proportional timing** — dit = 1 unit, dah = 3 units, symbol pause = 1, letter pause = 3, word pause = 7, giving a standard Morse rhythm.
+- **Audio lifecycle management & navigation teardown** — audio playback hooks into `pagehide`, `beforeunload`, `visibilitychange`, and navigation links to immediately stop active `OscillatorNode` instances, cancel gain ramps, and suspend `AudioContext`. This prevents orphaned audio from continuing to play in the background when users navigate away or switch tabs.
 - **Fallback maps in script.js** — a local `MORSE`/`REVERSE` map keeps the UI functional even if the engine module fails to load.
 
 ## Dependencies
