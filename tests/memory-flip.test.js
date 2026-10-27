@@ -39,3 +39,25 @@ test("challenge mode high score is saved separately from standard", () => {
   assert.equal(getHighScore("standard"), 40);
   assert.equal(getHighScore("challenge"), 25);
 });
+
+test("high score management enforces numeric bounds and rejects invalid inputs", () => {
+  localStorage.clear();
+
+  // Reject zero, negative, NaN, Infinity, non-integer, and excessively large scores
+  assert.equal(saveHighScore(0, "standard"), false);
+  assert.equal(saveHighScore(-15, "standard"), false);
+  assert.equal(saveHighScore(NaN, "standard"), false);
+  assert.equal(saveHighScore(Infinity, "standard"), false);
+  assert.equal(saveHighScore(12.5, "standard"), false);
+  assert.equal(saveHighScore("invalid", "standard"), false);
+  assert.equal(saveHighScore(9999999, "standard"), false);
+
+  assert.equal(getHighScore("standard"), null);
+
+  // Corrupted persisted score in localStorage is safely ignored
+  localStorage.setItem("cradle_memory_flip_high_score", "-50");
+  assert.equal(getHighScore("standard"), null);
+
+  localStorage.setItem("cradle_memory_flip_high_score", "not_a_number");
+  assert.equal(getHighScore("standard"), null);
+});

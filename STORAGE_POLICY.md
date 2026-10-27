@@ -50,6 +50,17 @@ const validateSettings = s =>
 const settings = storage.get("settings", defaultSettings, validateSettings);
 ```
 
+- **Numeric Bounds for Scores and Persisted Counters**: Game scores, streaks, match statistics, and user-supplied numeric values must be bounded and validated before use. Discard or clamp negative values, `NaN`, `Infinity`, or values exceeding safe numeric limits (`Number.MAX_SAFE_INTEGER` or domain-specific maximums) using `CradleStorage.getNumber()` or `CradleStorage.clampNumber()` to prevent overflow, distortion, and inconsistent state.
+
+```javascript
+// Good: Validates safe numeric bounds for persisted high score
+const highScore = storage.getNumber("high_score", 0, {
+  min: 0,
+  max: Number.MAX_SAFE_INTEGER,
+  integer: true,
+});
+```
+
 ## 4. When to use IndexedDB
 
 `localStorage` is synchronous and blockingly slow for large payloads. It is capped at around ~5MB total for the entire domain.
