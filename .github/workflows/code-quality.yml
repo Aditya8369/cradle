@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Code Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history required to inspect changes accurately
+          fetch-depth: 0
 
       - name: Setup Node.js Runtime environment
         uses: actions/setup-node@v4
@@ -27,7 +27,6 @@ jobs:
         run: npm ci
 
       - name: Execute Duplicate JavaScript Detection Script
-        # Assumes your script is located at scripts/detect-duplicates.js or maps an npm command
         run: |
           if [ -f "scripts/detect-duplicates.js" ]; then
             node scripts/detect-duplicates.js
@@ -35,3 +34,18 @@ jobs:
             echo "::warning file=scripts/detect-duplicates.js::Duplicate detection script file not found. Running fallback jscpd check."
             npx jscpd client/src backend/src
           fi
+
+  pettylint:
+    name: PettyLint
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Run PettyLint
+        uses: Facelessism/pettylint@v1.0.0
