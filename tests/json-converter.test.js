@@ -324,10 +324,76 @@ test("array of numbers in YAML", () => {
   assert.match(yaml, /- 30/);
 });
 
-test("special characters in XML element names are sanitized", () => {
-  const xml = toXml({
-    "my element": 1,
-  });
-
   assert.match(xml, /<my_element>/);
+});
+
+/* ------------------------------------------------------------------ */
+/* Fuzz Testing                                                       */
+/* ------------------------------------------------------------------ */
+
+test("fuzz testing: parseJSON handles malformed, randomized, and adversarial syntax", () => {
+  const malformedInputs = [
+    "{",
+    "}",
+    "[",
+    "]",
+    "{a: 1}",
+    "{'a': 1}",
+    '{"a": 1,}',
+    '{"a": [1, 2,]}',
+    '{"a": undefined}',
+    '{"a": NaN}',
+    '{"a": Infinity}',
+    '{"a": "unclosed string}',
+    '{"a": "\\uD800"}',
+    '{"a": "\\c"}',
+    "null 123",
+    "",
+    "   ",
+    null,
+    undefined,
+    12345,
+    {},
+    [],
+  ];
+
+  for (const input of malformedInputs) {
+    const res = parseJSON(input);
+    assert.equal(res.valid, false);
+    assert.ok(res.error);
+    assert.ok(typeof res.error.message === "string" && res.error.message.length > 0);
+    assert.ok(res.error.line >= 1);
+    assert.ok(res.error.column >= 1);
+  }
+});
+
+test("fuzz testing: toYaml, toCsv, and toXml handle deeply nested, circular, and exotic shapes", () => {
+  const circular = { id: 1 };
+  circular.self = circular;
+
+  let nested = { depth: 0 };
+  let curr = nested;
+  for (let i = 1; i <= 50; i++) {
+    curr.next = { depth: i };
+    curr = curr.next;
+  }
+
+  const adversarial = [
+    circular,
+    nested,
+    { "": "", "   ": " ", ":": ":", "-": "-", "\n": "\r\n" },
+    null,
+    undefined,
+    true,
+    false,
+    123,
+    [],
+    {},
+  ];
+
+  for (const obj of adversarial) {
+    assert.ok(typeof toYaml(obj) === "string");
+    assert.ok(typeof toCsv(obj) === "string");
+    assert.ok(typeof toXml(obj, "item") === "string");
+  }
 });

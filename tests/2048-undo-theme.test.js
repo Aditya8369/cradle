@@ -58,3 +58,39 @@ test("ThemeEngine provides valid theme presets and tile color mappings", () => {
   const tile8Color = themeEngineModule.getTileColor(8, "darkNeon");
   assert.strictEqual(typeof tile8Color, "string");
 });
+
+test("2048 storage enforces numeric bounds on scores and grid sizes", () => {
+  const gameStorage = require("../projects/games/2048-game/storage.js");
+
+  // Invalid grid size
+  assert.strictEqual(gameStorage.saveBestScore(1, 100), false);
+  assert.strictEqual(gameStorage.saveBestScore(99, 100), false);
+  assert.strictEqual(gameStorage.getBestScore(1), 0);
+
+  // Invalid scores (negative, NaN, Infinity, floats, excessive)
+  assert.strictEqual(gameStorage.saveBestScore(4, -50), false);
+  assert.strictEqual(gameStorage.saveBestScore(4, NaN), false);
+  assert.strictEqual(gameStorage.saveBestScore(4, Infinity), false);
+  assert.strictEqual(gameStorage.saveBestScore(4, 12.34), false);
+  assert.strictEqual(gameStorage.saveBestScore(4, Number.MAX_SAFE_INTEGER + 1000), false);
+
+  // Valid score save
+  assert.strictEqual(gameStorage.saveBestScore(4, 256), true);
+  assert.strictEqual(gameStorage.getBestScore(4), 256);
+
+  // Lower score does not overwrite
+  assert.strictEqual(gameStorage.saveBestScore(4, 128), false);
+  assert.strictEqual(gameStorage.getBestScore(4), 256);
+
+  // Load and save state bounds validation
+  gameStorage.saveGameState(4, {
+    board: [[2, 4], [0, 0]],
+    score: -500, // corrupt negative score
+    bestScore: NaN,
+  });
+  const loaded = gameStorage.loadGameState(4);
+  assert.strictEqual(loaded.score, 0);
+  assert.strictEqual(loaded.bestScore, 0);
+
+  gameStorage.clearGameState(4);
+});

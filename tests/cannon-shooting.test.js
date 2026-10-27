@@ -82,3 +82,46 @@ test("Storage stats recording and persistence logic", () => {
   assert.equal(stats.bestStreak, 1);
   assert.equal(stats.totalShots, 2);
 });
+
+test("Cannon storage applies numeric bounds and sanitizes corrupted state", () => {
+  // Corrupted saved state with negative values, NaN, and hits exceeding shots
+  const corrupted = {
+    score: -50,
+    highScore: -100,
+    currentStreak: NaN,
+    bestStreak: -5,
+    totalHits: 999,
+    totalShots: 10,
+  };
+
+  const sanitized = CannonStorage.sanitizeStats(corrupted);
+  assert.equal(sanitized.score, 0);
+  assert.equal(sanitized.highScore, 0);
+  assert.equal(sanitized.currentStreak, 0);
+  assert.equal(sanitized.bestStreak, 0);
+  assert.equal(sanitized.totalShots, 10);
+  assert.equal(sanitized.totalHits, 10); // clamped to totalShots
+});
+
+test("Cannon recordShot rejects invalid numeric inputs and prevents score overflow", () => {
+  let stats = CannonStorage.getInitialStats();
+
+  // Passing negative scoreAwarded or NaN streak should be safely handled
+  stats = CannonStorage.recordShot(stats, true, -500, -10);
+  assert.equal(stats.score, 0);
+  assert.equal(stats.currentStreak, 0);
+
+  // Excessive score award is safely bounded
+  stats = CannonStorage.recordShot(stats, true, 2000000, 5);
+  assert.equal(stats.score, 1000000);
+  assert.equal(stats.currentStreak, 5);
+});
+
+test("Cannon calculateScore handles invalid or excessively large streak numbers", () => {
+  const resNegative = CannonEngine.calculateScore(true, -10);
+  assert.equal(resNegative.newStreak, 1);
+  assert.equal(resNegative.scoreAwarded, 100);
+
+  const resHuge = CannonEngine.calculateScore(true, 1000000);
+  assert.equal(resHuge.multiplier, 5);
+});
