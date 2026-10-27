@@ -102,6 +102,27 @@ To protect users against clickjacking (UI redressing) attacks, the following pol
    - Shipped pages do not dynamically construct unvalidated `<iframe>` elements or embed arbitrary external targets without security review.
    - If an `<iframe>` is ever introduced for an isolated sandbox or interactive preview, it must use explicit `sandbox` attributes (e.g. `sandbox="allow-scripts"`) and never embed `javascript:` or untrusted `data:` URIs.
 
+## SVG Thumbnail Security Policy
+
+**SVG thumbnails are treated as untrusted assets and must be hardened against script execution, event handlers, and unauthorized external resource fetches.**
+
+Because Cradle displays interactive previews and cards for dozens of independently contributed mini-projects in the project gallery:
+
+1. **Strictly Inert Thumbnails:** SVG thumbnails (`thumbnail.svg`) rendered in gallery cards and components must never execute code or initiate unauthorized network calls.
+2. **Prohibited Constructs:**
+   - `<script>` tags and CDATA script blocks are strictly forbidden.
+   - Inline event handlers (`onload`, `onerror`, `onclick`, `onmouseover`, `onbegin`, `onend`, etc.) are forbidden on any element.
+   - `<foreignObject>` tags and embedded HTML (e.g. `<iframe>`, `<embed>`, `<form>`, `<input>`) are forbidden.
+   - Dangerous pseudo-protocols (`javascript:`, `vbscript:`, `data:text/html`) in `href` or `xlink:href` are forbidden.
+   - Remote external references (`<use href="https://...">`, `<image href="https://...">`, `<feImage href="https://...">`, `@import`) that could cause tracking, credential leakage, or SSRF are stripped or blocked.
+   - XML Entity Expansion (XXE) and `<!DOCTYPE>` declarations are prohibited.
+3. **Card Rendering Isolation:**
+   - Gallery cards render thumbnails via `<img>` elements with `loading="lazy"`, `decoding="async"`, and `referrerpolicy="no-referrer"`.
+   - SVG data URIs passed to card components are decoded and validated with `isSvgSafe()` before rendering; unsafe payloads fall back gracefully to a non-executable initial-letter avatar.
+4. **Contract Verification:**
+   - Every project's `thumbnail.svg` is evaluated during CI by `scripts/validate-mini-contract.js` using `validateSvgThumbnail()`. Any file containing scripts, event handlers, or external references triggers an immediate `unsafe-svg-thumbnail` build failure.
+
+
 ## Production Dependency Vulnerability Policy
 
 **Production dependencies must be free of known High and Critical security vulnerabilities.**

@@ -135,6 +135,24 @@ test("committed env files and unbuilt sources are reported", () => {
   assert.ok(rulesFor(root, "has-jsx").includes("build-step-source"));
 });
 
+test("SVG thumbnails with scripts or external references are reported as errors", () => {
+  const root = makeRoot({
+    "games/script-thumb": goodMini({
+      "thumbnail.svg": "<svg><script>alert(1)</script></svg>",
+    }),
+    "games/event-thumb": goodMini({
+      "thumbnail.svg": '<svg onload="alert(1)"><circle r="10"/></svg>',
+    }),
+    "games/external-thumb": goodMini({
+      "thumbnail.svg": '<svg><image href="https://evil.com/track.png"/></svg>',
+    }),
+  });
+  assert.ok(rulesFor(root, "script-thumb").includes("unsafe-svg-thumbnail"));
+  assert.ok(rulesFor(root, "event-thumb").includes("unsafe-svg-thumbnail"));
+  assert.ok(rulesFor(root, "external-thumb").includes("unsafe-svg-thumbnail"));
+});
+
+
 test("lifecycle and storage heuristics are warnings", () => {
   const root = makeRoot({
     "games/leaky": goodMini({

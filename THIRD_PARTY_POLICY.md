@@ -72,6 +72,12 @@ Your project must gracefully degrade if a script or model fails to load.
 
 - **No Global Pollution**: Third-party scripts should not wildly pollute the `window` namespace. Stick to established libraries.
 - **Sandboxing**: Where highly untrusted or experimental code is running, consider isolating it via a Web Worker or an `<iframe>`.
+- **SVG Thumbnail Hardening**: SVG thumbnails (`thumbnail.svg`) are treated as untrusted assets. In the project gallery, SVG assets must be completely inert:
+  - **No Scripts or Handlers:** `<script>`, `onload`, `onclick`, `onmouseover`, and all SMIL animation event handlers are prohibited.
+  - **No Foreign HTML:** `<foreignObject>` is disallowed to prevent embedding foreign HTML contexts or iframes.
+  - **No External Resources:** External references in `<use>`, `<image>`, `<feImage>`, and `@import` are forbidden to prevent unexpected external network calls and user tracking.
+  - **Mandatory Validation:** Thumbnails must pass `validateSvgThumbnail()` and comply with repository CI checks (`unsafe-svg-thumbnail`).
+
 
 ## 6. Dependency Ownership & Licensing
 
