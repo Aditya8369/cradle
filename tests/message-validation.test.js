@@ -359,3 +359,43 @@ test("isChessSearchRequest and reports reject unexpected keys (strict schema)", 
     false
   );
 });
+
+test("hasDangerousKeys and sanitizeState enforce depth limits and handle cycles gracefully", () => {
+  // Deeply nested object exceeding default max depth (64)
+  let deepObj = { leaf: true };
+  for (let i = 0; i < 70; i++) {
+    deepObj = { child: deepObj };
+  }
+
+  // hasDangerousKeys fails closed (treats exceeding safe bounds as dangerous)
+  assert.equal(hasDangerousKeys(deepObj), true);
+
+  // sanitizeState gracefully truncates at max depth without throwing stack overflow
+  const sanitizedDeep = sanitizeState(deepObj);
+  assert.ok(sanitizedDeep);
+
+  // Circular reference structure
+  const circularObj = { a: 1 };
+  circularObj.self = circularObj;
+
+  // hasDangerousKeys rejects circular structures as dangerous
+  assert.equal(hasDangerousKeys(circularObj), true);
+
+  // sanitizeState handles circular structures gracefully
+  const sanitizedCircular = sanitizeState(circularObj);
+  assert.equal(sanitizedCircular.a, 1);
+  assert.deepEqual(sanitizedCircular.self, {});
+
+  // isChessSearchRequest rejects excessive search depths exceeding bounds
+  assert.equal(
+    isChessSearchRequest({
+      type: "search",
+      searchId: 1,
+      board: emptyBoard,
+      color: "white",
+      depth: 25,
+    }),
+    false
+  );
+});
+

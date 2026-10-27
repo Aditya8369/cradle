@@ -521,10 +521,15 @@ onmessage = function (event) {
     return;
   }
 
+  const MAX_SEARCH_DEPTH = 16;
   const parsedDepth = Number.parseInt(depth, 10);
   const parsedTimeLimit = Number.parseInt(timeLimit, 10);
 
-  if (!Number.isInteger(parsedDepth) || parsedDepth < 1) {
+  if (
+    !Number.isInteger(parsedDepth) ||
+    parsedDepth < 1 ||
+    parsedDepth > MAX_SEARCH_DEPTH
+  ) {
     postMessage({
       type: "error",
       message: "Invalid search depth.",

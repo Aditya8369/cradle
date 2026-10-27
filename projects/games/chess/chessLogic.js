@@ -341,10 +341,21 @@ function attacksSquare(position, fromRow, fromCol, targetRow, targetCol) {
  * and acyclic, so recursion is bounded. Used by both the page and the worker
  * at the message boundary to reject poisoned payloads before any state merge.
  */
-function hasDangerousKeys(value) {
+const DEFAULT_MAX_RECURSION_DEPTH = 64;
+
+function hasDangerousKeys(
+  value,
+  depth = 0,
+  maxDepth = DEFAULT_MAX_RECURSION_DEPTH,
+  seen = new Set()
+) {
+  if (depth > maxDepth) return true;
   if (value === null || typeof value !== "object") return false;
+  if (seen.has(value)) return true;
+  seen.add(value);
+
   if (Array.isArray(value)) {
-    return value.some(hasDangerousKeys);
+    return value.some(item => hasDangerousKeys(item, depth + 1, maxDepth, seen));
   }
   for (const key of Reflect.ownKeys(value)) {
     if (
@@ -357,7 +368,7 @@ function hasDangerousKeys(value) {
     if (
       typeof child === "object" &&
       child !== null &&
-      hasDangerousKeys(child)
+      hasDangerousKeys(child, depth + 1, maxDepth, seen)
     ) {
       return true;
     }

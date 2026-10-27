@@ -116,12 +116,23 @@ function quoteYaml(str) {
 /**
  * Serialize a JavaScript value to YAML.
  */
-function toYaml(obj, indent) {
-  if (indent === undefined) {
-    indent = 0;
-  }
+const MAX_CONVERTER_DEPTH = 100;
 
+/**
+ * Serialize a JavaScript value to YAML.
+ */
+function toYaml(
+  obj,
+  indent = 0,
+  depth = 0,
+  maxDepth = MAX_CONVERTER_DEPTH,
+  seen = new Set()
+) {
   const pad = "  ".repeat(indent);
+
+  if (depth > maxDepth) {
+    return "[Depth limit exceeded]";
+  }
 
   if (obj === null || obj === undefined) {
     return "~";
@@ -139,6 +150,13 @@ function toYaml(obj, indent) {
     return obj === "" ? "''" : quoteYaml(obj);
   }
 
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      return "[Circular reference]";
+    }
+    seen.add(obj);
+  }
+
   if (Array.isArray(obj)) {
     if (obj.length === 0) {
       return "[]";
@@ -148,7 +166,7 @@ function toYaml(obj, indent) {
       "\n" +
       obj
         .map(item => {
-          const value = toYaml(item, indent + 1);
+          const value = toYaml(item, indent + 1, depth + 1, maxDepth, seen);
 
           if (typeof item === "object" && item !== null) {
             const lines = value.split("\n");
@@ -178,7 +196,13 @@ function toYaml(obj, indent) {
       "\n" +
       keys
         .map(key => {
-          const value = toYaml(obj[key], indent + 1);
+          const value = toYaml(
+            obj[key],
+            indent + 1,
+            depth + 1,
+            maxDepth,
+            seen
+          );
 
           const needsKeyQuote = /[:\-#\[\]{},"'!&*?|>%@`\n\r\s]/.test(key);
 
@@ -232,13 +256,17 @@ function escapeCsv(value) {
  * becomes:
  * { "a.b": 1 }
  */
-function flattenObj(obj, prefix, result) {
-  if (prefix === undefined) {
-    prefix = "";
-  }
-
-  if (result === undefined) {
-    result = {};
+function flattenObj(
+  obj,
+  prefix = "",
+  result = {},
+  depth = 0,
+  maxDepth = MAX_CONVERTER_DEPTH,
+  seen = new Set()
+) {
+  if (depth > maxDepth) {
+    result[prefix || "value"] = "[Depth limit exceeded]";
+    return result;
   }
 
   if (obj === null || obj === undefined) {
@@ -251,6 +279,12 @@ function flattenObj(obj, prefix, result) {
     return result;
   }
 
+  if (seen.has(obj)) {
+    result[prefix || "value"] = "[Circular reference]";
+    return result;
+  }
+  seen.add(obj);
+
   const keys = Object.keys(obj);
 
   if (keys.length === 0) {
@@ -261,7 +295,7 @@ function flattenObj(obj, prefix, result) {
   for (const key of keys) {
     const newPrefix = prefix ? `${prefix}.${key}` : key;
 
-    flattenObj(obj[key], newPrefix, result);
+    flattenObj(obj[key], newPrefix, result, depth + 1, maxDepth, seen);
   }
 
   return result;
@@ -347,19 +381,24 @@ function sanitizeXmlName(name) {
  * @param {*} obj
  * @param {string} rootName
  * @param {number} indent
+ * @param {number} depth
+ * @param {number} maxDepth
+ * @param {Set} seen
  */
-function toXml(obj, rootName, indent) {
-  if (rootName === undefined) {
-    rootName = "root";
-  }
-
-  if (indent === undefined) {
-    indent = 0;
-  }
-
+function toXml(
+  obj,
+  rootName = "root",
+  indent = 0,
+  depth = 0,
+  maxDepth = MAX_CONVERTER_DEPTH,
+  seen = new Set()
+) {
   const pad = "  ".repeat(indent);
-
   const name = isValidXmlName(rootName) ? rootName : sanitizeXmlName(rootName);
+
+  if (depth > maxDepth) {
+    return `${pad}<${name}>[Depth limit exceeded]</${name}>`;
+  }
 
   if (obj === null || obj === undefined) {
     return `${pad}<${name}/>`;
@@ -373,6 +412,13 @@ function toXml(obj, rootName, indent) {
     return `${pad}<${name}>` + escapeXml(String(obj)) + `</${name}>`;
   }
 
+  if (typeof obj === "object") {
+    if (seen.has(obj)) {
+      return `${pad}<${name}>[Circular reference]</${name}>`;
+    }
+    seen.add(obj);
+  }
+
   if (Array.isArray(obj)) {
     if (obj.length === 0) {
       return `${pad}<${name}/>`;
@@ -380,7 +426,9 @@ function toXml(obj, rootName, indent) {
 
     const itemName = name.replace(/s$/, "") || "item";
 
-    const items = obj.map(item => toXml(item, itemName, indent + 1)).join("\n");
+    const items = obj
+      .map(item => toXml(item, itemName, indent + 1, depth + 1, maxDepth, seen))
+      .join("\n");
 
     return `${pad}<${name}>\n` + `${items}\n` + `${pad}</${name}>`;
   }
@@ -396,7 +444,14 @@ function toXml(obj, rootName, indent) {
       .map(key => {
         const childName = isValidXmlName(key) ? key : sanitizeXmlName(key);
 
-        return toXml(obj[key], childName, indent + 1);
+        return toXml(
+          obj[key],
+          childName,
+          indent + 1,
+          depth + 1,
+          maxDepth,
+          seen
+        );
       })
       .join("\n");
 

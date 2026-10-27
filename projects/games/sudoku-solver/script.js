@@ -165,7 +165,20 @@ function createSolvedBoard() {
    SOLVER / GENERATOR
 ========================================= */
 
-function fillBoard(board) {
+const MAX_SUDOKU_DEPTH = 81;
+const MAX_SUDOKU_STEPS = 100000;
+
+function fillBoard(
+  board,
+  stepCount = { count: 0 },
+  maxSteps = MAX_SUDOKU_STEPS,
+  depth = 0,
+  maxDepth = MAX_SUDOKU_DEPTH
+) {
+  if (depth > maxDepth || ++stepCount.count > maxSteps) {
+    return false;
+  }
+
   const empty = findEmptyCell(board);
 
   if (!empty) {
@@ -180,7 +193,7 @@ function fillBoard(board) {
     if (isValidMove(board, row, col, number)) {
       board[row][col] = number;
 
-      if (fillBoard(board)) {
+      if (fillBoard(board, stepCount, maxSteps, depth + 1, maxDepth)) {
         return true;
       }
 
