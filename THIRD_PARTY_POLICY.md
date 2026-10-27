@@ -68,13 +68,36 @@ Your project must gracefully degrade if a script or model fails to load.
 - If a model or script fetch fails, display a clear, non-intrusive on-screen error message (e.g., _"Failed to load AI model. Check your network or adblocker."_).
 - Never allow the UI to "freeze" silently or crash the tab if a remote asset is blocked.
 
-## 5. Isolation Boundaries
+## 5. Isolation Boundaries & Dynamic Script Execution
 
-- **No Global Pollution**: Third-party scripts should not wildly pollute the `window` namespace. Stick to established libraries.
-- **Sandboxing**: Where highly untrusted or experimental code is running, consider isolating it via a Web Worker or an `<iframe>`.
+Third-party model scripts and external code must **never** be dynamically executed without strict trust boundaries.
+
+### Restricting Dynamic Script & Model Execution
+
+When dynamically injecting remote scripts (e.g. via `loadScriptAsync` or custom loaders), projects must adhere to four mandatory guardrails:
+
+1. **Explicit Origin Allowlist:**
+   - Dynamic script injection must validate the URL host strictly against `ALLOWED_MODEL_HOSTS` (`cdn.jsdelivr.net`, `unpkg.com`, `cdnjs.cloudflare.com`, `huggingface.co`).
+   - Plain HTTP, `javascript:`, `data:`, and untrusted origins are strictly forbidden and must fail closed before any element is injected into the DOM.
+
+2. **Mandatory Subresource Integrity (SRI) & CORS:**
+   - Dynamically injected remote scripts must specify a verified cryptographic hash (`sha256`, `sha384`, or `sha512`) via the `integrity` attribute and set `crossorigin="anonymous"`.
+   - Projects should use pre-verified entries in `KNOWN_MODEL_INTEGRITY` (e.g., pinned TensorFlow.js, MobileNet, KNN Classifier) or supply verified SRI hashes.
+
+3. **Controlled Loading & Lifecycle Management:**
+   - **Request Deduplication:** Use in-flight promise caching and DOM inspection to prevent duplicate concurrent network fetches and script tag duplication.
+   - **Bounded Timeouts & Cleanup:** All dynamic loads must enforce a strict timeout (e.g., `DEFAULT_SCRIPT_TIMEOUT_MS = 15000`). If a fetch stalls or errors, the injected `<script>` tag must be removed immediately from the DOM to prevent partial or corrupted execution contexts.
+   - **Sequential Dependency Chains:** Multi-part model suites must load dependencies sequentially using `loadScriptsSequentially` to avoid race conditions.
+
+4. **Isolation Strategy for External Code:**
+   - **Sandboxed Execution Context:** Where untrusted or unverified code must execute, isolate it inside a sandboxed `<iframe>` with `sandbox="allow-scripts"` (specifically **omitting** `allow-same-origin`). This assigns the frame an opaque, unique origin (`null`), blocking access to the parent window's `localStorage`, cookies, session tokens, and DOM tree.
+   - **Structured Messaging:** Communicate with isolated sandboxes exclusively via validated `postMessage` interfaces.
+   - **Global Pollution Monitoring:** When external scripts must run in the main thread, use `snapshotGlobalKeys` and `detectGlobalPollution` to detect and audit any unexpected properties injected into `window`.
+   - **Web Worker Compute:** Offload heavy model computation (e.g., ONNX, TFLite) to dedicated workers to prevent main-thread freezing and limit direct DOM access.
 
 ## 6. Dependency Ownership & Licensing
 
 - **Responsibility**: The author of the mini-project is responsible for ensuring the external dependencies are actively maintained and safe.
 - **Attribution**: The `ARCHITECTURE.md` of your project must include a "Dependencies" section explicitly stating the name, source, and open-source license of every third-party model, library, and asset you load.
 - **Commercial Restrictions**: Do not include models or scripts with licenses that strictly forbid commercial use or contain highly restrictive non-open-source clauses. Stick to MIT, Apache 2.0, BSD, or broadly permissive open weights.
+
