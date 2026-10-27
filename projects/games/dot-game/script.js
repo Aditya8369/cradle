@@ -20,12 +20,32 @@ let state = {};
 let matchHistory = [];
 
 try {
-  matchHistory =
+  const raw =
     JSON.parse(
       localStorage.getItem("cradle_dot_game_history") ||
         localStorage.getItem("dotGameHistory") ||
         "[]"
     ) || [];
+  matchHistory = Array.isArray(raw)
+    ? raw
+        .filter(entry => entry && typeof entry === "object")
+        .slice(0, 10)
+        .map(entry => ({
+          ...entry,
+          totalMoves:
+            typeof entry.totalMoves === "number" &&
+            Number.isFinite(entry.totalMoves) &&
+            entry.totalMoves >= 0
+              ? Math.min(Math.floor(entry.totalMoves), 100000)
+              : 0,
+          explosions:
+            typeof entry.explosions === "number" &&
+            Number.isFinite(entry.explosions) &&
+            entry.explosions >= 0
+              ? Math.min(Math.floor(entry.explosions), 100000)
+              : 0,
+        }))
+    : [];
 } catch {
   matchHistory = [];
 }

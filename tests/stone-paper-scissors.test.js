@@ -43,3 +43,35 @@ test("RPS Lizard Spock rules evaluate correctly", () => {
     message: "Paper disproves Spock! Computer wins!",
   });
 });
+
+test("rpsStorage bounds counters and sanitizes corrupted state", () => {
+  const rpsStorage = require("../projects/games/stone-paper-scissors-game/rpsStorage");
+
+  const corrupted = {
+    wins: -5,
+    losses: NaN,
+    ties: "invalid",
+    currentStreak: -2,
+    bestStreak: -10,
+    moveCounts: { rock: -1, paper: 1e30, scissors: NaN },
+  };
+
+  const sanitized = rpsStorage.sanitizeStats(corrupted);
+  assert.equal(sanitized.wins, 0);
+  assert.equal(sanitized.losses, 0);
+  assert.equal(sanitized.ties, 0);
+  assert.equal(sanitized.currentStreak, 0);
+  assert.equal(sanitized.bestStreak, 0);
+  assert.equal(sanitized.moveCounts.rock, 0);
+  assert.equal(sanitized.moveCounts.scissors, 0);
+  assert.ok(sanitized.moveCounts.paper <= Number.MAX_SAFE_INTEGER);
+
+  // When currentStreak is higher than bestStreak, bestStreak is normalized
+  const streakMismatch = {
+    currentStreak: 15,
+    bestStreak: 5,
+  };
+  const sanitizedStreak = rpsStorage.sanitizeStats(streakMismatch);
+  assert.equal(sanitizedStreak.currentStreak, 15);
+  assert.equal(sanitizedStreak.bestStreak, 15);
+});

@@ -243,12 +243,177 @@
   }
 
   /**
+   * Sanitizes and clamps a numeric value into safe bounds [min, max].
+   * If value is not a finite number or cannot be parsed, fallback is returned.
+   * @param {*} value
+   * @param {number} [min=0]
+   * @param {number} [max=Number.MAX_SAFE_INTEGER]
+   * @param {number} [fallback=min]
+   * @returns {number}
+   */
+  function clampNumber(
+    value,
+    min = 0,
+    max = Number.MAX_SAFE_INTEGER,
+    fallback = min
+  ) {
+    if (
+      value === null ||
+      value === undefined ||
+      typeof value === "boolean" ||
+      typeof value === "object" ||
+      typeof value === "symbol"
+    ) {
+      return fallback;
+    }
+    if (typeof value === "string" && value.trim() === "") {
+      return fallback;
+    }
+    const num = Number(value);
+    if (!Number.isFinite(num) || Number.isNaN(num)) {
+      return fallback;
+    }
+    const safeMin = Number.isFinite(Number(min)) ? Number(min) : 0;
+    const safeMax = Number.isFinite(Number(max))
+      ? Number(max)
+      : Number.MAX_SAFE_INTEGER;
+    const lower = Math.min(safeMin, safeMax);
+    const upper = Math.max(safeMin, safeMax);
+    return Math.min(Math.max(num, lower), upper);
+  }
+
+  /**
+   * Evaluates if a value is a valid finite number within safe bounds [min, max].
+   * @param {*} value
+   * @param {Object} [options]
+   * @param {number} [options.min=0]
+   * @param {number} [options.max=Number.MAX_SAFE_INTEGER]
+   * @param {boolean} [options.integer=false]
+   * @returns {boolean}
+   */
+  function validateBoundedNumber(value, options = {}) {
+    if (
+      value === null ||
+      value === undefined ||
+      typeof value === "boolean" ||
+      typeof value === "object" ||
+      typeof value === "symbol"
+    ) {
+      return false;
+    }
+    if (typeof value === "string" && value.trim() === "") {
+      return false;
+    }
+    const num = Number(value);
+    if (!Number.isFinite(num) || Number.isNaN(num)) {
+      return false;
+    }
+    const min =
+      options.min !== undefined && Number.isFinite(Number(options.min))
+        ? Number(options.min)
+        : 0;
+    const max =
+      options.max !== undefined && Number.isFinite(Number(options.max))
+        ? Number(options.max)
+        : Number.MAX_SAFE_INTEGER;
+    const lower = Math.min(min, max);
+    const upper = Math.max(min, max);
+
+    if (num < lower || num > upper) {
+      return false;
+    }
+    if (options.integer && !Number.isInteger(num)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Read a persisted numeric value with validation and safe bounds checking.
+   * Rejects corrupted, negative (if min >= 0), NaN, Infinity, or overflow values.
+   * @param {string} key
+   * @param {number} [fallback=0] Returned when key is missing or invalid.
+   * @param {Object|Function} [options={}] Options object { min, max, integer, clamp } or custom validator function.
+   * @returns {number}
+   */
+  function getNumber(key, fallback = 0, options = {}) {
+    const raw = getRaw(key, null);
+    if (raw === null) return fallback;
+
+    if (typeof options === "function") {
+      const num = Number(raw);
+      if (!Number.isFinite(num) || Number.isNaN(num)) return fallback;
+      return isValid(num, options) ? num : fallback;
+    }
+
+    const opts = typeof options === "object" && options !== null ? options : {};
+    const min =
+      opts.min !== undefined && Number.isFinite(Number(opts.min))
+        ? Number(opts.min)
+        : 0;
+    const max =
+      opts.max !== undefined && Number.isFinite(Number(opts.max))
+        ? Number(opts.max)
+        : Number.MAX_SAFE_INTEGER;
+    const integer = opts.integer !== undefined ? Boolean(opts.integer) : false;
+    const clamp = Boolean(opts.clamp);
+
+    if (clamp) {
+      const clamped = clampNumber(raw, min, max, fallback);
+      return integer ? Math.round(clamped) : clamped;
+    }
+
+    if (!validateBoundedNumber(raw, { min, max, integer })) {
+      return fallback;
+    }
+
+    const num = Number(raw);
+    return integer ? Math.round(num) : num;
+  }
+
+  /**
+   * Write a numeric value within safe bounds. Rejects invalid or out-of-bound numbers unless clamped.
+   * @param {string} key
+   * @param {number} value
+   * @param {Object} [options={}] Options { min, max, integer, clamp }
+   * @returns {boolean} True when the write succeeded, false if rejected or failed.
+   */
+  function setNumber(key, value, options = {}) {
+    const opts = typeof options === "object" && options !== null ? options : {};
+    const min =
+      opts.min !== undefined && Number.isFinite(Number(opts.min))
+        ? Number(opts.min)
+        : 0;
+    const max =
+      opts.max !== undefined && Number.isFinite(Number(opts.max))
+        ? Number(opts.max)
+        : Number.MAX_SAFE_INTEGER;
+    const integer = opts.integer !== undefined ? Boolean(opts.integer) : false;
+    const clamp = Boolean(opts.clamp);
+
+    let num;
+    if (clamp) {
+      num = clampNumber(value, min, max, null);
+      if (num === null) return false;
+      if (integer) num = Math.round(num);
+    } else {
+      if (!validateBoundedNumber(value, { min, max, integer })) {
+        return false;
+      }
+      num = Number(value);
+      if (integer) num = Math.round(num);
+    }
+
+    return setRaw(key, String(num));
+  }
+
+  /**
    * Create a namespaced handle so callers never repeat a key prefix.
    * All keys are stored as `prefix + key`.
    * @param {string} prefix e.g. "cradle_rps_"
    * @returns {{
-   *   get: Function, getRaw: Function,
-   *   set: Function, setRaw: Function,
+   *   get: Function, getRaw: Function, getNumber: Function,
+   *   set: Function, setRaw: Function, setNumber: Function,
    *   remove: Function, keys: Function, clear: Function
    * }}
    */
@@ -258,8 +423,11 @@
       get: (key, fallback, validator) => get(p + key, fallback, validator),
       getRaw: (key, fallback, validator) =>
         getRaw(p + key, fallback, validator),
+      getNumber: (key, fallback, options) =>
+        getNumber(p + key, fallback, options),
       set: (key, value) => set(p + key, value),
       setRaw: (key, value) => setRaw(p + key, value),
+      setNumber: (key, value, options) => setNumber(p + key, value, options),
       remove: key => remove(p + key),
       keys: () => keys(p),
       clear: () => clear(p),
@@ -270,8 +438,12 @@
   exports.isValid = isValid;
   exports.getRaw = getRaw;
   exports.get = get;
+  exports.getNumber = getNumber;
   exports.setRaw = setRaw;
   exports.set = set;
+  exports.setNumber = setNumber;
+  exports.clampNumber = clampNumber;
+  exports.validateBoundedNumber = validateBoundedNumber;
   exports.remove = remove;
   exports.keys = keys;
   exports.clear = clear;

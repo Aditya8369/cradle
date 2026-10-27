@@ -31,7 +31,13 @@ function calculateScore(isHit, currentStreak = 0) {
   if (!isHit) {
     return { scoreAwarded: 0, newStreak: 0, multiplier: 1 };
   }
-  const newStreak = currentStreak + 1;
+  const safeStreak =
+    typeof currentStreak === "number" &&
+    Number.isFinite(currentStreak) &&
+    currentStreak >= 0
+      ? Math.min(100000, Math.floor(currentStreak))
+      : 0;
+  const newStreak = safeStreak + 1;
   const multiplier = Math.min(5, 1 + Math.floor((newStreak - 1) / 3));
   const scoreAwarded = 100 * multiplier;
   return { scoreAwarded, newStreak, multiplier };

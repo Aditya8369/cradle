@@ -119,3 +119,129 @@ test("storage gracefully returns fallback values when localStorage throws Securi
   assert.equal(storage.getRaw("cradle_sec_raw", "default"), "default");
   assert.equal(storage.remove("cradle_sec_key"), false);
 });
+
+test("clampNumber correctly clamps and falls back on non-finite values", () => {
+  assert.equal(storage.clampNumber(50, 0, 100), 50);
+  assert.equal(storage.clampNumber(-10, 0, 100), 0);
+  assert.equal(storage.clampNumber(250, 0, 100), 100);
+  assert.equal(storage.clampNumber("42", 0, 100), 42);
+  assert.equal(storage.clampNumber("not-a-number", 0, 100, 15), 15);
+  assert.equal(storage.clampNumber(NaN, 0, 100, 0), 0);
+  assert.equal(storage.clampNumber(Infinity, 0, 100, 100), 100);
+  assert.equal(storage.clampNumber(null, 0, 100, 7), 7);
+  assert.equal(storage.clampNumber(true, 0, 100, 0), 0);
+});
+
+test("validateBoundedNumber validates min, max, and integer bounds", () => {
+  assert.equal(storage.validateBoundedNumber(10, { min: 0, max: 20 }), true);
+  assert.equal(storage.validateBoundedNumber(-1, { min: 0, max: 20 }), false);
+  assert.equal(storage.validateBoundedNumber(25, { min: 0, max: 20 }), false);
+  assert.equal(storage.validateBoundedNumber(10.5, { min: 0, max: 20 }), true);
+  assert.equal(
+    storage.validateBoundedNumber(10.5, { min: 0, max: 20, integer: true }),
+    false
+  );
+  assert.equal(
+    storage.validateBoundedNumber(10, { min: 0, max: 20, integer: true }),
+    true
+  );
+  assert.equal(storage.validateBoundedNumber("NaN", { min: 0, max: 20 }), false);
+  assert.equal(
+    storage.validateBoundedNumber(Number.MAX_SAFE_INTEGER + 1000, {
+      max: Number.MAX_SAFE_INTEGER,
+    }),
+    false
+  );
+});
+
+test("getNumber and setNumber safely store, validate, and bound persisted numbers", () => {
+  localStorage.clear();
+
+  // Reading missing key returns fallback
+  assert.equal(storage.getNumber("score", 0), 0);
+
+  // Storing valid integer score
+  assert.equal(
+    storage.setNumber("score", 500, { min: 0, max: 10000, integer: true }),
+    true
+  );
+  assert.equal(
+    storage.getNumber("score", 0, { min: 0, max: 10000, integer: true }),
+    500
+  );
+
+  // Reject invalid score on set
+  assert.equal(
+    storage.setNumber("score_invalid", -50, { min: 0, max: 10000 }),
+    false
+  );
+  assert.equal(storage.getNumber("score_invalid", 0), 0);
+
+  // Reject excessively large number beyond max
+  assert.equal(
+    storage.setNumber("score_huge", 99999999, { min: 0, max: 10000 }),
+    false
+  );
+
+  // Reject corrupted or negative raw value in storage
+  storage.setRaw("corrupt_score", "-500");
+  assert.equal(storage.getNumber("corrupt_score", 0, { min: 0 }), 0);
+
+  storage.setRaw("overflow_score", "999999999999999999999999999999");
+  assert.equal(
+    storage.getNumber("overflow_score", 0, {
+      min: 0,
+      max: Number.MAX_SAFE_INTEGER,
+    }),
+    0
+  );
+
+  storage.setRaw("nan_score", "not_a_number");
+  assert.equal(storage.getNumber("nan_score", 10), 10);
+
+  // Clamping mode on read
+  storage.setRaw("clamp_high", "5000");
+  assert.equal(
+    storage.getNumber("clamp_high", 0, { min: 0, max: 1000, clamp: true }),
+    1000
+  );
+  storage.setRaw("clamp_low", "-50");
+  assert.equal(
+    storage.getNumber("clamp_low", 0, { min: 0, max: 1000, clamp: true }),
+    0
+  );
+
+  // Custom function validator
+  storage.setRaw("custom_num", "42");
+  assert.equal(
+    storage.getNumber("custom_num", 0, n => n % 2 === 0),
+    42
+  );
+  storage.setRaw("custom_odd", "43");
+  assert.equal(
+    storage.getNumber("custom_odd", 0, n => n % 2 === 0),
+    0
+  );
+});
+
+test("namespace forwards getNumber and setNumber with prefix scoping", () => {
+  localStorage.clear();
+  const gameStore = storage.namespace("cradle_testgame_");
+
+  assert.equal(
+    gameStore.setNumber("score", 750, { min: 0, max: 10000, integer: true }),
+    true
+  );
+  assert.equal(localStorage.getItem("cradle_testgame_score"), "750");
+  assert.equal(
+    gameStore.getNumber("score", 0, { min: 0, max: 10000, integer: true }),
+    750
+  );
+
+  // Reject negative score
+  assert.equal(
+    gameStore.setNumber("score_bad", -10, { min: 0, max: 10000 }),
+    false
+  );
+  assert.equal(gameStore.getNumber("score_bad", 0), 0);
+});

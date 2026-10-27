@@ -292,10 +292,17 @@ let state = {
   timerId: null,
   startTime: null,
   wpm: 0,
-  bestWpm: parseInt(
-    localStorage.getItem("cradle:typing-racer-best-wpm") || "0",
-    10
-  ),
+  bestWpm: (function () {
+    try {
+      const raw = localStorage.getItem("cradle:typing-racer-best-wpm");
+      const parsed = parseInt(raw, 10);
+      return Number.isFinite(parsed) && parsed >= 0 && parsed <= 500
+        ? parsed
+        : 0;
+    } catch (_) {
+      return 0;
+    }
+  })(),
   opponentPos: 0,
   opponentSpeed: 0,
 };
@@ -501,8 +508,13 @@ function endGame() {
       : 100;
   const rank = getRank(wpm);
 
-  // Update best
-  if (wpm > state.bestWpm) {
+  // Update best (bounded between 0 and 500 wpm)
+  if (
+    Number.isFinite(wpm) &&
+    wpm >= 0 &&
+    wpm <= 500 &&
+    wpm > state.bestWpm
+  ) {
     state.bestWpm = wpm;
     localStorage.setItem("cradle:typing-racer-best-wpm", wpm.toString());
     bestWpmEl.textContent = wpm;

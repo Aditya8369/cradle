@@ -331,3 +331,61 @@ test("namespace forwards validator parameter on get and getRaw", () => {
     restore();
   }
 });
+
+test("getNumber and setNumber handle bounds, clamping, and rejection in mock storage", () => {
+  const localStorage = new MockStorage();
+  const { storage, restore } = loadStorage({ localStorage });
+  try {
+    // Missing key returns fallback
+    assert.equal(storage.getNumber("score", 0), 0);
+
+    // setNumber with safe bounds
+    assert.equal(
+      storage.setNumber("score", 1200, { min: 0, max: 5000, integer: true }),
+      true
+    );
+    assert.equal(
+      storage.getNumber("score", 0, { min: 0, max: 5000, integer: true }),
+      1200
+    );
+
+    // setNumber rejects out-of-bounds without clamp
+    assert.equal(
+      storage.setNumber("score_bad", -10, { min: 0, max: 5000 }),
+      false
+    );
+    assert.equal(storage.getNumber("score_bad", 0), 0);
+
+    // setNumber clamps when clamp: true
+    assert.equal(
+      storage.setNumber("clamped_high", 9999, {
+        min: 0,
+        max: 5000,
+        clamp: true,
+      }),
+      true
+    );
+    assert.equal(storage.getNumber("clamped_high", 0), 5000);
+
+    // Corrupted state in localStorage
+    localStorage.setItem("corrupt", "-99");
+    assert.equal(storage.getNumber("corrupt", 0, { min: 0 }), 0);
+
+    localStorage.setItem("overflow", "999999999999999999999999999999");
+    assert.equal(
+      storage.getNumber("overflow", 0, {
+        min: 0,
+        max: Number.MAX_SAFE_INTEGER,
+      }),
+      0
+    );
+
+    // Namespace forwards getNumber and setNumber
+    const store = storage.namespace("game_");
+    assert.equal(store.setNumber("level", 5, { min: 1, max: 100 }), true);
+    assert.equal(store.getNumber("level", 1, { min: 1, max: 100 }), 5);
+    assert.equal(localStorage.getItem("game_level"), "5");
+  } finally {
+    restore();
+  }
+});
