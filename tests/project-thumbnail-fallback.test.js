@@ -12,6 +12,10 @@ const CARD_SOURCE = fs.readFileSync(
   path.join(__dirname, "../src/components/ui/Card/Card.js"),
   "utf8"
 );
+const SANITIZE_SVG_SOURCE = fs.readFileSync(
+  path.join(__dirname, "../src/components/ui/sanitizeSvg.js"),
+  "utf8"
+);
 
 class MockElement {
   constructor(tagName = "div") {
@@ -135,6 +139,9 @@ function createEnvironment() {
     console,
   };
 
+  vm.runInNewContext(SANITIZE_SVG_SOURCE, context, {
+    filename: "sanitizeSvg.js",
+  });
   vm.runInNewContext(BUTTON_SOURCE, context, { filename: "Button.js" });
   vm.runInNewContext(CARD_SOURCE, context, { filename: "Card.js" });
 
@@ -156,6 +163,7 @@ test("valid thumbnail URL renders <img> element normally", () => {
   assert.ok(img, "Card must render an <img> element for a valid image URL");
   assert.equal(img.src, "projects/games/chess/thumbnail.svg");
   assert.equal(img.alt, "Chess");
+  assert.equal(img.referrerPolicy, "no-referrer");
   assert.ok(img.classList.contains("cradle-card__image"));
 });
 
@@ -193,7 +201,18 @@ test("null, empty, or whitespace thumbnail renders safe fallback element", () =>
 test("malformed thumbnail URLs render safe fallback element", () => {
   const { CradleCard } = createEnvironment();
 
-  for (const malformed of ["data:,", "javascript:void(0)", "http://"]) {
+  for (const malformed of [
+    "data:,",
+    "javascript:void(0)",
+    "JAVASCRIPT:alert(1)",
+    "http://",
+    "http://evil.com/thumb.svg",
+    "data:text/html,<script>alert(1)</script>",
+    "data:image/svg+xml;utf8,<svg onload=alert(1)></svg>",
+    "data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9ImFsZXJ0KDEpIj48L3N2Zz4=",
+    "data:image/svg+xml;utf8,<svg><script>alert(1)</script></svg>",
+    "data:image/svg+xml;utf8,<svg><foreignObject><iframe></iframe></foreignObject></svg>",
+  ]) {
     const card = CradleCard.create({
       title: "Piano",
       image: malformed,

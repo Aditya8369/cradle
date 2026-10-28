@@ -9,6 +9,7 @@ const {
   validateProjectNavigation,
   validateProjectFavicons,
 } = require("./validate-mini-projects");
+const { validateSvgThumbnail } = require("../src/components/ui/sanitizeSvg.js");
 
 // Checks every mini against the contract in docs/MINI_CONTRACT.md and prints
 // the problems found per mini.
@@ -95,6 +96,23 @@ function checkFiles(project, files) {
   const indexPath = path.join(project.absPath, "index.html");
   if (fs.existsSync(indexPath) && fs.statSync(indexPath).size === 0) {
     issues.push(issue("error", "empty-file", '"index.html" is empty.'));
+  }
+
+  const thumbPath = path.join(project.absPath, "thumbnail.svg");
+  if (fs.existsSync(thumbPath)) {
+    const thumbContent = fs.readFileSync(thumbPath, "utf8");
+    if (thumbContent.trim() !== "") {
+      const check = validateSvgThumbnail(thumbContent);
+      if (!check.safe) {
+        issues.push(
+          issue(
+            "error",
+            "unsafe-svg-thumbnail",
+            `"thumbnail.svg" contains unsafe constructs: ${check.violations.join("; ")}`
+          )
+        );
+      }
+    }
   }
 
   for (const file of files) {

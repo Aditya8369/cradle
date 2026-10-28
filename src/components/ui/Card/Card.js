@@ -233,22 +233,85 @@
     return fallback;
   }
 
+  /* ── SVG & HTML sanitizer helpers ──────────────────────── */
+  const _isSvgSafe =
+    (typeof window !== "undefined" &&
+      window.CradleSanitize &&
+      window.CradleSanitize.isSvgSafe) ||
+    (typeof require === "function" &&
+      (function () {
+        try {
+          return require("../sanitizeSvg.js").isSvgSafe;
+        } catch {
+          return null;
+        }
+      })()) ||
+    function () {
+      return true;
+    };
+
+  function decodeSvgDataUri(uri) {
+    try {
+      const commaIdx = uri.indexOf(",");
+      if (commaIdx === -1) return null;
+      const meta = uri.slice(0, commaIdx).toLowerCase();
+      const payload = uri.slice(commaIdx + 1);
+      if (meta.includes(";base64")) {
+        if (typeof atob === "function") {
+          return atob(payload.trim());
+        }
+        if (typeof Buffer !== "undefined") {
+          return Buffer.from(payload.trim(), "base64").toString("utf8");
+        }
+        return null;
+      }
+      return decodeURIComponent(payload);
+    } catch {
+      return null;
+    }
+  }
+
   function isValidImageUrl(url) {
     if (typeof url !== "string") return false;
     const trimmed = url.trim();
     if (!trimmed) return false;
+    const lower = trimmed.toLowerCase();
+
+    // Instant rejection of dangerous pseudo-protocols and invalid strings
     if (
       trimmed === "undefined" ||
       trimmed === "null" ||
       trimmed === "data:," ||
       trimmed === "data:image/svg+xml;base64," ||
-      trimmed.startsWith("javascript:")
+      trimmed === "data:image/svg+xml," ||
+      lower.startsWith("javascript:") ||
+      lower.startsWith("vbscript:")
     ) {
       return false;
     }
+
     if (trimmed === "http://" || trimmed === "https://" || trimmed === "//") {
       return false;
     }
+
+    // Rejection of non-image data URIs (e.g. data:text/html, data:application/javascript)
+    if (lower.startsWith("data:") && !lower.startsWith("data:image/")) {
+      return false;
+    }
+
+    // Treat SVG data URIs as untrusted assets: inspect and validate SVG content
+    if (lower.startsWith("data:image/svg+xml")) {
+      const decoded = decodeSvgDataUri(trimmed);
+      if (!decoded || !_isSvgSafe(decoded)) {
+        return false;
+      }
+    }
+
+    // Disallow unencrypted plain http:// for external assets
+    if (lower.startsWith("http://")) {
+      return false;
+    }
+
     return true;
   }
 
@@ -409,6 +472,8 @@
           img.src = image.trim();
           img.alt = title || "";
           img.loading = "lazy";
+          img.decoding = "async";
+          img.referrerPolicy = "no-referrer";
           let failed = false;
           img.addEventListener("error", () => {
             if (!failed) {

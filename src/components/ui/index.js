@@ -24,9 +24,9 @@
  *   - CradleThemeToggle  Light/dark theme toggle with localStorage + OS preference
  *   - CradleNavbar       Sticky navbar with mobile drawer
  *   - CradleBackToHome   Fixed "Back to Home" pill button
- *  - CradleEscape       HTML escaping utility (CradleEscape.escapeHtml)
- *  - CradleSanitize     HTML sanitization utility (CradleSanitize.sanitizeHtml)
- *  - CradleStorage      localStorage helper (CradleStorage.get/set/...)
+ *   - CradleEscape       HTML escaping utility (CradleEscape.escapeHtml)
+ *   - CradleSanitize     HTML and SVG sanitization (CradleSanitize.sanitizeHtml, CradleSanitize.sanitizeSvg, CradleSanitize.isSvgSafe)
+ *   - CradleStorage      localStorage helper (CradleStorage.get/set/...)
  *
  * Individual component files:
  *   /src/components/ui/Button/Button.js
@@ -38,6 +38,7 @@
  * Utility files:
  *   /src/components/ui/escapeHtml.js
  *   /src/components/ui/sanitizeHtml.js
+ *   /src/components/ui/sanitizeSvg.js
  *   /src/components/ui/storage.js
  *
  * Design tokens:
@@ -103,7 +104,12 @@
   ];
 
   /* Non-DOM utilities that follow the same load-on-demand pattern. */
-  const UTILITIES = ["escapeHtml.js", "sanitizeHtml.js", "storage.js"];
+  const UTILITIES = [
+    "escapeHtml.js",
+    "sanitizeHtml.js",
+    "sanitizeSvg.js",
+    "storage.js",
+  ];
 
   /**
    * Load a single component script.
