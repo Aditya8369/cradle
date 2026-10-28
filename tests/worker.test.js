@@ -163,6 +163,17 @@ test("filters projects matching both category and query", () => {
   assert.equal(result[0].id, "chess");
 });
 
+test("filters projects matching description within selected category", () => {
+  const result = runWorkerFilter({
+    allProjects: sampleProjects,
+    selectedCategory: "games",
+    query: "AI",
+  });
+
+  assert.equal(result.length, 1);
+  assert.equal(result[0].id, "chess");
+});
+
 test("excludes project if query matches title but project belongs to different category", () => {
   const result = runWorkerFilter({
     allProjects: sampleProjects,
