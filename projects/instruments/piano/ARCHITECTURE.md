@@ -77,7 +77,9 @@ Engine triggers an exponential decay ramp to silence the note smoothly
 
 ## Key Features
 
-- **Polyphonic Playback**: Multiple notes can be played simultaneously without cutting each other off.
+- **Polyphonic Playback**: Multiple notes can be played simultaneously (e.g., chords like C4 + D4 + E4) cleanly without cutting each other off or doubling audio output.
+- **Strict Input Deduplication & Repeat Suppression**: Filters out OS keyboard repeat events (`event.repeat`) and checks active note states (`pressedKeyboardKeys`, `activeNotes`) to prevent duplicate triggers or stuttering when playing multiple keys simultaneously.
+- **Master Bus Dynamics Compression**: Passes combined synthesized voice outputs through a DynamicsCompressorNode before `context.destination` to prevent polyphonic signal clipping and acoustic distortion during simultaneous chord playback.
 - **Hybrid Synthesis**: Combines triangle and sine oscillators with a noise-based attack for a more natural piano sound.
 - **Comprehensive Mapping**: Supports a wide range of notes from C3 to E6.
 - **Input Flexibility**: Works with pointer events (mouse/touch) and a dedicated keyboard mapping.
@@ -105,9 +107,12 @@ Engine triggers an exponential decay ramp to silence the note smoothly
 
 ### `script.js`
 
-- `playNote()`: Coordinates the visual highlight and the audio trigger.
-- `stopNote()`: Coordinates the visual reset and the audio release.
-- Handles pointer capture to ensure notes don't "stick" when dragging off a key.
+- `playNote()`: Coordinates the visual highlight and audio trigger, verifying voice deduplication before initiating oscillators.
+- `stopNote()`: Coordinates the visual reset and smooth decay release of the active note.
+- `handleKeydown()`: Suppresses OS repeated keydown events (`event.repeat`), maps `event.code` to musical notes, and deduplicates chord inputs.
+- `handleKeyup()`: Releases notes only when no other physical key or pointer is holding the same pitch.
+- `getMasterBus()`: Configures a shared `DynamicsCompressorNode` and master gain to normalize polyphonic chord output.
+- Handles pointer capture and page lifecycle events (`pagehide`, `blur`, `visibilitychange`) to cleanly release held notes and prevent stuck oscillators.
 
 ### `pianoEngine.js`
 
@@ -128,6 +133,8 @@ Engine triggers an exponential decay ramp to silence the note smoothly
 
 - **Additive Synthesis**: Used a combination of a fundamental triangle wave and several sine harmonics to approximate the timbre of a piano.
 - **Noise-based Attack**: Added a high-pass filtered noise burst at the start of each note to simulate the hammer hitting the string.
+- **Master Dynamics Compression**: Polyphonic chord playback can quickly exceed 0 dBFS when multiple oscillators and noise bursts are active at once; routing through a compressor ensures clean sound without digital clipping.
+- **Strict Chord Deduplication**: Checking both `pressedKeyboardKeys` and `activeNotes` prevents double note triggers when chord keys are pressed in rapid succession or held.
 - **Exponential Decay**: Implemented exponential gain ramps for a natural-sounding fade-out.
 - **Decoupled Engine**: Wrapped the audio logic in a UMD-style `PianoEngine` to make it potentially reusable in other projects.
 
