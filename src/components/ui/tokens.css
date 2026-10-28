@@ -32,6 +32,7 @@
   --cradle-accent: #1e3a8a;
   --cradle-accent-hover: #2563eb;
   --cradle-accent-light: rgba(37, 99, 235, 0.15);
+  --color-accent: var(--cradle-accent-hover, #2563eb);
 
   /* Semantic colours */
   --cradle-success: #16a34a;
@@ -100,6 +101,7 @@ html.light-theme {
   --cradle-accent: #2563eb;
   --cradle-accent-hover: #1d4ed8;
   --cradle-accent-light: rgba(37, 99, 235, 0.1);
+  --color-accent: var(--cradle-accent-hover, #1d4ed8);
 
   --cradle-success: #16a34a;
   --cradle-danger: #dc2626;

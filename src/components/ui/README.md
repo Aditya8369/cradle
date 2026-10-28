@@ -390,7 +390,7 @@ Every component:
 
 - Uses semantic HTML (`<button>`, `<nav>`, `<a>`, `<article>`)
 - Has `aria-label` / `aria-labelledby` where needed
-- Provides visible `:focus-visible` rings
+- Provides visible `:focus-visible` rings (`outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px;`) meeting WCAG 2.1 Success Criterion 2.4.7
 - Supports keyboard navigation (Tab, Enter, Space, Escape)
 - Works with screen readers (`aria-expanded`, `aria-current`, `aria-busy`, etc.)
 - Respects `prefers-reduced-motion`

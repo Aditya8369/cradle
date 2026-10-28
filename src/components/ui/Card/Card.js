@@ -57,9 +57,14 @@
           box-shadow var(--cradle-transition, 0.35s cubic-bezier(0.22,1,0.36,1));
       }
 
-      .cradle-card:focus-visible {
-        outline: 2px solid var(--cradle-accent-hover, #2563eb);
+      .cradle-card:focus-visible,
+      .cradle-card--clickable:focus-visible {
+        outline: 2px solid var(--color-accent, var(--cradle-accent-hover, #2563eb));
         outline-offset: 2px;
+        border-radius: 4px;
+      }
+      .cradle-card:focus:not(:focus-visible) {
+        outline: none;
       }
 
       /* Hover elevation — only when .cradle-card--clickable */

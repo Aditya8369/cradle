@@ -85,10 +85,11 @@
           opacity var(--cradle-transition-fast, 0.15s ease);
       }
 
-      /* Focus ring — keyboard only */
+      /* Focus ring — keyboard only (WCAG 2.1 Focus Visible) */
       .cradle-btn:focus-visible {
-        outline: 2px solid var(--cradle-accent-hover, #2563eb);
-        outline-offset: 3px;
+        outline: 2px solid var(--color-accent, var(--cradle-accent-hover, #2563eb));
+        outline-offset: 2px;
+        border-radius: 4px;
       }
       .cradle-btn:focus:not(:focus-visible) {
         outline: none;
