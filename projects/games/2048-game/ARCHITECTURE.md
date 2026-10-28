@@ -12,7 +12,7 @@ The project is intentionally self-contained: no build tools, no frameworks, no e
 
 - Reach a tile worth 2048 by merging equal tiles
 - Demonstrate a pure game-logic module (`logic.js`) that has no DOM dependency and can be unit tested in Node.js
-- Showcase immutable state management and localStorage persistence without frameworks or a build step
+- Showcase immutable state management and persistent storage using the repo's CradleStorage utility without frameworks or a build step
 
 ---
 
@@ -22,7 +22,7 @@ The project is intentionally self-contained: no build tools, no frameworks, no e
 2048-game/
 ├── index.html          # Page shell, score display, game board container
 ├── logic.js            # Pure game rules (no DOM access)
-├── storage.js          # State and high score saving/loading per grid size
+├── storage.js          # State and high score saving/loading per grid size via CradleStorage
 ├── gameUndoManager.js  # Move history stack manager with rollback support
 ├── gameThemeEngine.js  # Preset grid color themes (Classic, Dark Neon, Cyberpunk)
 ├── script.js           # UI layer — renders the board and handles input
@@ -35,7 +35,7 @@ The project is intentionally self-contained: no build tools, no frameworks, no e
 
 ## System / Project Architecture Overview
 
-The project follows a strict separation of concerns. `logic.js` contains every game rule as pure functions exposed through a UMD wrapper, `storage.js` handles best-score persistence, `gameUndoManager.js` keeps an undo history stack, and `gameThemeEngine.js` supplies the grid colour themes. `script.js` is the only file that touches the DOM — it reads the public API from `window.__2048Logic`, handles keyboard input, and re-renders the board. There is no build step; the browser loads the files directly.
+The project follows a strict separation of concerns. `logic.js` contains every game rule as pure functions exposed through a UMD wrapper, `storage.js` handles best-score and game-state persistence using `CradleStorage`, `gameUndoManager.js` keeps an undo history stack, and `gameThemeEngine.js` supplies the grid colour themes. `script.js` is the only file that touches the DOM — it reads the public API from `window.__2048Logic`, handles keyboard input, and re-renders the board. There is no build step; the browser loads the files directly.
 
 ---
 
@@ -44,13 +44,13 @@ The project follows a strict separation of concerns. `logic.js` contains every g
 ```text
 User opens index.html
         ↓
-Browser loads style.css → logic.js → script.js
+Browser loads style.css → logic.js → storage.js → script.js
         ↓
-script.js calls createInitialState()
+script.js checks CradleStorage for saved game state and best score
         ↓
-Two random tiles (value 2 or 4) are placed on the board
+Two random tiles (value 2 or 4) are placed on board (or saved board restored)
         ↓
-renderBoard() draws all tiles and the current score
+renderBoard() draws all tiles and current / best scores
         ↓
 User presses an arrow key (or WASD)
         ↓
@@ -60,7 +60,9 @@ moveGameState(state, direction) returns a new state object
         ↓
 If the move changed the board, a new random tile is added
         ↓
-renderBoard() re-draws the board and updates the score
+saveGameState() and saveBestScore() persist state to CradleStorage
+        ↓
+renderBoard() re-draws the board and updates scores
         ↓
 Win / loss status is checked and displayed
 ```
@@ -95,9 +97,9 @@ The UI layer. Reads the public API from `window.__2048Logic`, handles keyboard e
 Key responsibilities:
 
 - **`renderBoard()`** — clears and redraws every tile div, applies tile colour classes (e.g. `tile--128`), and updates the score display.
-- **`handleMove(direction)`** — calls `moveGameState`, persists the best score to `localStorage`, and triggers a re-render.
+- **`handleMove(direction)`** — calls `moveGameState`, persists the best score and game state via `CradleStorage`, and triggers a re-render.
 - **`handleKeydown(event)`** — maps arrow keys and WASD to direction strings.
-- **`restartGame()`** — creates a fresh state and re-renders.
+- **`restartGame()`** — creates a fresh state and re-renders while preserving the high score.
 
 ### `style.css`
 
@@ -108,7 +110,7 @@ Handles all visual presentation. Tile colours are assigned through CSS classes n
 ## Key Features
 
 - 4×4 sliding tile grid with merge-on-collision logic
-- Score counter and persistent best score via localStorage
+- Score counter and persistent best score via `CradleStorage`
 - Keyboard (arrow keys) and WASD controls
 - Win detection at 2048 and loss detection when no moves remain
 - Undo support via a move history stack and switchable colour themes
@@ -117,12 +119,12 @@ Handles all visual presentation. Tile colours are assigned through CSS classes n
 
 ## Technologies Used
 
-| Technology                | Purpose                                   |
-| ------------------------- | ----------------------------------------- |
-| HTML5                     | Page structure and semantic markup        |
-| CSS3 (CSS Grid)           | Board layout and tile colour theming      |
-| Vanilla JavaScript (ES6+) | Game logic, storage, and DOM manipulation |
-| localStorage API          | Persisting the best score across sessions |
+| Technology                             | Purpose                                                            |
+| -------------------------------------- | ------------------------------------------------------------------ |
+| HTML5                                  | Page structure and semantic markup                                 |
+| CSS3 (CSS Grid)                        | Board layout and tile colour theming                               |
+| Vanilla JavaScript (ES6+)              | Game logic, storage, and DOM manipulation                          |
+| localStorage API (via `CradleStorage`) | Persisting game state and best score per grid size across sessions |
 
 ---
 
@@ -142,7 +144,7 @@ Handles all visual presentation. Tile colours are assigned through CSS classes n
 
 ### `storage.js`
 
-- Saves and loads game state and best score per grid size
+- Wraps repo `CradleStorage` with numeric bounds validation and fallback support to persist game state and best score per grid size
 
 ### `gameUndoManager.js`
 
@@ -166,7 +168,7 @@ All game state lives in a single plain JavaScript object (`state`) held in `scri
 {
   board: number[][],   // 4×4 matrix of tile values (0 = empty)
   score: number,       // Current game score
-  bestScore: number,   // All-time best score (persisted in localStorage)
+  bestScore: number,   // All-time best score (persisted via CradleStorage)
   won: boolean,        // True when a 2048 tile exists
   over: boolean,       // True when no moves remain
   moved: boolean       // True if the last move changed the board
@@ -175,7 +177,7 @@ All game state lives in a single plain JavaScript object (`state`) held in `scri
 
 State is **never mutated in place**. `moveGameState` always returns a brand-new state object, which makes the logic easy to test and reason about.
 
-The best score is the only value persisted across sessions, stored in `localStorage` under the key `cradle-2048-best-score`.
+Best scores and active game states are persisted per grid size across sessions using the shared `CradleStorage` abstraction under keys prefixed with `cradle_2048_best_score_` and `cradle_2048_game_state_`.
 
 ---
 
@@ -192,7 +194,9 @@ moveGameState(state, direction)  [logic.js — pure function]
         ↓
 New state returned (with moved, won, over flags)
         ↓
-persistBestScore()  →  writes to localStorage if score improved
+saveBestScore()  →  writes to CradleStorage if score improved
+        ↓
+saveGameState()  →  persists board and score to CradleStorage
         ↓
 renderBoard()  →  updates all tile divs and score elements
 ```
@@ -216,7 +220,6 @@ None. The project is pure HTML, CSS, and JavaScript with no external libraries.
 
 - **Swipe support** — add touch event listeners so the game works on mobile devices.
 - **Tile slide animations** — animate tiles moving across the grid before they settle.
-- **Undo** — since state is immutable, keeping a history stack would be straightforward.
 - **Keyboard shortcut hints** — surface the WASD alternative visually for new players.
 
 ---
@@ -225,7 +228,6 @@ None. The project is pure HTML, CSS, and JavaScript with no external libraries.
 
 - No touch/swipe support — keyboard only
 - No animation — tiles jump instantly instead of sliding
-- Undo is implemented via `gameUndoManager.js`, but there is no "undo" button in the current UI
 
 ---
 
