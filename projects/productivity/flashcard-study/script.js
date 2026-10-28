@@ -190,6 +190,15 @@ $deckForm.addEventListener("submit", e => {
   const desc = document.getElementById("deckDesc").value.trim();
   if (!name) return;
 
+  if (name.length > 50) {
+    alert("Deck name cannot exceed 50 characters.");
+    return;
+  }
+  if (desc.length > 50) {
+    alert("Deck Description cannot exceed 50 characters.");
+    return;
+  }
+
   if ($deckForm.dataset.editId) {
     const deck = data.decks.find(d => d.id === $deckForm.dataset.editId);
     deck.name = name;
@@ -266,8 +275,9 @@ $cardForm.addEventListener("submit", e => {
 
   saveData();
   closeCardModal();
-  openDeckDetail(deckId); // refresh the detail view
+  openDeckDetail(deckId,true); // refresh the detail view
   renderDashboard();
+  document.getElementById("btn-add-card").focus({focusVisible: true});
 });
 
 function deleteCard(deckId, cardId) {
@@ -280,7 +290,7 @@ function deleteCard(deckId, cardId) {
 
 /* ── Deck Detail View ───────────────────────────────────────────── */
 
-function openDeckDetail(deckId) {
+function openDeckDetail(deckId, scrollToLatest = false) {
   currentDeckId = deckId;
   const deck = data.decks.find(d => d.id === deckId);
 
@@ -322,6 +332,18 @@ function openDeckDetail(deckId) {
   }
 
   $detailModal.classList.remove("hidden");
+
+  document.getElementById("btn-add-card").focus({focusVisible: true});
+
+  if (scrollToLatest) {
+    requestAnimationFrame(() => {
+      const cardList = document.getElementById("cardList");
+      cardList.scrollTo({
+        top: cardList.scrollHeight,
+        behavior: "smooth",
+      });
+    });
+  }
 }
 
 /* ── Study Mode ─────────────────────────────────────────────────── */
@@ -386,6 +408,8 @@ function markKnown() {
   card.mastery = Math.min(card.mastery + 1, 5);
   card.lastReviewed = Date.now();
   studyState.known.push(card.id);
+  document.getElementById("scoreKnown").textContent = `${studyState.known.length} ✓`;
+  document.getElementById("scoreUnknown").textContent = `${studyState.unknown.length} ✗`;
   advanceStudy();
 }
 
@@ -541,6 +565,20 @@ document.addEventListener("keydown", e => {
     }
     if (e.key === "ArrowRight" || e.key === "k") markKnown();
     if (e.key === "ArrowLeft" || e.key === "j") markDontKnow();
+  }
+});
+
+// Close modals with the Escape key
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+
+  if (!$cardModal.classList.contains("hidden")) {
+    closeCardModal();
+  } else if (!$detailModal.classList.contains("hidden")) {
+    $detailModal.classList.add("hidden");
+    renderDashboard();
+  } else if (!$deckModal.classList.contains("hidden")) {
+    closeDeckModal();
   }
 });
 
