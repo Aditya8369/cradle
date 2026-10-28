@@ -118,6 +118,7 @@ Subresource Integrity guarantees that files fetched from external Content Delive
   - `cdn.jsdelivr.net`
   - `cdnjs.cloudflare.com`
   - `huggingface.co`
+- [ ] **Dynamic Script & Model Loading Boundaries:** Any runtime or async loading of external scripts (e.g. AI models via `loadScriptAsync`) must enforce the explicit origin allowlist (`ALLOWED_MODEL_HOSTS`), verify SRI digests, enforce execution timeouts with DOM cleanup, and isolate untrusted code in sandboxed contexts per [THIRD_PARTY_POLICY.md](THIRD_PARTY_POLICY.md).
 - [ ] **Automated CI Contract Enforcement:** Verify that all remote scripts comply with SRI requirements by running the contract validator:
 
 ```bash
@@ -125,6 +126,7 @@ npm run validate:mini-contract
 ```
 
 Any script tag missing an `integrity` attribute will fail the build with an `external-script-no-sri` violation.
+
 
 ---
 

@@ -77,6 +77,18 @@ Where external resources are loaded over a CDN, pin the resource and use
 Subresource Integrity (`integrity="sha384-..."`) attributes so a compromised
 CDN cannot execute code in a visitor's browser.
 
+## Dynamic Script & Model Execution Trust Model
+
+**Third-party model scripts and external code must not be dynamically executed without strict trust boundaries.**
+
+When code loads or injects external scripts at runtime (such as browser AI models or utility libraries via `loadScriptAsync`):
+
+1. **Origin Allowlist:** Dynamic injection is restricted exclusively to trusted, vetted CDN endpoints (`cdn.jsdelivr.net`, `unpkg.com`, `cdnjs.cloudflare.com`, `huggingface.co`). Requests targeting unauthorized domains, insecure `http://`, or pseudo-protocols (`javascript:`, `data:`) fail closed and are blocked before DOM injection.
+2. **Mandatory Integrity Verification (SRI):** External script tags must include cryptographic SRI hashes (`sha256`, `sha384`, `sha512`) and `crossorigin="anonymous"`. Known models (such as TensorFlow.js and MobileNet) maintain committed SRI hashes in `KNOWN_MODEL_INTEGRITY`.
+3. **Controlled Lifecycle:** Scripts are tracked in an in-flight cache to prevent duplicate fetches. Injections enforce bounded timeouts (`DEFAULT_SCRIPT_TIMEOUT_MS = 15000`); on error or timeout, the injected `<script>` node is immediately purged from the DOM.
+4. **Sandboxed Isolation Strategy:** Untrusted third-party code must execute within an isolated sandboxed iframe (`sandbox="allow-scripts"` without `allow-same-origin`) or Web Worker. This cuts off access to `window.parent`, `localStorage`, `document.cookie`, and top-level DOM nodes. In addition, `snapshotGlobalKeys` and `detectGlobalPollution` are provided to audit global namespace contamination.
+
+
 ## User-Gesture-Driven Audio Activation Policy
 
 **Web Audio contexts and media playback must only be instantiated or resumed after an explicit user interaction (click, keypress, tap).**
