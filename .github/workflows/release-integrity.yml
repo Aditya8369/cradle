@@ -1,0 +1,53 @@
+name: Release Integrity
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-verify-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline || npm install
+
+      - name: Build project assets
+        run: npm run build
+
+      - name: Package release archives
+        run: |
+          mkdir -p dist
+          TAG_NAME="${{ github.event.release.tag_name || 'v1.0.0' }}"
+          VERSION="${TAG_NAME#v}"
+          tar -czvf "dist/cradle-${VERSION}.tar.gz" --exclude='.git' --exclude='node_modules' --exclude='dist' .
+          zip -r "dist/cradle-${VERSION}.zip" . -x "*.git*" -x "*node_modules*" -x "*dist*"
+
+      - name: Generate cryptographic checksums
+        run: |
+          node scripts/release-integrity.js --generate dist/*.tar.gz dist/*.zip --out dist/ --dir dist/
+
+      - name: Verify generated release checksums
+        run: |
+          node scripts/release-integrity.js --verify dist/SHA256SUMS --dir dist/
+          node scripts/release-integrity.js --verify dist/SHA512SUMS --dir dist/
+          node scripts/release-integrity.js --verify dist/release-integrity.json --dir dist/
+
+      - name: Upload release assets & checksums
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*

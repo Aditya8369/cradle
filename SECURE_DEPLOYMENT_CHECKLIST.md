@@ -118,6 +118,7 @@ Subresource Integrity guarantees that files fetched from external Content Delive
   - `cdn.jsdelivr.net`
   - `cdnjs.cloudflare.com`
   - `huggingface.co`
+- [ ] **Dynamic Script & Model Loading Boundaries:** Any runtime or async loading of external scripts (e.g. AI models via `loadScriptAsync`) must enforce the explicit origin allowlist (`ALLOWED_MODEL_HOSTS`), verify SRI digests, enforce execution timeouts with DOM cleanup, and isolate untrusted code in sandboxed contexts per [THIRD_PARTY_POLICY.md](THIRD_PARTY_POLICY.md).
 - [ ] **Automated CI Contract Enforcement:** Verify that all remote scripts comply with SRI requirements by running the contract validator:
 
 ```bash
@@ -125,6 +126,7 @@ npm run validate:mini-contract
 ```
 
 Any script tag missing an `integrity` attribute will fail the build with an `external-script-no-sri` violation.
+
 
 ---
 
@@ -219,6 +221,10 @@ Proper caching policies ensure users immediately receive security updates while 
 - [ ] **Un-hashed Script / Style Assets:**
   - Header: `Cache-Control: public, max-age=3600, must-revalidate`.
 - [ ] **ETag Support:** Ensure `ETag` or `Last-Modified` validation headers are enabled on the host to enable efficient HTTP 304 Not Modified revalidation.
+- [ ] **Release Asset Checksums & Integrity:**
+  - Every downloadable release artifact (`.tar.gz`, `.zip`, bundles) must be published with accompanying `SHA256SUMS`, `SHA512SUMS`, and `release-integrity.json` manifests generated via `npm run release:checksums`.
+  - Consumers must be provided verification instructions (`npm run verify:release-integrity`, `sha256sum -c SHA256SUMS`, or PowerShell `Get-FileHash`) per [RELEASE_INTEGRITY.md](RELEASE_INTEGRITY.md).
+
 
 ---
 
