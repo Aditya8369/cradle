@@ -246,6 +246,18 @@ p {
   padding: var(--cradle-space-6, 24px) 0;
 }
 
+#cardList:has(> .empty-state) {
+  justify-content: center;
+  align-items: center;
+}
+
+#cardList > .empty-state {
+  padding: 24px 0;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+}
+
 .deck-card {
   background: var(--card);
   border: 1px solid var(--cradle-border, #374151);
@@ -573,6 +585,9 @@ p {
   z-index: var(--cradle-z-modal, 1020);
   padding: var(--cradle-space-4, 16px);
 }
+#cardModal {
+  z-index: 1021;
+}
 
 .modal-box {
   background: var(--card);
@@ -587,7 +602,22 @@ p {
 }
 
 .modal-large {
+  display: flex;
+  flex-direction: column;
   max-width: 640px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-large .modal-header {
+  order: 0;
+  flex-shrink: 0;
+}
+
+.modal-large .detail-actions {
+  order: 2;
+  margin-top: 12px;
+  margin-bottom: 0;
 }
 
 .modal-header {
@@ -649,10 +679,40 @@ p {
   margin-bottom: var(--cradle-space-4, 16px);
 }
 
+#detailModal .modal-box {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#detailModal .modal-box.modal-large {
+  height: 400px;
+  min-height: 400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#detailModal .modal-header,
+#detailModal .detail-actions {
+  flex-shrink: 0;
+}
+
+#detailModal .card-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .card-list {
   display: flex;
   flex-direction: column;
   gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .card-list-item {
