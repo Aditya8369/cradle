@@ -177,6 +177,107 @@
     return storage.set(STORAGE_KEY, filtered);
   }
 
+  /**
+   * Generate a sanitized filename with appropriate extension.
+   * Ensures output is always formatted e.g. "qr-code.png" or "qr-code.svg".
+   */
+  function getDownloadFilename(name = "qr-code", extension = "png") {
+    const ext =
+      typeof extension === "string"
+        ? extension.toLowerCase().replace(/^\./, "").trim()
+        : "png";
+    const validExts = ["png", "svg", "jpeg", "jpg", "webp"];
+    const resolvedExt = validExts.includes(ext)
+      ? ext === "jpg"
+        ? "jpeg"
+        : ext
+      : "png";
+
+    let cleanName = typeof name === "string" ? name.trim() : "";
+    if (!cleanName) {
+      cleanName = "qr-code";
+    }
+
+    // Remove invalid filename characters: < > : " / \ | ? * and control chars
+    cleanName = cleanName
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "-")
+      .replace(/\.+$/, "");
+    if (!cleanName) {
+      cleanName = "qr-code";
+    }
+
+    // If cleanName already ends with .ext, preserve it
+    const lowerName = cleanName.toLowerCase();
+    if (
+      lowerName.endsWith("." + resolvedExt) ||
+      (resolvedExt === "jpeg" && lowerName.endsWith(".jpg"))
+    ) {
+      return cleanName;
+    }
+
+    return `${cleanName}.${resolvedExt}`;
+  }
+
+  /**
+   * Trigger browser download for a Blob, data URL, or object URL with an explicit filename.
+   * Ensures anchor element has download="filename.ext" set before clicking.
+   */
+  function triggerDownload(blobOrUrl, filename = "qr-code.png", doc = null) {
+    const documentObj =
+      doc || (typeof document !== "undefined" ? document : null);
+    if (!documentObj || typeof documentObj.createElement !== "function") {
+      return false;
+    }
+
+    const isBlob = typeof Blob !== "undefined" && blobOrUrl instanceof Blob;
+    let url = blobOrUrl;
+    let objectUrlCreated = false;
+
+    if (isBlob) {
+      if (
+        typeof URL !== "undefined" &&
+        typeof URL.createObjectURL === "function"
+      ) {
+        url = URL.createObjectURL(blobOrUrl);
+        objectUrlCreated = true;
+      }
+    }
+
+    const anchor = documentObj.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.setAttribute("download", filename);
+
+    if (
+      documentObj.body &&
+      typeof documentObj.body.appendChild === "function"
+    ) {
+      documentObj.body.appendChild(anchor);
+    }
+
+    if (typeof anchor.click === "function") {
+      anchor.click();
+    }
+
+    setTimeout(() => {
+      if (
+        anchor.parentNode &&
+        typeof anchor.parentNode.removeChild === "function"
+      ) {
+        anchor.parentNode.removeChild(anchor);
+      }
+      if (
+        objectUrlCreated &&
+        typeof URL !== "undefined" &&
+        typeof URL.revokeObjectURL === "function"
+      ) {
+        URL.revokeObjectURL(url);
+      }
+    }, 1000);
+
+    return true;
+  }
+
   return {
     DEFAULT_OPTIONS,
     isValidHex,
@@ -185,5 +286,7 @@
     getSavedPresets,
     savePreset,
     deletePreset,
+    getDownloadFilename,
+    triggerDownload,
   };
 });

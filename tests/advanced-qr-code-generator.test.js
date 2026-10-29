@@ -36,3 +36,82 @@ test("buildConfigPayload formats valid QRCodeStyling config payload", () => {
   assert.equal(payload.backgroundOptions.color, "#FFFFFF");
   assert.equal(payload.qrOptions.errorCorrectionLevel, "H");
 });
+
+test("getDownloadFilename generates descriptive filenames with valid extensions", () => {
+  assert.equal(QREngine.getDownloadFilename(), "qr-code.png");
+  assert.equal(QREngine.getDownloadFilename("qr-code", "png"), "qr-code.png");
+  assert.equal(QREngine.getDownloadFilename("qr-code", "svg"), "qr-code.svg");
+  assert.equal(
+    QREngine.getDownloadFilename("custom-qr", "png"),
+    "custom-qr.png"
+  );
+  assert.equal(
+    QREngine.getDownloadFilename("custom-qr.png", "png"),
+    "custom-qr.png"
+  );
+  assert.equal(
+    QREngine.getDownloadFilename("custom-qr.svg", "svg"),
+    "custom-qr.svg"
+  );
+  assert.equal(QREngine.getDownloadFilename("", "png"), "qr-code.png");
+  assert.equal(QREngine.getDownloadFilename(null, "svg"), "qr-code.svg");
+  assert.equal(
+    QREngine.getDownloadFilename("invalid/name:code*", "png"),
+    "invalid-name-code-.png"
+  );
+  assert.equal(
+    QREngine.getDownloadFilename("qr-code", "unknown"),
+    "qr-code.png"
+  );
+});
+
+test("triggerDownload creates an anchor element with download attribute and clicks it", () => {
+  let clicked = false;
+  let appended = false;
+  let removed = false;
+  const createdAttr = {};
+
+  const mockAnchor = {
+    setAttribute(name, val) {
+      createdAttr[name] = val;
+    },
+    click() {
+      clicked = true;
+    },
+    parentNode: null,
+  };
+
+  const mockDoc = {
+    createElement(tag) {
+      if (tag === "a") return mockAnchor;
+      return {};
+    },
+    body: {
+      appendChild(node) {
+        appended = true;
+        node.parentNode = this;
+      },
+      removeChild(node) {
+        removed = true;
+        node.parentNode = null;
+      },
+    },
+  };
+
+  const success = QREngine.triggerDownload(
+    "blob:https://example.com/mock-id",
+    "qr-code.png",
+    mockDoc
+  );
+  assert.equal(success, true);
+  assert.equal(mockAnchor.download, "qr-code.png");
+  assert.equal(mockAnchor.href, "blob:https://example.com/mock-id");
+  assert.equal(createdAttr.download, "qr-code.png");
+  assert.equal(appended, true);
+  assert.equal(clicked, true);
+});
+
+test("triggerDownload returns false when document is unavailable", () => {
+  const success = QREngine.triggerDownload("data:test", "qr-code.png", {});
+  assert.equal(success, false);
+});

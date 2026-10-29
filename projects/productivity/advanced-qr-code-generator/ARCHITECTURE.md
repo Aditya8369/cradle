@@ -98,6 +98,8 @@ User clicks Download PNG/SVG -> Image blob generated for download
 
 - `buildPayload(type, data)` — Formats type-specific payload strings (e.g., WiFi `WIFI:S:...`).
 - `validateInput(text)` — Sanitizes payload input.
+- `getDownloadFilename(name, extension)` — Generates sanitized export filename with correct extension.
+- `triggerDownload(blobOrUrl, filename, doc)` — Dispatches anchor download with explicit filename.
 
 ### `script.js`
 
