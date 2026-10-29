@@ -117,6 +117,7 @@ Engine triggers an exponential decay ramp to silence the note smoothly
 - `handleKeyup()`: Releases notes only when no other physical key or pointer is holding the same pitch.
 - `initMidiAccess()` / `handleMidiMessage()`: Initializes Web MIDI access and routes controller messages.
 - `getMasterBus()`: Configures a shared `DynamicsCompressorNode` and master gain to normalize polyphonic chord output.
+- `resumeAudio()`: Detects AudioContext resume and autoplay rejection failures, displaying an interactive recovery alert on the status element to re-enable audio upon user gesture.
 - Handles pointer capture and page lifecycle events (`pagehide`, `blur`, `visibilitychange`) to cleanly release held notes and prevent stuck oscillators.
 
 ### `pianoEngine.js`

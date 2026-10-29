@@ -137,6 +137,50 @@
     return audioContext;
   }
 
+  let audioBlocked = false;
+
+  function showAudioBlocked(msg) {
+    audioBlocked = true;
+    const targetEl = status || noteLabel;
+    if (targetEl) {
+      targetEl.classList.add("audio-blocked");
+      targetEl.textContent =
+        msg || "Audio blocked by browser. Click to enable sound.";
+      targetEl.style.cursor = "pointer";
+      targetEl.title = "Click to enable sound";
+    }
+  }
+
+  function clearAudioBlocked() {
+    if (!audioBlocked) return;
+    audioBlocked = false;
+    const targetEl = status || noteLabel;
+    if (targetEl) {
+      targetEl.classList.remove("audio-blocked");
+      targetEl.style.cursor = "";
+      targetEl.title = "";
+      if (status) status.textContent = "Ready";
+      if (noteLabel) noteLabel.textContent = "Ready";
+    }
+  }
+
+  [status, noteLabel].forEach(el => {
+    if (el) {
+      el.addEventListener("click", async () => {
+        if (
+          audioBlocked ||
+          (audioContext && audioContext.state === "suspended")
+        ) {
+          try {
+            await resumeAudio();
+          } catch (e) {
+            console.warn("Violin audio resume failed:", e);
+          }
+        }
+      });
+    }
+  });
+
   async function resumeAudio() {
     const context = getAudioContext();
 
@@ -145,7 +189,14 @@
     }
 
     if (context.state === "suspended") {
-      await context.resume();
+      try {
+        await context.resume();
+        clearAudioBlocked();
+      } catch (err) {
+        console.warn("Violin AudioContext resume failed:", err);
+        showAudioBlocked();
+        return null;
+      }
     }
 
     return context;

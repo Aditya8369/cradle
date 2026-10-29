@@ -89,6 +89,18 @@ button {
   line-height: 1.45;
 }
 
+.status.audio-blocked {
+  border-color: #ef4444;
+  color: #fca5a5;
+  cursor: pointer;
+  background: #3b180d;
+}
+
+.status.audio-blocked:hover {
+  border-color: #f87171;
+  color: #ffffff;
+}
+
 .status {
   min-width: 95px;
   padding: 9px 15px;

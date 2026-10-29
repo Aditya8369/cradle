@@ -19,10 +19,45 @@ export class AudioProcessor {
     this.destination = this.audioContext.createMediaStreamDestination();
   }
 
+  async resumeContext() {
+    if (!this.audioContext) await this.init();
+    if (this.audioContext.state === "suspended") {
+      try {
+        await this.audioContext.resume();
+        const banner = document.getElementById("error-banner");
+        if (banner && banner.dataset.audioBlocked) {
+          banner.hidden = true;
+          delete banner.dataset.audioBlocked;
+        }
+        return true;
+      } catch (err) {
+        console.warn("AudioContext resume failed:", err);
+        const banner = document.getElementById("error-banner");
+        if (banner) {
+          banner.dataset.audioBlocked = "true";
+          banner.textContent =
+            "Audio playback is blocked by your browser. Click here to enable audio.";
+          banner.hidden = false;
+          banner.style.cursor = "pointer";
+          banner.onclick = async () => {
+            try {
+              await this.audioContext.resume();
+              banner.hidden = true;
+              delete banner.dataset.audioBlocked;
+            } catch (e) {
+              console.error("Resume retry failed:", e);
+            }
+          };
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
   async startMicrophone() {
     if (!this.audioContext) await this.init();
-    if (this.audioContext.state === "suspended")
-      await this.audioContext.resume();
+    await this.resumeContext();
 
     try {
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -40,8 +75,7 @@ export class AudioProcessor {
 
   async loadAudioFile(file) {
     if (!this.audioContext) await this.init();
-    if (this.audioContext.state === "suspended")
-      await this.audioContext.resume();
+    await this.resumeContext();
 
     this.stop(); // Clean up previous
     this.audioElement = new Audio();

@@ -196,7 +196,27 @@ async function playMorse() {
     }
 
     if (audioContext && audioContext.state === "suspended") {
-      await audioContext.resume();
+      try {
+        await audioContext.resume();
+      } catch (err) {
+        console.warn("AudioContext resume rejected:", err);
+        isPlaying = false;
+        if (playBtn) {
+          playBtn.disabled = false;
+          playBtn.textContent = "⚠ Click to enable audio";
+          playBtn.onclick = async () => {
+            playBtn.onclick = null;
+            try {
+              await audioContext.resume();
+              playBtn.textContent = "▶ Play";
+              playMorse();
+            } catch (e) {
+              console.error("Audio resume retry failed:", e);
+            }
+          };
+        }
+        return;
+      }
     }
 
     if (!audioContext || !isPlaying || playbackSessionId !== currentSession) {

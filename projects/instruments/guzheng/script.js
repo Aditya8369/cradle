@@ -4,6 +4,43 @@ const status = document.getElementById("status");
 let isPointerDown = false;
 let lastPluckedNote = null;
 const pressedKeyboardKeys = new Set();
+let audioBlocked = false;
+
+function showAudioBlocked() {
+  audioBlocked = true;
+  if (status) {
+    status.classList.add("audio-blocked");
+    status.textContent = "Audio blocked by browser. Click to enable sound.";
+    status.style.cursor = "pointer";
+    status.title = "Click to enable sound";
+  }
+}
+
+function clearAudioBlocked() {
+  if (!audioBlocked) return;
+  audioBlocked = false;
+  if (status) {
+    status.classList.remove("audio-blocked");
+    status.style.cursor = "";
+    status.title = "";
+    status.textContent = "Ready";
+  }
+}
+
+if (typeof GuzhengEngine.setOnBlockedCallback === "function") {
+  GuzhengEngine.setOnBlockedCallback(blocked => {
+    if (blocked) showAudioBlocked();
+    else clearAudioBlocked();
+  });
+}
+
+if (status) {
+  status.addEventListener("click", () => {
+    if (audioBlocked && typeof GuzhengEngine.resumeAudio === "function") {
+      GuzhengEngine.resumeAudio();
+    }
+  });
+}
 
 function getStringElement(note) {
   return [...strings].find(s => s.dataset.note === note);
