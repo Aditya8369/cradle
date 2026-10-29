@@ -79,6 +79,7 @@
     lines: [],
     sourceName: "",
     objectUrl: "",
+    pausedForVisibility: false,
   };
 
   function numberValue(el) {
@@ -159,6 +160,7 @@
   }
 
   function setEmptyState() {
+    state.pausedForVisibility = false;
     stopCamera(true);
 
     state.mode = "empty";
@@ -663,8 +665,61 @@
     }
 
     if (els.sampleBtn) {
-      els.sampleBtn.addEventListener("click", loadSample);
+      els.sampleBtn.addEventListener("click", () => {
+        state.pausedForVisibility = false;
+        loadSample();
+      });
     }
+
+    window.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  }
+
+  function handlePageHide() {
+    if (state.mode === "camera" || state.stream) {
+      stopCamera(false);
+      state.mode = "empty";
+      if (els.video) {
+        els.video.srcObject = null;
+      }
+    }
+  }
+
+  async function handleVisibilityChange() {
+    if (document.hidden) {
+      if (state.mode === "camera" && state.stream) {
+        state.pausedForVisibility = true;
+        stopCamera(false);
+        setStatus(
+          "Camera Paused",
+          "Tab Hidden",
+          "Camera stream paused while tab is hidden to save power and privacy."
+        );
+      }
+    } else {
+      if (state.pausedForVisibility) {
+        state.pausedForVisibility = false;
+        try {
+          await startCamera();
+        } catch {
+          setStatus(
+            "Camera Paused",
+            "Click Start Camera",
+            "Click 'Start Camera' to resume video feed."
+          );
+        }
+      }
+    }
+  }
+
+  if (typeof window !== "undefined") {
+    window.ASCIICamera = {
+      startCamera,
+      stopCamera,
+      handlePageHide,
+      handleVisibilityChange,
+      getState: () => state,
+    };
   }
 
   document.addEventListener("DOMContentLoaded", () => {
