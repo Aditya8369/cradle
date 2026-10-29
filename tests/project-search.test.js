@@ -92,3 +92,102 @@ test("filtering with category 'games' and query 'snake' uses strict AND logic", 
 test("returns all projects when no filters are active", () => {
   assert.deepEqual(filterProjects(sampleProjects, "all", ""), sampleProjects);
 });
+
+test("selecting category 'games' and then typing query 's' retains category and filters with AND logic", () => {
+  const projects = [
+    {
+      id: "sudoku",
+      title: "Sudoku Solver",
+      category: "games",
+      description: "Solve sudoku puzzles",
+    },
+    {
+      id: "snake",
+      title: "Snake",
+      category: "games",
+      description: "Classic retro arcade snake",
+    },
+    {
+      id: "chess",
+      title: "Chess",
+      category: "games",
+      description: "Play chess",
+    },
+    {
+      id: "diff",
+      title: "Text Diff Checker",
+      category: "dev-tools",
+      description: "Compare text strings",
+    },
+    {
+      id: "stopwatch",
+      title: "Stopwatch",
+      category: "productivity",
+      description: "Measure seconds",
+    },
+  ];
+
+  // User selects Games category first
+  const gamesOnly = filterProjects(projects, "games", "");
+  assert.equal(gamesOnly.length, 3);
+  assert.deepEqual(
+    gamesOnly.map(p => p.id),
+    ["sudoku", "snake", "chess"]
+  );
+
+  // User then types 's' into search bar while Games is selected
+  const gamesWithS = filterProjects(projects, "games", "s");
+  // All 3 games contain 's' in title or description; dev-tools and productivity projects with 's' are excluded
+  assert.equal(gamesWithS.length, 3);
+  assert.deepEqual(
+    gamesWithS.map(p => p.id),
+    ["sudoku", "snake", "chess"]
+  );
+
+  // User types 'snake' into search bar
+  const snakeGame = filterProjects(projects, "games", "snake");
+  assert.equal(snakeGame.length, 1);
+  assert.equal(snakeGame[0].id, "snake");
+
+  // Handles capitalized category 'Games' cleanly
+  const capitalizedGames = filterProjects(projects, "Games", "snake");
+  assert.equal(capitalizedGames.length, 1);
+  assert.equal(capitalizedGames[0].id, "snake");
+});
+
+test("typing query first and then selecting category retains query and applies category filter", () => {
+  const projects = [
+    {
+      id: "sudoku",
+      title: "Sudoku Solver",
+      category: "games",
+      description: "Solve sudoku puzzles",
+    },
+    {
+      id: "code",
+      title: "Code Formatter",
+      category: "dev-tools",
+      description: "Format source code",
+    },
+    {
+      id: "notes",
+      title: "Quick Notes",
+      category: "productivity",
+      description: "Take quick notes",
+    },
+  ];
+
+  // User types 'code' first across all categories
+  const allWithCode = filterProjects(projects, "all", "code");
+  assert.equal(allWithCode.length, 1);
+  assert.equal(allWithCode[0].id, "code");
+
+  // User then clicks 'games' category: query 'code' is preserved, no games match 'code'
+  const gamesWithCode = filterProjects(projects, "games", "code");
+  assert.equal(gamesWithCode.length, 0);
+
+  // User clicks 'dev-tools' category: query 'code' is preserved and matches Code Formatter
+  const devToolsWithCode = filterProjects(projects, "dev-tools", "code");
+  assert.equal(devToolsWithCode.length, 1);
+  assert.equal(devToolsWithCode[0].id, "code");
+});

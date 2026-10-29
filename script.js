@@ -64,7 +64,7 @@ function restoreFiltersFromUrl() {
   }
 
   if (category) {
-    selectedCategory = category;
+    selectedCategory = category.toLowerCase().trim();
   }
 }
 
@@ -104,9 +104,20 @@ function updateUrlFilterState() {
 }
 
 function validateSelectedCategory() {
-  const categories = new Set(allProjects.map(project => project.category));
+  const categories = new Set(
+    allProjects
+      .map(project =>
+        project && typeof project.category === "string"
+          ? project.category.toLowerCase().trim()
+          : ""
+      )
+      .filter(Boolean)
+  );
 
-  if (selectedCategory !== "all" && !categories.has(selectedCategory)) {
+  if (
+    selectedCategory !== "all" &&
+    !categories.has(selectedCategory.toLowerCase().trim())
+  ) {
     selectedCategory = "all";
   }
 }
