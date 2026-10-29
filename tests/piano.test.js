@@ -441,3 +441,219 @@ test("holding C4 and pressing E4 triggers C4 once and E4 once with no stutter or
   assert.equal(pianoStudio.getActiveNotes().size, 0);
   assert.equal(statusEl.textContent, "Ready");
 });
+
+
+test("validateKeyboardMapping gracefully rejects malformed inputs without throwing", () => {
+  const malformedInputs = [null, undefined, 42, "invalid", true, [], Symbol("test")];
+
+  malformedInputs.forEach(input => {
+    const result = PianoEngine.validateKeyboardMapping(input);
+    assert.equal(result.isValid, false);
+    assert.ok(result.errors.length > 0);
+    assert.deepEqual(result.sanitizedMapping, {});
+  });
+});
+
+test("validateKeyboardMapping validates note names and detects invalid notes", () => {
+  const result = PianoEngine.validateKeyboardMapping({
+    a: "C4",
+    b: "InvalidNote",
+    c: "H4",
+    d: "C#9",
+  });
+
+  assert.equal(result.isValid, false);
+  assert.ok(result.invalidMappings.some(m => m.note === "InvalidNote"));
+  assert.ok(result.invalidMappings.some(m => m.note === "H4"));
+  assert.ok(result.invalidMappings.some(m => m.note === "C#9"));
+  assert.equal(result.sanitizedMapping.a, "C4");
+  assert.equal(result.sanitizedMapping.b, undefined);
+});
+
+test("validateKeyboardMapping detects duplicate keys and empty key strings", () => {
+  const emptyKeyResult = PianoEngine.validateKeyboardMapping({
+    "": "C4",
+    "   ": "D4",
+    a: "E4",
+  });
+  assert.equal(emptyKeyResult.isValid, false);
+  assert.ok(emptyKeyResult.errors.some(err => err.includes("Empty or blank key identifier")));
+
+  const duplicateKeyResult = PianoEngine.validateKeyboardMapping({
+    a: "C4",
+    A: "D4",
+  });
+  assert.equal(duplicateKeyResult.isValid, false);
+  assert.ok(duplicateKeyResult.duplicateKeys.includes("a"));
+});
+
+test("validateKeyboardMapping detects duplicate note assignments when disallowed", () => {
+  const resultDisallowed = PianoEngine.validateKeyboardMapping(
+    {
+      a: "C4",
+      b: "C4",
+    },
+    { allowDuplicateNotes: false }
+  );
+
+  assert.equal(resultDisallowed.isValid, false);
+  assert.ok(resultDisallowed.duplicateNotes.includes("C4"));
+
+  const resultAllowed = PianoEngine.validateKeyboardMapping(
+    {
+      a: "C4",
+      b: "C4",
+    },
+    { allowDuplicateNotes: true }
+  );
+
+  assert.equal(resultAllowed.isValid, true);
+  assert.equal(resultAllowed.warnings.length > 0, true);
+});
+
+test("validateKeyboardMapping detects missing notes when required", () => {
+  const result = PianoEngine.validateKeyboardMapping(
+    { a: "C4" },
+    { requireAllNotes: true, expectedNotes: ["C4", "D4", "E4"] }
+  );
+
+  assert.equal(result.isValid, false);
+  assert.ok(result.missingNotes.includes("D4"));
+  assert.ok(result.missingNotes.includes("E4"));
+  assert.ok(!result.missingNotes.includes("C4"));
+});
+
+test("applyKeyboardMapping updates mapping and preserves previous on failure", () => {
+  PianoEngine.resetKeyboardMapping();
+  const initialC4Key = PianoEngine.getKeyFromNote("C4");
+
+  // Valid mapping applied
+  const applyRes = PianoEngine.applyKeyboardMapping({
+    z: "C4",
+    x: "D4",
+  });
+  assert.equal(applyRes.success, true);
+  assert.equal(PianoEngine.getNoteFromKey("z"), "C4");
+  assert.equal(PianoEngine.getKeyFromNote("C4"), "z");
+
+  // Attempt invalid mapping
+  const failRes = PianoEngine.applyKeyboardMapping({
+    invalidKey: "NotANote",
+  });
+  assert.equal(failRes.success, false);
+  // Previous valid mapping is preserved
+  assert.equal(PianoEngine.getNoteFromKey("z"), "C4");
+
+  // Reset restores factory default
+  PianoEngine.resetKeyboardMapping();
+  assert.equal(PianoEngine.getKeyFromNote("C4"), initialC4Key);
+});
+
+test("validateMidiMapping gracefully rejects malformed inputs without throwing", () => {
+  const malformedInputs = [null, undefined, 123, "midi", false, []];
+
+  malformedInputs.forEach(input => {
+    const result = PianoEngine.validateMidiMapping(input);
+    assert.equal(result.isValid, false);
+    assert.ok(result.errors.length > 0);
+  });
+});
+
+test("validateMidiMapping supports both midi-to-note and note-to-midi formats", () => {
+  const midiToNote = {
+    60: "C4",
+    62: "D4",
+    64: "E4",
+  };
+  const res1 = PianoEngine.validateMidiMapping(midiToNote);
+  assert.equal(res1.isValid, true);
+  assert.equal(res1.sanitizedMapping[60], "C4");
+  assert.equal(res1.sanitizedMapping[62], "D4");
+
+  const noteToMidi = {
+    C4: 60,
+    D4: 62,
+    E4: 64,
+  };
+  const res2 = PianoEngine.validateMidiMapping(noteToMidi);
+  assert.equal(res2.isValid, true);
+  assert.equal(res2.sanitizedMapping[60], "C4");
+  assert.equal(res2.sanitizedMapping[62], "D4");
+});
+
+test("validateMidiMapping detects out-of-range MIDI numbers and invalid notes", () => {
+  const outOfRange = PianoEngine.validateMidiMapping({
+    "-5": "C4",
+    128: "D4",
+    "60.5": "E4",
+    NaN: "F4",
+  });
+
+  assert.equal(outOfRange.isValid, false);
+  assert.ok(outOfRange.invalidMappings.length >= 3);
+
+  const invalidNotes = PianoEngine.validateMidiMapping({
+    60: "NotANote",
+    61: "C#99",
+  });
+
+  assert.equal(invalidNotes.isValid, false);
+  assert.ok(invalidNotes.invalidMappings.some(m => m.note === "NotANote"));
+});
+
+test("validateMidiMapping detects duplicate MIDI numbers and notes", () => {
+  const duplicateNotes = PianoEngine.validateMidiMapping(
+    {
+      60: "C4",
+      61: "C4",
+    },
+    { allowDuplicateNotes: false }
+  );
+
+  assert.equal(duplicateNotes.isValid, false);
+  assert.ok(duplicateNotes.duplicateNotes.includes("C4"));
+});
+
+test("applyMidiMapping updates mapping and preserves previous on failure", () => {
+  PianoEngine.resetMidiMapping();
+  const initialNote60 = PianoEngine.getNoteFromMidi(60);
+
+  // Valid MIDI mapping
+  const successRes = PianoEngine.applyMidiMapping({
+    60: "C3",
+    62: "D3",
+  });
+  assert.equal(successRes.success, true);
+  assert.equal(PianoEngine.getNoteFromMidi(60), "C3");
+  assert.equal(PianoEngine.getMidiFromNote("C3"), 60);
+
+  // Attempt invalid MIDI mapping
+  const failRes = PianoEngine.applyMidiMapping({
+    999: "C3",
+  });
+  assert.equal(failRes.success, false);
+  // Preserves existing mapping
+  assert.equal(PianoEngine.getNoteFromMidi(60), "C3");
+
+  // Reset
+  PianoEngine.resetMidiMapping();
+  assert.equal(PianoEngine.getNoteFromMidi(60), initialNote60);
+});
+
+test("MIDI utility functions perform bidirectional conversions correctly", () => {
+  assert.equal(PianoEngine.noteToMidiNumber("C4"), 60);
+  assert.equal(PianoEngine.noteToMidiNumber("A4"), 69);
+  assert.equal(PianoEngine.midiNumberToNote(60), "C4");
+  assert.equal(PianoEngine.midiNumberToNote(69), "A4");
+
+  // Frequency conversion
+  assert.equal(Math.round(PianoEngine.midiToFrequency(69)), 440);
+  assert.equal(PianoEngine.frequencyToMidi(440), 69);
+
+  // Edge cases
+  assert.equal(PianoEngine.noteToMidiNumber("Invalid"), null);
+  assert.equal(PianoEngine.midiNumberToNote(-1), null);
+  assert.equal(PianoEngine.midiNumberToNote(128), null);
+  assert.equal(PianoEngine.midiToFrequency(NaN), null);
+  assert.equal(PianoEngine.frequencyToMidi(-10), null);
+});
