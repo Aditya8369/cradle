@@ -97,8 +97,11 @@
     const orbitalRegex = /(\d)([spdfg])(\d+)/g;
     let match;
     const extraShells = {};
+    let parseIterations = 0;
+    const MAX_PARSE_ITERATIONS = 500;
 
     while ((match = orbitalRegex.exec(remaining)) !== null) {
+      if (++parseIterations > MAX_PARSE_ITERATIONS) break;
       const shellNum = parseInt(match[1], 10);
       const count = parseInt(match[3], 10);
       extraShells[shellNum] = (extraShells[shellNum] || 0) + count;
@@ -225,5 +228,228 @@
   exports.calculatePhaseState = calculatePhaseState;
   exports.parseShellElectrons = parseShellElectrons;
   exports.filterElements = filterElements;
+  const DEFAULT_MAX_TRAVERSAL_ITERATIONS = 1000;
+  const DEFAULT_MAX_TRAVERSAL_DEPTH = 100;
+
+  /**
+   * Traverses element relationships (decay chains, periodic groups/periods, chemical bonding,
+   * or custom graph topologies) while guarding against malformed cycles and excessive iteration paths.
+   *
+   * Returns controlled failure objects rather than throwing uncaught errors or allowing runaway processing.
+   *
+   * @param {string|number} startId - Initial element symbol or atomic number.
+   * @param {Object|Map|Function|Array} relationships - Adjacency map, neighbor function, or element graph.
+   * @param {Object} [options={}] - Traversal options.
+   * @param {number} [options.maxIterations=1000] - Hard cap on total iterations to prevent runaway execution.
+   * @param {number} [options.maxDepth=100] - Hard cap on traversal depth.
+   * @param {string} [options.strategy='bfs'] - Traversal strategy ('bfs' or 'dfs').
+   * @param {boolean} [options.allowCycles=false] - Whether to permit re-visiting nodes across paths without failing.
+   * @param {boolean} [options.throwOnError=false] - If true, throws Error on limit/cycle; otherwise returns controlled failure.
+   * @returns {{
+   *   success: boolean,
+   *   visited: Array<string|number>,
+   *   path: Array<string|number>,
+   *   iterations: number,
+   *   hasCycle: boolean,
+   *   exceededLimit: boolean,
+   *   error: string|null,
+   *   cycleNode?: string|number|null
+   * }}
+   */
+  function traverseRelationships(startId, relationships, options = {}) {
+    const maxIterations =
+      typeof options.maxIterations === "number" && options.maxIterations > 0
+        ? options.maxIterations
+        : DEFAULT_MAX_TRAVERSAL_ITERATIONS;
+
+    const maxDepth =
+      typeof options.maxDepth === "number" && options.maxDepth > 0
+        ? options.maxDepth
+        : DEFAULT_MAX_TRAVERSAL_DEPTH;
+
+    const strategy = options.strategy === "dfs" ? "dfs" : "bfs";
+    const allowCycles = options.allowCycles === true;
+    const throwOnError = options.throwOnError === true;
+
+    let iterations = 0;
+    const visited = new Set();
+    const visitedOrder = [];
+
+    function fail(errorMessage, extra = {}) {
+      const result = {
+        success: false,
+        visited: Array.from(visited),
+        path: Array.from(visitedOrder),
+        iterations,
+        hasCycle: extra.hasCycle || false,
+        exceededLimit: extra.exceededLimit || false,
+        cycleNode: extra.cycleNode ?? null,
+        error: errorMessage,
+      };
+      if (throwOnError) {
+        const err = new Error(errorMessage);
+        Object.assign(err, result);
+        throw err;
+      }
+      return result;
+    }
+
+    if (
+      startId === null ||
+      startId === undefined ||
+      (typeof startId !== "string" && typeof startId !== "number")
+    ) {
+      return fail("Invalid start node provided for relationship traversal.");
+    }
+
+    if (!relationships || (typeof relationships !== "object" && typeof relationships !== "function")) {
+      return fail("Invalid relationships parameter. Must be an object, Map, Array, or function.");
+    }
+
+    function getNeighbors(node) {
+      if (typeof relationships === "function") {
+        try {
+          const res = relationships(node);
+          return Array.isArray(res) ? res : [];
+        } catch {
+          return [];
+        }
+      }
+      if (relationships instanceof Map) {
+        const res = relationships.get(node);
+        return Array.isArray(res) ? res : [];
+      }
+      if (Array.isArray(relationships)) {
+        const item = relationships.find(
+          el => el && (el.number === node || el.symbol === node || el.id === node || el.name === node)
+        );
+        if (item) {
+          const related = item.related || item.neighbors || item.decayTo || item.connections;
+          return Array.isArray(related) ? related : [];
+        }
+        return [];
+      }
+      if (typeof relationships === "object") {
+        const res = relationships[node];
+        return Array.isArray(res) ? res : [];
+      }
+      return [];
+    }
+
+    if (strategy === "bfs") {
+      const queue = [{ node: startId, depth: 0, pathSet: new Set([startId]) }];
+      visited.add(startId);
+      visitedOrder.push(startId);
+
+      while (queue.length > 0) {
+        iterations++;
+        if (iterations > maxIterations) {
+          return fail(
+            `Iteration limit exceeded: traversal halted after ${maxIterations} iterations.`,
+            { exceededLimit: true }
+          );
+        }
+
+        const current = queue.shift();
+        if (current.depth >= maxDepth) {
+          continue;
+        }
+
+        const neighbors = getNeighbors(current.node);
+        for (const neighbor of neighbors) {
+          iterations++;
+          if (iterations > maxIterations) {
+            return fail(
+              `Iteration limit exceeded: traversal halted after ${maxIterations} iterations.`,
+              { exceededLimit: true }
+            );
+          }
+
+          if (!allowCycles && current.pathSet.has(neighbor)) {
+            return fail(
+              `Malformed cycle detected: node "${neighbor}" was re-encountered in active path.`,
+              { hasCycle: true, cycleNode: neighbor }
+            );
+          }
+
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            visitedOrder.push(neighbor);
+
+            const nextPathSet = new Set(current.pathSet);
+            nextPathSet.add(neighbor);
+
+            queue.push({
+              node: neighbor,
+              depth: current.depth + 1,
+              pathSet: nextPathSet,
+            });
+          }
+        }
+      }
+    } else {
+      const activePath = new Set();
+
+      function dfsVisit(node, depth) {
+        iterations++;
+        if (iterations > maxIterations) {
+          return fail(
+            `Iteration limit exceeded: traversal halted after ${maxIterations} iterations.`,
+            { exceededLimit: true }
+          );
+        }
+
+        if (depth > maxDepth) {
+          return null;
+        }
+
+        if (!allowCycles && activePath.has(node)) {
+          return fail(
+            `Malformed cycle detected: node "${node}" was re-encountered in active path.`,
+            { hasCycle: true, cycleNode: node }
+          );
+        }
+
+        activePath.add(node);
+        if (!visited.has(node)) {
+          visited.add(node);
+          visitedOrder.push(node);
+        }
+
+        const neighbors = getNeighbors(node);
+        for (const neighbor of neighbors) {
+          if (!visited.has(neighbor) || (!allowCycles && activePath.has(neighbor))) {
+            const errResult = dfsVisit(neighbor, depth + 1);
+            if (errResult && errResult.success === false) {
+              return errResult;
+            }
+          }
+        }
+
+        activePath.delete(node);
+        return null;
+      }
+
+      const dfsErr = dfsVisit(startId, 0);
+      if (dfsErr && dfsErr.success === false) {
+        return dfsErr;
+      }
+    }
+
+    return {
+      success: true,
+      visited: Array.from(visited),
+      path: Array.from(visitedOrder),
+      iterations,
+      hasCycle: false,
+      exceededLimit: false,
+      error: null,
+      cycleNode: null,
+    };
+  }
+
   exports.calculateElementStats = calculateElementStats;
+  exports.traverseRelationships = traverseRelationships;
+  exports.DEFAULT_MAX_TRAVERSAL_ITERATIONS = DEFAULT_MAX_TRAVERSAL_ITERATIONS;
+  exports.DEFAULT_MAX_TRAVERSAL_DEPTH = DEFAULT_MAX_TRAVERSAL_DEPTH;
 })(typeof exports === "undefined" ? (window.PeriodicEngine = {}) : exports);

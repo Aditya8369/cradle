@@ -118,6 +118,7 @@ User clicks an element tile → Modal opens → HTML5 Canvas draws Bohr model fo
 - `parseShellElectrons(configStr)` — parses electron configuration strings into per-shell electron counts.
 - `filterElements(elements, options)` — filters by search, category, block, and phase.
 - `calculateElementStats(elements, tempK)` — tallies solid/liquid/gas/synthetic counts and category distribution.
+- `traverseRelationships(start, relationships, options)` — relationship traversal with cycle detection and bounded iteration limits to protect against runaway processing.
 
 ### `periodicStorage.js`
 

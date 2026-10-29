@@ -113,8 +113,101 @@
     )
   );
 
-  let audioContext = null;
+  const SEMITONE_MAP = Object.freeze({
+    C: 0,
+    "C#": 1,
+    DB: 1,
+    D: 2,
+    "D#": 3,
+    EB: 3,
+    E: 4,
+    F: 5,
+    "F#": 6,
+    GB: 6,
+    G: 7,
+    "G#": 8,
+    AB: 8,
+    A: 9,
+    "A#": 10,
+    BB: 10,
+    B: 11,
+  });
 
+  const MIDI_NOTE_NAMES = Object.freeze([
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
+  ]);
+
+  /**
+   * Converts a standard musical note name (e.g. "C4", "A#3") into a MIDI note number (0–127).
+   * Returns null for invalid or out-of-range notes without throwing.
+   */
+  function noteToMidiNumber(note) {
+    if (typeof note !== "string") return null;
+    const trimmed = note.trim();
+    const match = /^([A-Ga-g][#b]?)(-?\d+)$/.exec(trimmed);
+    if (!match) return null;
+    const pitch = match[1].toUpperCase();
+    const semitone = SEMITONE_MAP[pitch];
+    if (semitone === undefined) return null;
+    const octave = parseInt(match[2], 10);
+    const midi = (octave + 1) * 12 + semitone;
+    return midi >= 0 && midi <= 127 ? midi : null;
+  }
+
+  /**
+   * Converts a MIDI note number (0–127) into a canonical note name (e.g. 60 -> "C4").
+   * Returns null for invalid MIDI numbers without throwing.
+   */
+  function midiNumberToNote(midi) {
+    const num = Number(midi);
+    if (!Number.isInteger(num) || num < 0 || num > 127) {
+      return null;
+    }
+    const octave = Math.floor(num / 12) - 1;
+    const pitch = MIDI_NOTE_NAMES[num % 12];
+    return `${pitch}${octave}`;
+  }
+
+  // Precomputed standard MIDI mappings for all piano frequencies (C3=48 through E6=88)
+  const DEFAULT_MIDI_TO_NOTE = Object.freeze(
+    Object.fromEntries(
+      Object.keys(NOTE_FREQUENCIES)
+        .map(note => {
+          const midi = noteToMidiNumber(note);
+          return midi !== null ? [midi, note] : null;
+        })
+        .filter(Boolean)
+    )
+  );
+
+  const DEFAULT_NOTE_TO_MIDI = Object.freeze(
+    Object.fromEntries(
+      Object.entries(DEFAULT_MIDI_TO_NOTE).map(([midi, note]) => [
+        note,
+        Number(midi),
+      ])
+    )
+  );
+
+  // Active mapping state (can be reconfigured after passing validation)
+  let activeKeyToNote = { ...KEY_TO_NOTE };
+  let activeNoteToKey = { ...NOTE_TO_KEY };
+
+  let activeMidiToNote = { ...DEFAULT_MIDI_TO_NOTE };
+  let activeNoteToMidi = { ...DEFAULT_NOTE_TO_MIDI };
+
+  let audioContext = null;
   const activeVoices = new Map();
 
   function getAudioContext() {
@@ -424,15 +517,22 @@
       return null;
     }
 
-    return KEY_TO_NOTE[key.toLowerCase()] || null;
+    return activeKeyToNote[key.toLowerCase()] || null;
   }
 
   function getKeyFromNote(note) {
-    return NOTE_TO_KEY[note] || null;
+    if (typeof note !== "string") {
+      return null;
+    }
+
+    return activeNoteToKey[note] || null;
   }
 
   function isValidNote(note) {
-    return Object.prototype.hasOwnProperty.call(NOTE_FREQUENCIES, note);
+    return (
+      typeof note === "string" &&
+      Object.prototype.hasOwnProperty.call(NOTE_FREQUENCIES, note.trim())
+    );
   }
 
   function getNotes() {
@@ -441,20 +541,502 @@
 
   function getKeyboardMap() {
     return {
-      ...KEY_TO_NOTE,
+      ...activeKeyToNote,
     };
+  }
+
+  /**
+   * Validates a keyboard mapping object without throwing uncaught exceptions.
+   * Detects duplicate key assignments, duplicate notes, invalid keys, invalid notes, and missing notes.
+   *
+   * @param {Object} mapping - Key-to-note mapping object ({ [key]: note }).
+   * @param {Object} [options={}] - Validation options.
+   * @param {boolean} [options.requireAllNotes=false] - When true, fails if mapping does not cover all visible notes.
+   * @param {boolean} [options.allowDuplicateNotes=false] - When true, permits multiple keys to map to the same note.
+   * @param {boolean} [options.caseSensitive=false] - Whether to preserve key casing.
+   * @param {Array<string>} [options.expectedNotes] - Override list of notes to verify against.
+   * @returns {Object} Validation result { isValid, errors, warnings, duplicateKeys, duplicateNotes, missingNotes, invalidMappings, sanitizedMapping }.
+   */
+  function validateKeyboardMapping(mapping, options = {}) {
+    const result = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      duplicateKeys: [],
+      duplicateNotes: [],
+      missingNotes: [],
+      invalidMappings: [],
+      sanitizedMapping: null,
+    };
+
+    if (
+      mapping === null ||
+      mapping === undefined ||
+      typeof mapping !== "object" ||
+      Array.isArray(mapping)
+    ) {
+      result.isValid = false;
+      result.errors.push("Keyboard mapping must be a non-null object.");
+      result.invalidMappings.push({
+        reason: "Mapping is not an object",
+        value: mapping,
+      });
+      return result;
+    }
+
+    const requireAllNotes = Boolean(options.requireAllNotes);
+    const allowDuplicateNotes = Boolean(options.allowDuplicateNotes);
+    const caseSensitive = Boolean(options.caseSensitive);
+    const expectedNotes = Array.isArray(options.expectedNotes)
+      ? options.expectedNotes
+      : getNotes();
+
+    const sanitized = {};
+    const seenNotes = new Map(); // note -> array of keys
+    const seenKeys = new Set();
+
+    let entries = [];
+    try {
+      entries = Object.entries(mapping);
+    } catch (_) {
+      result.isValid = false;
+      result.errors.push("Failed to read keyboard mapping entries.");
+      return result;
+    }
+
+    if (entries.length === 0) {
+      result.warnings.push("Keyboard mapping is empty.");
+      if (requireAllNotes) {
+        result.isValid = false;
+        result.errors.push("Keyboard mapping is empty but notes are required.");
+      }
+    }
+
+    for (const [rawKey, rawNote] of entries) {
+      if (typeof rawKey !== "string" || rawKey.trim().length === 0) {
+        result.isValid = false;
+        const msg = `Invalid key: "${rawKey}". Key must be a non-empty string.`;
+        result.errors.push(msg);
+        result.invalidMappings.push({ key: rawKey, note: rawNote, reason: msg });
+        continue;
+      }
+
+      const key = caseSensitive ? rawKey : rawKey.toLowerCase();
+
+      if (seenKeys.has(key)) {
+        result.isValid = false;
+        const msg = `Duplicate key assignment detected for key "${key}".`;
+        result.errors.push(msg);
+        if (!result.duplicateKeys.includes(key)) {
+          result.duplicateKeys.push(key);
+        }
+        result.invalidMappings.push({ key, note: rawNote, reason: msg });
+        continue;
+      }
+      seenKeys.add(key);
+
+      if (typeof rawNote !== "string" || !isValidNote(rawNote.trim())) {
+        result.isValid = false;
+        const msg = `Invalid note assignment "${rawNote}" for key "${key}".`;
+        result.errors.push(msg);
+        result.invalidMappings.push({ key, note: rawNote, reason: msg });
+        continue;
+      }
+
+      const note = rawNote.trim();
+
+      if (!seenNotes.has(note)) {
+        seenNotes.set(note, []);
+      }
+      seenNotes.get(note).push(key);
+
+      if (!allowDuplicateNotes && seenNotes.get(note).length > 1) {
+        result.isValid = false;
+        const msg = `Duplicate note assignment: note "${note}" is assigned to multiple keys (${seenNotes.get(note).join(", ")}).`;
+        result.errors.push(msg);
+        if (!result.duplicateNotes.includes(note)) {
+          result.duplicateNotes.push(note);
+        }
+        result.invalidMappings.push({ key, note, reason: msg });
+      }
+
+      sanitized[key] = note;
+    }
+
+    // Check for missing notes
+    const mappedNoteSet = new Set(Object.values(sanitized));
+    const missing = expectedNotes.filter(n => !mappedNoteSet.has(n));
+    if (missing.length > 0) {
+      result.missingNotes = missing;
+      if (requireAllNotes) {
+        result.isValid = false;
+        result.errors.push(
+          `Mapping is missing ${missing.length} required notes: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "..." : ""}.`
+        );
+      } else {
+        result.warnings.push(
+          `Mapping does not cover ${missing.length} notes: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "..." : ""}.`
+        );
+      }
+    }
+
+    if (result.isValid) {
+      result.sanitizedMapping = Object.freeze(sanitized);
+    }
+
+    return result;
+  }
+
+  /**
+   * Applies a validated keyboard mapping to the piano engine.
+   * If validation fails, retains the existing mapping and returns a structured failure without throwing.
+   *
+   * @param {Object} mapping - Proposed key-to-note mapping.
+   * @param {Object} [options={}] - Validation options.
+   * @returns {{ success: boolean, mapping?: Object, errors?: Array<string>, validation: Object }}
+   */
+  function setKeyboardMapping(mapping, options = {}) {
+    const validation = validateKeyboardMapping(mapping, options);
+    if (!validation.isValid) {
+      return {
+        success: false,
+        errors: validation.errors,
+        validation,
+      };
+    }
+
+    activeKeyToNote = { ...validation.sanitizedMapping };
+    activeNoteToKey = Object.fromEntries(
+      Object.entries(activeKeyToNote).map(([k, n]) => [n, k])
+    );
+
+    return {
+      success: true,
+      mapping: { ...activeKeyToNote },
+      validation,
+    };
+  }
+
+  function applyKeyboardMapping(mapping, options = {}) {
+    return setKeyboardMapping(mapping, options);
+  }
+
+  /**
+   * Resets keyboard mapping back to default factory configuration.
+   */
+  function resetKeyboardMapping() {
+    activeKeyToNote = { ...KEY_TO_NOTE };
+    activeNoteToKey = { ...NOTE_TO_KEY };
+    return true;
+  }
+
+  /**
+   * Validates a MIDI mapping (either { [midiNumber]: note } or { [note]: midiNumber }).
+   * Detects duplicate MIDI assignments, duplicate notes, out-of-bounds MIDI numbers, invalid notes, and missing notes.
+   *
+   * @param {Object} mapping - MIDI mapping object.
+   * @param {Object} [options={}] - Validation options.
+   * @param {boolean} [options.requireAllNotes=false] - When true, fails if mapping does not cover all expected notes.
+   * @param {boolean} [options.allowDuplicateNotes=false] - When true, permits multiple MIDI numbers to map to one note.
+   * @param {boolean} [options.allowDuplicateMidi=false] - When true, permits multiple notes to share a MIDI number.
+   * @param {number} [options.minMidi=0] - Lower bound for MIDI note number.
+   * @param {number} [options.maxMidi=127] - Upper bound for MIDI note number.
+   * @param {Array<string>} [options.expectedNotes] - Notes required to be covered.
+   * @returns {Object} Validation result { isValid, errors, warnings, duplicateMidiNumbers, duplicateNotes, missingNotes, invalidMappings, sanitizedMapping }.
+   */
+  function validateMidiMapping(mapping, options = {}) {
+    const result = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      duplicateMidiNumbers: [],
+      duplicateNotes: [],
+      missingNotes: [],
+      invalidMappings: [],
+      sanitizedMapping: null,
+    };
+
+    if (
+      mapping === null ||
+      mapping === undefined ||
+      typeof mapping !== "object" ||
+      Array.isArray(mapping)
+    ) {
+      result.isValid = false;
+      result.errors.push("MIDI mapping must be a non-null object.");
+      result.invalidMappings.push({
+        reason: "Mapping is not an object",
+        value: mapping,
+      });
+      return result;
+    }
+
+    const requireAllNotes = Boolean(options.requireAllNotes);
+    const allowDuplicateNotes = Boolean(options.allowDuplicateNotes);
+    const allowDuplicateMidi = Boolean(options.allowDuplicateMidi);
+    const minMidi = typeof options.minMidi === "number" ? options.minMidi : 0;
+    const maxMidi = typeof options.maxMidi === "number" ? options.maxMidi : 127;
+    const expectedNotes = Array.isArray(options.expectedNotes)
+      ? options.expectedNotes
+      : getNotes();
+
+    let entries = [];
+    try {
+      entries = Object.entries(mapping);
+    } catch (_) {
+      result.isValid = false;
+      result.errors.push("Failed to read MIDI mapping entries.");
+      return result;
+    }
+
+    if (entries.length === 0) {
+      result.warnings.push("MIDI mapping is empty.");
+      if (requireAllNotes) {
+        result.isValid = false;
+        result.errors.push("MIDI mapping is empty but notes are required.");
+      }
+    }
+
+    const midiToNote = {};
+    const noteToMidi = {};
+    const seenMidi = new Map(); // midi -> array of notes
+    const seenNotes = new Map(); // note -> array of midis
+
+    for (const [rawKey, rawVal] of entries) {
+      let midiNum = null;
+      let noteName = null;
+
+      const keyAsNum = Number(rawKey);
+      const valAsNum = Number(rawVal);
+
+      if (
+        !Number.isNaN(keyAsNum) &&
+        Number.isInteger(keyAsNum) &&
+        typeof rawVal === "string"
+      ) {
+        // midi -> note orientation
+        midiNum = keyAsNum;
+        noteName = rawVal.trim();
+      } else if (
+        typeof rawKey === "string" &&
+        !Number.isNaN(valAsNum) &&
+        Number.isInteger(valAsNum)
+      ) {
+        // note -> midi orientation
+        noteName = rawKey.trim();
+        midiNum = valAsNum;
+      } else {
+        result.isValid = false;
+        const msg = `Invalid MIDI mapping entry: [${rawKey}, ${rawVal}]. Expected integer MIDI number (${minMidi}–${maxMidi}) and valid note string.`;
+        result.errors.push(msg);
+        result.invalidMappings.push({ key: rawKey, value: rawVal, reason: msg });
+        continue;
+      }
+
+      // Check bounds
+      if (midiNum < minMidi || midiNum > maxMidi) {
+        result.isValid = false;
+        const msg = `MIDI note number ${midiNum} is out of bounds (${minMidi}–${maxMidi}).`;
+        result.errors.push(msg);
+        result.invalidMappings.push({ midi: midiNum, note: noteName, reason: msg });
+        continue;
+      }
+
+      // Validate Note
+      if (!isValidNote(noteName)) {
+        result.isValid = false;
+        const msg = `Invalid piano note "${noteName}" for MIDI note ${midiNum}.`;
+        result.errors.push(msg);
+        result.invalidMappings.push({ midi: midiNum, note: noteName, reason: msg });
+        continue;
+      }
+
+      // Track duplicate MIDI assignments
+      if (!seenMidi.has(midiNum)) {
+        seenMidi.set(midiNum, []);
+      }
+      seenMidi.get(midiNum).push(noteName);
+
+      if (!allowDuplicateMidi && seenMidi.get(midiNum).length > 1) {
+        result.isValid = false;
+        const msg = `Duplicate MIDI assignment: MIDI note ${midiNum} is assigned to multiple notes (${seenMidi.get(midiNum).join(", ")}).`;
+        result.errors.push(msg);
+        if (!result.duplicateMidiNumbers.includes(midiNum)) {
+          result.duplicateMidiNumbers.push(midiNum);
+        }
+        result.invalidMappings.push({ midi: midiNum, note: noteName, reason: msg });
+      }
+
+      // Track duplicate Note assignments
+      if (!seenNotes.has(noteName)) {
+        seenNotes.set(noteName, []);
+      }
+      seenNotes.get(noteName).push(midiNum);
+
+      if (!allowDuplicateNotes && seenNotes.get(noteName).length > 1) {
+        result.isValid = false;
+        const msg = `Duplicate note assignment: Note "${noteName}" is assigned to multiple MIDI notes (${seenNotes.get(noteName).join(", ")}).`;
+        result.errors.push(msg);
+        if (!result.duplicateNotes.includes(noteName)) {
+          result.duplicateNotes.push(noteName);
+        }
+        result.invalidMappings.push({ midi: midiNum, note: noteName, reason: msg });
+      }
+
+      midiToNote[midiNum] = noteName;
+      noteToMidi[noteName] = midiNum;
+    }
+
+    // Check for missing notes
+    const mappedNoteSet = new Set(Object.values(midiToNote));
+    const missing = expectedNotes.filter(n => !mappedNoteSet.has(n));
+    if (missing.length > 0) {
+      result.missingNotes = missing;
+      if (requireAllNotes) {
+        result.isValid = false;
+        result.errors.push(
+          `MIDI mapping is missing ${missing.length} required notes: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "..." : ""}.`
+        );
+      } else {
+        result.warnings.push(
+          `MIDI mapping does not cover ${missing.length} notes: ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? "..." : ""}.`
+        );
+      }
+    }
+
+    if (result.isValid) {
+      result.sanitizedMapping = Object.freeze({
+        midiToNote: Object.freeze(midiToNote),
+        noteToMidi: Object.freeze(noteToMidi),
+      });
+    }
+
+    return result;
+  }
+
+  /**
+   * Applies a validated MIDI mapping to the piano engine.
+   * If validation fails, retains the existing mapping and returns a structured failure without throwing.
+   *
+   * @param {Object} mapping - Proposed MIDI mapping.
+   * @param {Object} [options={}] - Validation options.
+   * @returns {{ success: boolean, mapping?: Object, errors?: Array<string>, validation: Object }}
+   */
+  function setMidiMapping(mapping, options = {}) {
+    const validation = validateMidiMapping(mapping, options);
+    if (!validation.isValid) {
+      return {
+        success: false,
+        errors: validation.errors,
+        validation,
+      };
+    }
+
+    activeMidiToNote = { ...validation.sanitizedMapping.midiToNote };
+    activeNoteToMidi = { ...validation.sanitizedMapping.noteToMidi };
+
+    return {
+      success: true,
+      mapping: {
+        midiToNote: { ...activeMidiToNote },
+        noteToMidi: { ...activeNoteToMidi },
+      },
+      validation,
+    };
+  }
+
+  function applyMidiMapping(mapping, options = {}) {
+    return setMidiMapping(mapping, options);
+  }
+
+  /**
+   * Resets MIDI mapping back to default factory configuration.
+   */
+  function resetMidiMapping() {
+    activeMidiToNote = { ...DEFAULT_MIDI_TO_NOTE };
+    activeNoteToMidi = { ...DEFAULT_NOTE_TO_MIDI };
+    return true;
+  }
+
+  function getMidiMap() {
+    return {
+      ...activeMidiToNote,
+    };
+  }
+
+  function getMidiMapping() {
+    return {
+      midiToNote: { ...activeMidiToNote },
+      noteToMidi: { ...activeNoteToMidi },
+    };
+  }
+
+  function getNoteFromMidi(midi) {
+    const num = Number(midi);
+    if (!Number.isInteger(num)) return null;
+    return activeMidiToNote[num] || null;
+  }
+
+  function getMidiFromNote(note) {
+    if (typeof note !== "string") return null;
+    const num = activeNoteToMidi[note.trim()];
+    return num !== undefined ? num : null;
+  }
+
+  function playNoteFromMidi(midi) {
+    const note = getNoteFromMidi(midi);
+    if (!note) return false;
+    return playNote(note);
+  }
+
+  function stopNoteFromMidi(midi) {
+    const note = getNoteFromMidi(midi);
+    if (!note) return false;
+    return stopNote(note);
+  }
+
+  function midiToFrequency(midi) {
+    const num = Number(midi);
+    if (Number.isNaN(num)) return null;
+    return 440 * Math.pow(2, (num - 69) / 12);
+  }
+
+  function frequencyToMidi(frequency) {
+    const freq = Number(frequency);
+    if (Number.isNaN(freq) || freq <= 0) return null;
+    return Math.round(69 + 12 * Math.log2(freq / 440));
   }
 
   return {
     NOTE_FREQUENCIES,
     KEY_TO_NOTE,
     NOTE_TO_KEY,
+    DEFAULT_MIDI_TO_NOTE,
+    DEFAULT_NOTE_TO_MIDI,
     getFrequency,
     getNoteFromKey,
     getKeyFromNote,
     isValidNote,
     getNotes,
     getKeyboardMap,
+    validateKeyboardMapping,
+    setKeyboardMapping,
+    applyKeyboardMapping,
+    resetKeyboardMapping,
+    validateMidiMapping,
+    setMidiMapping,
+    applyMidiMapping,
+    resetMidiMapping,
+    getMidiMap,
+    getMidiMapping,
+    getNoteFromMidi,
+    getMidiFromNote,
+    noteToMidiNumber,
+    midiNumberToNote,
+    midiToFrequency,
+    frequencyToMidi,
+    playNoteFromMidi,
+    stopNoteFromMidi,
     startNote,
     stopNote,
     playNote,

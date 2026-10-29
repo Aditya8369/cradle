@@ -374,7 +374,9 @@ if (keys && keys.length) {
       if (pressedKey && pressedKey.dataset) {
         const note = pressedKey.dataset.note;
         const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-          code => KEY_CODES[code] === note
+          code =>
+            KEY_CODES[code] === note ||
+            (engine && engine.getNoteFromKey(code) === note)
         );
         const isHeldByPointer = [...activePointers.values()].some(
           k => k === pressedKey
@@ -397,7 +399,9 @@ if (keys && keys.length) {
       if (pressedKey && pressedKey.dataset) {
         const note = pressedKey.dataset.note;
         const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-          code => KEY_CODES[code] === note
+          code =>
+            KEY_CODES[code] === note ||
+            (engine && engine.getNoteFromKey(code) === note)
         );
         const isHeldByPointer = [...activePointers.values()].some(
           k => k === pressedKey
@@ -415,7 +419,9 @@ if (keys && keys.length) {
         activePointers.delete(event.pointerId);
         const note = pressedKey.dataset.note;
         const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-          code => KEY_CODES[code] === note
+          code =>
+            KEY_CODES[code] === note ||
+            (engine && engine.getNoteFromKey(code) === note)
         );
         const isHeldByPointer = [...activePointers.values()].some(
           k => k === pressedKey
@@ -436,7 +442,10 @@ function handleKeydown(event) {
   }
 
   const code = event.code || event.key;
-  const note = KEY_CODES[event.code] || KEY_CODES[code];
+  const note =
+    KEY_CODES[event.code] ||
+    KEY_CODES[code] ||
+    (engine ? engine.getNoteFromKey(event.key || code) : null);
   if (!note) {
     return;
   }
@@ -462,7 +471,10 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
   const code = event.code || event.key;
-  const note = KEY_CODES[event.code] || KEY_CODES[code];
+  const note =
+    KEY_CODES[event.code] ||
+    KEY_CODES[code] ||
+    (engine ? engine.getNoteFromKey(event.key || code) : null);
   if (!note) {
     return;
   }
@@ -476,7 +488,9 @@ function handleKeyup(event) {
 
   // Only release the note if no other physical key or pointer is holding it
   const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-    c => KEY_CODES[c] === note
+    c =>
+      KEY_CODES[c] === note ||
+      (engine && engine.getNoteFromKey(c) === note)
   );
   const isHeldByPointer = [...activePointers.values()].some(
     k => k && k.dataset && k.dataset.note === note
@@ -485,6 +499,48 @@ function handleKeyup(event) {
   if (!isHeldByKeyboard && !isHeldByPointer) {
     const key = getKeyElement(note);
     releaseKey(key);
+  }
+}
+
+function handleMidiMessage(event) {
+  if (!event || !event.data || event.data.length < 2) return;
+  const [statusByte, noteNumber, velocity = 0] = event.data;
+  const command = statusByte >> 4;
+  if (command === 9 && velocity > 0) {
+    // Note On
+    if (engine && typeof engine.getNoteFromMidi === "function") {
+      const note = engine.getNoteFromMidi(noteNumber);
+      if (note) playNote(note);
+    }
+  } else if (command === 8 || (command === 9 && velocity === 0)) {
+    // Note Off
+    if (engine && typeof engine.getNoteFromMidi === "function") {
+      const note = engine.getNoteFromMidi(noteNumber);
+      if (note) stopNote(note);
+    }
+  }
+}
+
+function initMidiAccess() {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.requestMIDIAccess === "function"
+  ) {
+    navigator
+      .requestMIDIAccess()
+      .then(midiAccess => {
+        for (const input of midiAccess.inputs.values()) {
+          input.onmidimessage = handleMidiMessage;
+        }
+        midiAccess.onstatechange = e => {
+          if (e.port && e.port.type === "input" && e.port.state === "connected") {
+            e.port.onmidimessage = handleMidiMessage;
+          }
+        };
+      })
+      .catch(() => {
+        // MIDI access not granted or unavailable
+      });
   }
 }
 
@@ -507,6 +563,8 @@ if (doc) {
 }
 
 if (win) {
+  initMidiAccess();
+
   win.addEventListener("blur", () => {
     pressedKeyboardKeys.clear();
     activePointers.clear();
@@ -542,6 +600,10 @@ if (win) {
     isAudioBlocked: () => isAudioBlocked,
     showAudioBlockedUI,
     clearAudioBlockedUI,
+    setKeyboardMapping: (m, opt) => engine?.setKeyboardMapping(m, opt),
+    setMidiMapping: (m, opt) => engine?.setMidiMapping(m, opt),
+    validateKeyboardMapping: (m, opt) => engine?.validateKeyboardMapping(m, opt),
+    validateMidiMapping: (m, opt) => engine?.validateMidiMapping(m, opt),
     getActiveNotes: () => activeNotes,
     getPressedKeyboardKeys: () => pressedKeyboardKeys,
     getActivePointers: () => activePointers,
@@ -560,6 +622,10 @@ if (typeof module !== "undefined" && module.exports) {
     isAudioBlocked: () => isAudioBlocked,
     showAudioBlockedUI,
     clearAudioBlockedUI,
+    setKeyboardMapping: (m, opt) => engine?.setKeyboardMapping(m, opt),
+    setMidiMapping: (m, opt) => engine?.setMidiMapping(m, opt),
+    validateKeyboardMapping: (m, opt) => engine?.validateKeyboardMapping(m, opt),
+    validateMidiMapping: (m, opt) => engine?.validateMidiMapping(m, opt),
     getActiveNotes: () => activeNotes,
     getPressedKeyboardKeys: () => pressedKeyboardKeys,
     getActivePointers: () => activePointers,
