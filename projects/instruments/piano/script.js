@@ -34,6 +34,60 @@ const engine =
       ? require("./pianoEngine.js")
       : null;
 
+let isAudioBlocked = false;
+
+function showAudioBlockedUI(message) {
+  isAudioBlocked = true;
+  if (!status) return;
+  status.classList.add("audio-blocked");
+  status.setAttribute("role", "alert");
+  status.textContent =
+    message || "Audio blocked by browser. Click here to enable sound.";
+  status.style.cursor = "pointer";
+  status.title = "Click to enable audio playback";
+}
+
+function clearAudioBlockedUI() {
+  if (!isAudioBlocked) return;
+  isAudioBlocked = false;
+  if (!status) return;
+  status.classList.remove("audio-blocked");
+  status.removeAttribute("role");
+  status.style.cursor = "";
+  status.title = "";
+  if (activeNotes.size === 0) {
+    status.textContent = "Ready";
+  }
+}
+
+async function resumeAudio() {
+  if (!audioContext) {
+    getAudioContext();
+  }
+  if (!audioContext) {
+    showAudioBlockedUI("Web Audio API is not supported in this browser.");
+    return false;
+  }
+  if (audioContext.state === "running") {
+    clearAudioBlockedUI();
+    return true;
+  }
+  try {
+    await audioContext.resume();
+    if (audioContext.state === "running") {
+      clearAudioBlockedUI();
+      return true;
+    } else {
+      showAudioBlockedUI("Audio is suspended. Click here to enable sound.");
+      return false;
+    }
+  } catch (error) {
+    console.warn("AudioContext resume failed:", error);
+    showAudioBlockedUI("Audio blocked by browser. Click here to enable sound.");
+    return false;
+  }
+}
+
 function getAudioContext() {
   if (!audioContext) {
     const AudioCtx =
@@ -41,15 +95,42 @@ function getAudioContext() {
       (typeof globalThis !== "undefined" &&
         (globalThis.AudioContext || globalThis.webkitAudioContext));
     if (AudioCtx) {
-      audioContext = new AudioCtx();
+      try {
+        audioContext = new AudioCtx();
+      } catch (err) {
+        console.warn("Failed to create AudioContext:", err);
+        showAudioBlockedUI("Audio initialization failed. Click here to retry.");
+        return null;
+      }
     }
   }
 
   if (audioContext && audioContext.state === "suspended") {
-    audioContext.resume().catch(() => {});
+    audioContext
+      .resume()
+      .then(() => {
+        clearAudioBlockedUI();
+      })
+      .catch(err => {
+        console.warn("AudioContext resume rejected:", err);
+        showAudioBlockedUI(
+          "Audio blocked by browser. Click here to enable sound."
+        );
+      });
   }
 
   return audioContext;
+}
+
+if (status) {
+  status.addEventListener("click", () => {
+    if (
+      isAudioBlocked ||
+      (audioContext && audioContext.state === "suspended")
+    ) {
+      resumeAudio();
+    }
+  });
 }
 
 function getMasterBus(context) {
@@ -238,7 +319,9 @@ function stopNote(note) {
   setKeyPressed(key, false);
 
   if (status) {
-    if (activeNotes.size === 0) {
+    if (isAudioBlocked) {
+      // Preserve blocked banner until audio is successfully resumed
+    } else if (activeNotes.size === 0) {
       status.textContent = "Ready";
     } else {
       status.textContent = `Playing ${[...activeNotes.keys()].join(", ")}`;
@@ -291,7 +374,9 @@ if (keys && keys.length) {
       if (pressedKey && pressedKey.dataset) {
         const note = pressedKey.dataset.note;
         const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-          code => KEY_CODES[code] === note
+          code =>
+            KEY_CODES[code] === note ||
+            (engine && engine.getNoteFromKey(code) === note)
         );
         const isHeldByPointer = [...activePointers.values()].some(
           k => k === pressedKey
@@ -314,7 +399,9 @@ if (keys && keys.length) {
       if (pressedKey && pressedKey.dataset) {
         const note = pressedKey.dataset.note;
         const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-          code => KEY_CODES[code] === note
+          code =>
+            KEY_CODES[code] === note ||
+            (engine && engine.getNoteFromKey(code) === note)
         );
         const isHeldByPointer = [...activePointers.values()].some(
           k => k === pressedKey
@@ -332,7 +419,9 @@ if (keys && keys.length) {
         activePointers.delete(event.pointerId);
         const note = pressedKey.dataset.note;
         const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-          code => KEY_CODES[code] === note
+          code =>
+            KEY_CODES[code] === note ||
+            (engine && engine.getNoteFromKey(code) === note)
         );
         const isHeldByPointer = [...activePointers.values()].some(
           k => k === pressedKey
@@ -353,7 +442,10 @@ function handleKeydown(event) {
   }
 
   const code = event.code || event.key;
-  const note = KEY_CODES[event.code] || KEY_CODES[code];
+  const note =
+    KEY_CODES[event.code] ||
+    KEY_CODES[code] ||
+    (engine ? engine.getNoteFromKey(event.key || code) : null);
   if (!note) {
     return;
   }
@@ -379,7 +471,10 @@ function handleKeydown(event) {
 
 function handleKeyup(event) {
   const code = event.code || event.key;
-  const note = KEY_CODES[event.code] || KEY_CODES[code];
+  const note =
+    KEY_CODES[event.code] ||
+    KEY_CODES[code] ||
+    (engine ? engine.getNoteFromKey(event.key || code) : null);
   if (!note) {
     return;
   }
@@ -393,7 +488,9 @@ function handleKeyup(event) {
 
   // Only release the note if no other physical key or pointer is holding it
   const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-    c => KEY_CODES[c] === note
+    c =>
+      KEY_CODES[c] === note ||
+      (engine && engine.getNoteFromKey(c) === note)
   );
   const isHeldByPointer = [...activePointers.values()].some(
     k => k && k.dataset && k.dataset.note === note
@@ -402,6 +499,48 @@ function handleKeyup(event) {
   if (!isHeldByKeyboard && !isHeldByPointer) {
     const key = getKeyElement(note);
     releaseKey(key);
+  }
+}
+
+function handleMidiMessage(event) {
+  if (!event || !event.data || event.data.length < 2) return;
+  const [statusByte, noteNumber, velocity = 0] = event.data;
+  const command = statusByte >> 4;
+  if (command === 9 && velocity > 0) {
+    // Note On
+    if (engine && typeof engine.getNoteFromMidi === "function") {
+      const note = engine.getNoteFromMidi(noteNumber);
+      if (note) playNote(note);
+    }
+  } else if (command === 8 || (command === 9 && velocity === 0)) {
+    // Note Off
+    if (engine && typeof engine.getNoteFromMidi === "function") {
+      const note = engine.getNoteFromMidi(noteNumber);
+      if (note) stopNote(note);
+    }
+  }
+}
+
+function initMidiAccess() {
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.requestMIDIAccess === "function"
+  ) {
+    navigator
+      .requestMIDIAccess()
+      .then(midiAccess => {
+        for (const input of midiAccess.inputs.values()) {
+          input.onmidimessage = handleMidiMessage;
+        }
+        midiAccess.onstatechange = e => {
+          if (e.port && e.port.type === "input" && e.port.state === "connected") {
+            e.port.onmidimessage = handleMidiMessage;
+          }
+        };
+      })
+      .catch(() => {
+        // MIDI access not granted or unavailable
+      });
   }
 }
 
@@ -424,6 +563,8 @@ if (doc) {
 }
 
 if (win) {
+  initMidiAccess();
+
   win.addEventListener("blur", () => {
     pressedKeyboardKeys.clear();
     activePointers.clear();
@@ -455,6 +596,14 @@ if (win) {
     releaseKey,
     handleKeydown,
     handleKeyup,
+    resumeAudio,
+    isAudioBlocked: () => isAudioBlocked,
+    showAudioBlockedUI,
+    clearAudioBlockedUI,
+    setKeyboardMapping: (m, opt) => engine?.setKeyboardMapping(m, opt),
+    setMidiMapping: (m, opt) => engine?.setMidiMapping(m, opt),
+    validateKeyboardMapping: (m, opt) => engine?.validateKeyboardMapping(m, opt),
+    validateMidiMapping: (m, opt) => engine?.validateMidiMapping(m, opt),
     getActiveNotes: () => activeNotes,
     getPressedKeyboardKeys: () => pressedKeyboardKeys,
     getActivePointers: () => activePointers,
@@ -469,6 +618,14 @@ if (typeof module !== "undefined" && module.exports) {
     releaseKey,
     handleKeydown,
     handleKeyup,
+    resumeAudio,
+    isAudioBlocked: () => isAudioBlocked,
+    showAudioBlockedUI,
+    clearAudioBlockedUI,
+    setKeyboardMapping: (m, opt) => engine?.setKeyboardMapping(m, opt),
+    setMidiMapping: (m, opt) => engine?.setMidiMapping(m, opt),
+    validateKeyboardMapping: (m, opt) => engine?.validateKeyboardMapping(m, opt),
+    validateMidiMapping: (m, opt) => engine?.validateMidiMapping(m, opt),
     getActiveNotes: () => activeNotes,
     getPressedKeyboardKeys: () => pressedKeyboardKeys,
     getActivePointers: () => activePointers,
