@@ -7,10 +7,18 @@ import { getSearchableCategory } from "../components/ui/utils/categoryFilter.js"
 export function filterProjects(allProjects, selectedCategory, query) {
   if (!Array.isArray(allProjects)) return [];
   const q = typeof query === "string" ? query.toLowerCase().trim() : "";
+  const cat =
+    typeof selectedCategory === "string"
+      ? selectedCategory.toLowerCase().trim()
+      : "all";
+
   return allProjects.filter(project => {
     if (!project) return false;
-    const matchesCategory =
-      selectedCategory === "all" || project.category === selectedCategory;
+    const projectCategory =
+      typeof project.category === "string"
+        ? project.category.toLowerCase().trim()
+        : "";
+    const matchesCategory = cat === "all" || projectCategory === cat;
     if (!matchesCategory) return false;
 
     if (!q) return true;
