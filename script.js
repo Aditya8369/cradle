@@ -888,14 +888,25 @@ if (shortcutsOverlay) {
 function isInteractiveElement(element) {
   if (!element) return false;
   const tagName = element.tagName ? element.tagName.toUpperCase() : "";
+  const contentEditableAttr = element.getAttribute?.("contenteditable");
+  const isContentEditable =
+    Boolean(element.isContentEditable) ||
+    (contentEditableAttr !== null &&
+      contentEditableAttr !== undefined &&
+      contentEditableAttr !== "false");
+  const role = element.getAttribute?.("role");
+  const isAriaInput = role === "textbox" || role === "searchbox";
+
   return (
     tagName === "INPUT" ||
     tagName === "TEXTAREA" ||
     tagName === "SELECT" ||
-    Boolean(element.isContentEditable) ||
-    element.getAttribute?.("contenteditable") === "true" ||
+    isContentEditable ||
+    isAriaInput ||
     Boolean(
-      element.closest?.("input, textarea, select, [contenteditable='true']")
+      element.closest?.(
+        "input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='textbox'], [role='searchbox']"
+      )
     )
   );
 }
@@ -934,12 +945,22 @@ document.addEventListener("keydown", e => {
   }
 
   // Toggle Theme
+  const activeTagName = document.activeElement?.tagName
+    ? document.activeElement.tagName.toUpperCase()
+    : "";
+  const isInteractiveTagActive =
+    activeTagName === "INPUT" ||
+    activeTagName === "TEXTAREA" ||
+    activeTagName === "SELECT";
+
   if (
     e.key.toLowerCase() === "t" &&
     !e.ctrlKey &&
     !e.metaKey &&
     !e.altKey &&
-    !isInputActive
+    !isInputActive &&
+    !isInteractiveTagActive &&
+    document.activeElement !== searchInput
   ) {
     e.preventDefault();
     const themeToggleEl = document.getElementById("themeToggle");
