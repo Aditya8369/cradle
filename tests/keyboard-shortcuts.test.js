@@ -115,6 +115,7 @@ function createEnvironment({ activeElement = null } = {}) {
   }
 
   return {
+    searchInput,
     dispatchKeydown,
     setActiveElement(el) {
       doc.activeElement = el;
@@ -217,4 +218,60 @@ test("focuses search bar on Ctrl+K regardless of active element", () => {
   assert.equal(kEvent.defaultPrevented, true);
   assert.equal(env.getState().searchFocused, true);
   assert.equal(env.getState().searchSelected, true);
+});
+
+test("typing words containing 't' (e.g. 'timer', 'text', 'tools') in search input does not toggle theme", () => {
+  const env = createEnvironment();
+  env.setActiveElement(env.searchInput);
+
+  const testWords = ["timer", "text", "tools", "TypeScript"];
+  for (const word of testWords) {
+    for (const char of word) {
+      const event = env.dispatchKeydown({
+        key: char,
+        shiftKey: char === char.toUpperCase() && char !== char.toLowerCase(),
+      });
+      assert.equal(
+        env.getState().themeToggled,
+        false,
+        `Theme should not toggle when typing '${char}' from '${word}' in search input`
+      );
+      assert.equal(
+        event.defaultPrevented,
+        false,
+        `Keystroke '${char}' should not be default-prevented in search input`
+      );
+    }
+  }
+});
+
+test("suppresses theme shortcut when document.activeElement has lowercase tagName 'input'", () => {
+  const env = createEnvironment({ activeElement: { tagName: "input" } });
+  const event = env.dispatchKeydown({ key: "t" });
+  assert.equal(event.defaultPrevented, false);
+  assert.equal(env.getState().themeToggled, false);
+});
+
+test("suppresses theme shortcut when element has contenteditable='' or role='textbox'", () => {
+  const contentEditableEl = {
+    tagName: "DIV",
+    getAttribute(attr) {
+      return attr === "contenteditable" ? "" : null;
+    },
+  };
+  const env1 = createEnvironment({ activeElement: contentEditableEl });
+  const event1 = env1.dispatchKeydown({ key: "t" });
+  assert.equal(event1.defaultPrevented, false);
+  assert.equal(env1.getState().themeToggled, false);
+
+  const roleTextboxEl = {
+    tagName: "DIV",
+    getAttribute(attr) {
+      return attr === "role" ? "textbox" : null;
+    },
+  };
+  const env2 = createEnvironment({ activeElement: roleTextboxEl });
+  const event2 = env2.dispatchKeydown({ key: "t" });
+  assert.equal(event2.defaultPrevented, false);
+  assert.equal(env2.getState().themeToggled, false);
 });
