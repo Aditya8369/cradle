@@ -340,28 +340,190 @@ addListener(el.removeLogoBtn, "click", () => {
   showToast("Logo removed.", "info");
 });
 
-/** Download PNG */
-addListener(el.downloadPngBtn, "click", async () => {
+/* ---------------------- DOWNLOAD HELPERS ---------------------- */
+
+/** Helper to trigger file download using an anchor element with explicit filename */
+function triggerDownloadFile(blobOrUrl, filename) {
+  if (
+    typeof QREngine !== "undefined" &&
+    typeof QREngine.triggerDownload === "function"
+  ) {
+    return QREngine.triggerDownload(blobOrUrl, filename);
+  }
+
+  const isBlob = typeof Blob !== "undefined" && blobOrUrl instanceof Blob;
+  const url = isBlob ? URL.createObjectURL(blobOrUrl) : blobOrUrl;
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.setAttribute("download", filename);
+  document.body.appendChild(a);
+  a.click();
+
+  setTimeout(() => {
+    if (a.parentNode) {
+      a.parentNode.removeChild(a);
+    }
+    if (
+      isBlob &&
+      typeof URL !== "undefined" &&
+      typeof URL.revokeObjectURL === "function"
+    ) {
+      URL.revokeObjectURL(url);
+    }
+  }, 1000);
+  return true;
+}
+
+/** Render SVG element to a Blob of requested raster format */
+function renderSvgToBlob(svgEl, size, extension = "png") {
+  return new Promise((resolve, reject) => {
+    try {
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svgEl);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(
+          /^<svg/,
+          '<svg xmlns="http://www.w3.org/2000/svg"'
+        );
+      }
+      const svgBlob = new Blob([source], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          URL.revokeObjectURL(url);
+          if (typeof canvas.toBlob === "function") {
+            canvas.toBlob(blob => resolve(blob), `image/${extension}`);
+          } else {
+            resolve(null);
+          }
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          reject(e);
+        }
+      };
+      img.onerror = e => {
+        URL.revokeObjectURL(url);
+        reject(e);
+      };
+      img.src = url;
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+/** Main download handler for PNG/SVG with explicit filename and extension */
+async function downloadQR(extension = "png") {
   if (!qrCode || !state.text.trim()) return;
+
+  const filename =
+    typeof QREngine !== "undefined" &&
+    typeof QREngine.getDownloadFilename === "function"
+      ? QREngine.getDownloadFilename("qr-code", extension)
+      : `qr-code.${extension}`;
+
   try {
-    await qrCode.download({ name: "qr-code", extension: "png" });
-    showToast("PNG downloaded successfully!", "success");
+    let blob = null;
+
+    // 1. Prefer obtaining the raw Blob directly from qrCode instance if available
+    if (typeof qrCode.getRawData === "function") {
+      try {
+        blob = await qrCode.getRawData(extension);
+      } catch (e) {
+        console.warn(
+          "qrCode.getRawData failed, falling back to DOM extraction:",
+          e
+        );
+      }
+    }
+
+    // 2. If getRawData didn't return a blob, build blob from the rendered DOM container
+    if (!blob) {
+      if (extension === "svg") {
+        const svgEl = el.qrContainer
+          ? el.qrContainer.querySelector("svg")
+          : null;
+        if (svgEl) {
+          const serializer = new XMLSerializer();
+          let source = serializer.serializeToString(svgEl);
+          if (
+            !source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)
+          ) {
+            source = source.replace(
+              /^<svg/,
+              '<svg xmlns="http://www.w3.org/2000/svg"'
+            );
+          }
+          blob = new Blob(
+            ['<?xml version="1.0" standalone="no"?>\r\n' + source],
+            { type: "image/svg+xml;charset=utf-8" }
+          );
+        }
+      } else {
+        const canvas = el.qrContainer
+          ? el.qrContainer.querySelector("canvas")
+          : null;
+        if (canvas && typeof canvas.toBlob === "function") {
+          blob = await new Promise(resolve =>
+            canvas.toBlob(resolve, `image/${extension}`)
+          );
+        } else if (canvas && typeof canvas.toDataURL === "function") {
+          const dataUrl = canvas.toDataURL(`image/${extension}`);
+          triggerDownloadFile(dataUrl, filename);
+          showToast(
+            `${extension.toUpperCase()} downloaded successfully!`,
+            "success"
+          );
+          return;
+        } else {
+          const svgEl = el.qrContainer
+            ? el.qrContainer.querySelector("svg")
+            : null;
+          if (svgEl) {
+            blob = await renderSvgToBlob(svgEl, state.size, extension);
+          }
+        }
+      }
+    }
+
+    if (blob) {
+      triggerDownloadFile(blob, filename);
+      showToast(
+        `${extension.toUpperCase()} downloaded successfully!`,
+        "success"
+      );
+    } else {
+      // Fallback to library download if neither blob extraction succeeded
+      await qrCode.download({ name: "qr-code", extension });
+      showToast(
+        `${extension.toUpperCase()} downloaded successfully!`,
+        "success"
+      );
+    }
   } catch (err) {
-    showToast("Failed to download PNG.", "error");
+    showToast(`Failed to download ${extension.toUpperCase()}.`, "error");
     console.error(err);
   }
+}
+
+/** Download PNG */
+addListener(el.downloadPngBtn, "click", async () => {
+  await downloadQR("png");
 });
 
 /** Download SVG */
 addListener(el.downloadSvgBtn, "click", async () => {
-  if (!qrCode || !state.text.trim()) return;
-  try {
-    await qrCode.download({ name: "qr-code", extension: "svg" });
-    showToast("SVG downloaded successfully!", "success");
-  } catch (err) {
-    showToast("Failed to download SVG.", "error");
-    console.error(err);
-  }
+  await downloadQR("svg");
 });
 
 /** Copy or share QR image */
@@ -487,6 +649,9 @@ if (typeof module !== "undefined" && module.exports) {
     isValidHex,
     isValidLogoType,
     shouldGenerateQRCode,
+    downloadQR,
+    triggerDownloadFile,
+    renderSvgToBlob,
   };
 }
 
