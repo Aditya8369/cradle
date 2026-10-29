@@ -15,6 +15,7 @@ The project is self-contained with no external dependencies — just HTML, CSS, 
 - Track WPM, accuracy, streaks, and best scores
 - Offer three difficulty levels (easy, medium, hard) with different word banks
 - Work offline with localStorage persistence for best scores
+- Accurately calculate completed words and WPM even when backspacing across word boundaries
 
 ---
 
@@ -35,15 +36,17 @@ typing-speed-racer/
 
 The game follows a state-driven loop. The `state` object in `script.js` tracks the race progress, timer, and player performance. Input is captured in real-time, and every word submitted triggers a state update and a corresponding visual update to the race track (moving the player's car) and the stats bar. An interval-based tick manages the countdown timer and the movement of the AI opponent.
 
+The input system supports word-boundary backspacing: when a player presses `Backspace` while the input is empty and previous words exist, the state steps back into the previous word, decrementing the completed word counts (`correctWords` or `wrongWords`) and recomputing active streaks so that WPM and accuracy metrics stay accurate.
+
 ---
 
 ## Component Breakdown
 
-| File         | Responsibility                                                                     |
-| ------------ | ---------------------------------------------------------------------------------- |
-| `index.html` | UI shell, race track lanes, stats display, and the results overlay                 |
-| `script.js`  | Word generation, WPM calculation, timer management, and car movement logic         |
-| `style.css`  | Visuals for the race track, animations for cars and streaks, and responsive layout |
+| File         | Responsibility                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------- |
+| `index.html` | UI shell, race track lanes, stats display, and the results overlay                                    |
+| `script.js`  | Word generation, WPM calculation, timer management, car movement, and word-boundary backspacing logic |
+| `style.css`  | Visuals for the race track, animations for cars and streaks, and responsive layout                    |
 
 ---
 
@@ -62,6 +65,9 @@ If correct: state.correctWords++ → Player car moves forward → Streak increme
 ↓
 If wrong: state.wrongWords++ → Streak resets to 0
 ↓
+If Backspace pressed on empty input at word boundary:
+stepBackWord() pops previous word → correctWords/wrongWords decremented → streak recomputed → previous word restored to input
+↓
 setInterval(tick) runs every second → Timer decreases → AI car moves
 ↓
 Timer reaches 0 → endGame() triggered
@@ -73,17 +79,18 @@ Final WPM calculated → Rank assigned → Results overlay displayed
 
 ## Key Features
 
-| Feature                 | Description                                                             |
-| ----------------------- | ----------------------------------------------------------------------- |
-| **Race Track**          | Visual lanes with player and AI cars that move based on typing progress |
-| **3 Difficulty Levels** | Easy (3-letter words), Medium (5-letter words), Hard (8+ letter words)  |
-| **Time Modes**          | 30s, 60s, or 120s race durations                                        |
-| **Streak System**       | Consecutive correct words build streaks with visual feedback            |
-| **Boost Mechanic**      | Every 5-streak correct words gives the player a speed boost             |
-| **AI Opponent**         | Moves at difficulty-based speed, creating competitive pressure          |
-| **Live Stats**          | WPM, accuracy, streak, correct/wrong counts, and time remaining         |
-| **Results Screen**      | Final stats with rank classification (Sunday Driver → Formula 1 Legend) |
-| **Best Score**          | Persisted in localStorage across sessions                               |
+| Feature                       | Description                                                             |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| **Race Track**                | Visual lanes with player and AI cars that move based on typing progress |
+| **3 Difficulty Levels**       | Easy (3-letter words), Medium (5-letter words), Hard (8+ letter words)  |
+| **Time Modes**                | 30s, 60s, or 120s race durations                                        |
+| **Streak System**             | Consecutive correct words build streaks with visual feedback            |
+| **Boost Mechanic**            | Every 5-streak correct words gives the player a speed boost             |
+| **AI Opponent**               | Moves at difficulty-based speed, creating competitive pressure          |
+| **Live Stats**                | WPM, accuracy, streak, correct/wrong counts, and time remaining         |
+| **Word Boundary Backspacing** | Rewinds previous words and decrements counts when backspacing at start  |
+| **Results Screen**            | Final stats with rank classification (Sunday Driver → Formula 1 Legend) |
+| **Best Score**                | Persisted in localStorage across sessions                               |
 
 ---
 
@@ -110,6 +117,9 @@ Final WPM calculated → Rank assigned → Results overlay displayed
 - `startGame()`: Initializes the game state and timer.
 - `tick()`: Manages the second-by-second updates for the timer and AI.
 - `calculateWpm()`: Computes words per minute based on elapsed time and correct words.
+- `stepBackWord()`: Reverses the last submitted word, decrements completed counts, and restores state.
+- `recalculateStreak()`: Recomputes the active consecutive correct word streak from typed history.
+- `handleBackspace()`: Intercepts Backspace on empty input to step back into the previous word.
 - `endGame()`: Finalizes the race, updates best score, and shows results.
 
 ### `style.css`
@@ -125,6 +135,7 @@ Final WPM calculated → Rank assigned → Results overlay displayed
 - **No frameworks**: Pure vanilla JS for fast loading and zero dependencies.
 - **Word batching**: Generates 60 words initially, adds 30 more when running low to avoid huge initial arrays.
 - **Live feedback**: Input border turns green/red for correct/misspelled partial matches to guide the user.
+- **Word boundary handling**: Pressing Backspace on empty input decrements the completed counter and restores the word so retyping does not inflate WPM.
 - **Car animation**: CSS transitions for smooth car movement (0.3s ease-out).
 - **localStorage**: Best WPM persisted under `cradle:typing-racer-best-wpm`.
 

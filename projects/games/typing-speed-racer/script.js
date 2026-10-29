@@ -252,29 +252,30 @@ const WORD_BANKS = {
 };
 
 // ─── DOM Elements ──────────────────────────────────────────────────
-const startBtn = document.getElementById("startBtn");
-const resetBtn = document.getElementById("resetBtn");
-const timeLimit = document.getElementById("timeLimit");
-const difficulty = document.getElementById("difficulty");
-const statsBar = document.getElementById("statsBar");
-const wordDisplay = document.getElementById("wordDisplay");
-const inputArea = document.getElementById("inputArea");
-const typeInput = document.getElementById("typeInput");
-const resultsOverlay = document.getElementById("resultsOverlay");
-const playAgainBtn = document.getElementById("playAgainBtn");
-const closeResultsBtn = document.getElementById("closeResultsBtn");
-const wpmEl = document.getElementById("wpmValue");
-const bestWpmEl = document.getElementById("bestWpmValue");
-const timeLeftEl = document.getElementById("timeLeft");
-const correctCountEl = document.getElementById("correctCount");
-const wrongCountEl = document.getElementById("wrongCount");
-const accuracyEl = document.getElementById("accuracy");
-const streakEl = document.getElementById("streak");
-const progressBar = document.getElementById("progressBar");
-const progressLabel = document.getElementById("progressLabel");
-const playerCar = document.getElementById("playerCar");
-const playerLane = document.getElementById("playerLane");
-const opponentLane = document.getElementById("opponentLane");
+const doc = typeof document !== "undefined" ? document : null;
+const startBtn = doc?.getElementById("startBtn");
+const resetBtn = doc?.getElementById("resetBtn");
+const timeLimit = doc?.getElementById("timeLimit");
+const difficulty = doc?.getElementById("difficulty");
+const statsBar = doc?.getElementById("statsBar");
+const wordDisplay = doc?.getElementById("wordDisplay");
+const inputArea = doc?.getElementById("inputArea");
+const typeInput = doc?.getElementById("typeInput");
+const resultsOverlay = doc?.getElementById("resultsOverlay");
+const playAgainBtn = doc?.getElementById("playAgainBtn");
+const closeResultsBtn = doc?.getElementById("closeResultsBtn");
+const wpmEl = doc?.getElementById("wpmValue");
+const bestWpmEl = doc?.getElementById("bestWpmValue");
+const timeLeftEl = doc?.getElementById("timeLeft");
+const correctCountEl = doc?.getElementById("correctCount");
+const wrongCountEl = doc?.getElementById("wrongCount");
+const accuracyEl = doc?.getElementById("accuracy");
+const streakEl = doc?.getElementById("streak");
+const progressBar = doc?.getElementById("progressBar");
+const progressLabel = doc?.getElementById("progressLabel");
+const playerCar = doc?.getElementById("playerCar");
+const playerLane = doc?.getElementById("playerLane");
+const opponentLane = doc?.getElementById("opponentLane");
 
 // ─── Game State ────────────────────────────────────────────────────
 let state = {
@@ -294,6 +295,7 @@ let state = {
   wpm: 0,
   bestWpm: (function () {
     try {
+      if (typeof localStorage === "undefined") return 0;
       const raw = localStorage.getItem("cradle:typing-racer-best-wpm");
       const parsed = parseInt(raw, 10);
       return Number.isFinite(parsed) && parsed >= 0 && parsed <= 500
@@ -318,7 +320,7 @@ function shuffleArray(arr) {
 }
 
 function generateWords(count) {
-  const bank = WORD_BANKS[state.difficulty];
+  const bank = WORD_BANKS[state.difficulty] || WORD_BANKS.medium;
   const words = [];
   for (let i = 0; i < count; i++) {
     words.push(bank[Math.floor(Math.random() * bank.length)]);
@@ -326,11 +328,75 @@ function generateWords(count) {
   return words;
 }
 
-function calculateWpm() {
-  if (!state.startTime) return 0;
-  const elapsed = (Date.now() - state.startTime) / 1000 / 60;
+function calculateWpm(gameState = state) {
+  if (!gameState || !gameState.startTime) return 0;
+  const elapsed = (Date.now() - gameState.startTime) / 1000 / 60;
   if (elapsed <= 0) return 0;
-  return Math.round(state.correctWords / elapsed);
+  return Math.round((gameState.correctWords || 0) / elapsed);
+}
+
+function recalculateStreak(typedWords, targetWords) {
+  if (!Array.isArray(typedWords) || !Array.isArray(targetWords)) return 0;
+  let streak = 0;
+  for (let i = typedWords.length - 1; i >= 0; i--) {
+    if (typedWords[i] === targetWords[i]) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function stepBackWord(gameState = state) {
+  if (
+    !gameState ||
+    !gameState.running ||
+    gameState.currentIndex <= 0 ||
+    !Array.isArray(gameState.typedWords) ||
+    gameState.typedWords.length === 0
+  ) {
+    return null;
+  }
+
+  gameState.currentIndex--;
+  const prevWord = gameState.typedWords.pop();
+  const targetWord = gameState.words[gameState.currentIndex];
+
+  if (prevWord === targetWord) {
+    gameState.correctWords = Math.max(0, (gameState.correctWords || 0) - 1);
+  } else {
+    gameState.wrongWords = Math.max(0, (gameState.wrongWords || 0) - 1);
+  }
+
+  gameState.streak = recalculateStreak(gameState.typedWords, gameState.words);
+
+  return prevWord;
+}
+
+function handleBackspace(e) {
+  if (!state.running) return;
+  if (!typeInput) return;
+
+  if (typeInput.value === "" && state.currentIndex > 0) {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+    const restored = stepBackWord(state);
+    if (restored !== null && restored !== undefined) {
+      typeInput.value = restored;
+      if (typeof typeInput.setSelectionRange === "function") {
+        typeInput.setSelectionRange(restored.length, restored.length);
+      }
+      const currentWord = state.words[state.currentIndex];
+      const partialMatch = currentWord && currentWord.startsWith(restored);
+      typeInput.className = partialMatch
+        ? "type-input correct"
+        : "type-input wrong";
+      renderWords();
+      updateStats();
+    }
+  }
 }
 
 function getRank(wpm) {
@@ -371,13 +437,14 @@ function getRank(wpm) {
   };
 }
 
-function getOpponentSpeed(difficulty) {
+function getOpponentSpeed(diff) {
   const speeds = { easy: 0.3, medium: 0.6, hard: 0.9 };
-  return speeds[difficulty] || 0.6;
+  return speeds[diff] || 0.6;
 }
 
 // ─── Render ────────────────────────────────────────────────────────
 function renderWords() {
+  if (!wordDisplay) return;
   const html = state.words
     .map((word, i) => {
       let cls = "word";
@@ -397,40 +464,43 @@ function renderWords() {
 function updateStats() {
   const wpm = calculateWpm();
   state.wpm = wpm;
-  wpmEl.textContent = wpm;
+  if (wpmEl) wpmEl.textContent = wpm;
 
   const totalAttempted = state.correctWords + state.wrongWords;
   const acc =
     totalAttempted > 0
       ? Math.round((state.correctWords / totalAttempted) * 100)
       : 100;
-  correctCountEl.textContent = state.correctWords;
-  wrongCountEl.textContent = state.wrongWords;
-  accuracyEl.textContent = acc + "%";
-  streakEl.textContent = state.streak;
-  timeLeftEl.textContent = state.timeLeft + "s";
-
-  // Time warning
-  if (state.timeLeft <= 10) {
-    timeLeftEl.classList.add("time-warning");
-  } else {
-    timeLeftEl.classList.remove("time-warning");
+  if (correctCountEl) correctCountEl.textContent = state.correctWords;
+  if (wrongCountEl) wrongCountEl.textContent = state.wrongWords;
+  if (accuracyEl) accuracyEl.textContent = acc + "%";
+  if (streakEl) streakEl.textContent = state.streak;
+  if (timeLeftEl) {
+    timeLeftEl.textContent = state.timeLeft + "s";
+    // Time warning
+    if (state.timeLeft <= 10) {
+      timeLeftEl.classList.add("time-warning");
+    } else {
+      timeLeftEl.classList.remove("time-warning");
+    }
   }
 
   // Progress & car position
-  const progress = Math.min(
-    (state.currentIndex / state.words.length) * 100,
-    100
-  );
-  progressBar.style.width = progress + "%";
-  progressLabel.textContent = Math.round(progress) + "%";
+  const progress =
+    state.words.length > 0
+      ? Math.min((state.currentIndex / state.words.length) * 100, 100)
+      : 0;
+  if (progressBar) progressBar.style.width = progress + "%";
+  if (progressLabel) progressLabel.textContent = Math.round(progress) + "%";
 
   const carLeft = Math.min(progress * 0.85, 85);
-  playerCar.style.left = carLeft + "%";
+  if (playerCar) playerCar.style.left = carLeft + "%";
 
   // Opponent car
   state.opponentPos = Math.min(state.opponentPos, 90);
-  const opponentCar = opponentLane.querySelector(".car-icon");
+  const opponentCar = opponentLane
+    ? opponentLane.querySelector(".car-icon")
+    : null;
   if (opponentCar) opponentCar.style.left = state.opponentPos + "%";
 }
 
@@ -450,23 +520,25 @@ function startGame() {
     wrongWords: 0,
     streak: 0,
     bestStreak: 0,
-    timeLimit: parseInt(timeLimit.value, 10),
-    timeLeft: parseInt(timeLimit.value, 10),
-    difficulty: difficulty.value,
+    timeLimit: parseInt(timeLimit?.value || "60", 10),
+    timeLeft: parseInt(timeLimit?.value || "60", 10),
+    difficulty: difficulty?.value || "medium",
     timerId: null,
     startTime: Date.now(),
     wpm: 0,
     opponentPos: 0,
-    opponentSpeed: getOpponentSpeed(difficulty.value),
+    opponentSpeed: getOpponentSpeed(difficulty?.value || "medium"),
   };
 
-  startBtn.hidden = true;
-  resetBtn.hidden = false;
-  statsBar.hidden = false;
-  inputArea.hidden = false;
-  resultsOverlay.hidden = true;
-  typeInput.value = "";
-  typeInput.focus();
+  if (startBtn) startBtn.hidden = true;
+  if (resetBtn) resetBtn.hidden = false;
+  if (statsBar) statsBar.hidden = false;
+  if (inputArea) inputArea.hidden = false;
+  if (resultsOverlay) resultsOverlay.hidden = true;
+  if (typeInput) {
+    typeInput.value = "";
+    typeInput.focus();
+  }
 
   renderWords();
   updateStats();
@@ -478,7 +550,7 @@ function tick() {
   if (!state.running) return;
 
   state.timeLeft--;
-  timeLeftEl.textContent = state.timeLeft + "s";
+  if (timeLeftEl) timeLeftEl.textContent = state.timeLeft + "s";
 
   // Move opponent
   state.opponentPos += state.opponentSpeed * (0.8 + Math.random() * 0.4);
@@ -509,28 +581,28 @@ function endGame() {
   const rank = getRank(wpm);
 
   // Update best (bounded between 0 and 500 wpm)
-  if (
-    Number.isFinite(wpm) &&
-    wpm >= 0 &&
-    wpm <= 500 &&
-    wpm > state.bestWpm
-  ) {
+  if (Number.isFinite(wpm) && wpm >= 0 && wpm <= 500 && wpm > state.bestWpm) {
     state.bestWpm = wpm;
-    localStorage.setItem("cradle:typing-racer-best-wpm", wpm.toString());
-    bestWpmEl.textContent = wpm;
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("cradle:typing-racer-best-wpm", wpm.toString());
+      }
+    } catch (_) {}
+    if (bestWpmEl) bestWpmEl.textContent = wpm;
   }
 
   // Show results
-  const finalWpm = document.getElementById("finalWpm");
+  const currentDoc = typeof document !== "undefined" ? document : null;
+  const finalWpm = currentDoc?.getElementById("finalWpm");
   if (finalWpm) finalWpm.textContent = wpm;
-  const finalAccuracy = document.getElementById("finalAccuracy");
+  const finalAccuracy = currentDoc?.getElementById("finalAccuracy");
   if (finalAccuracy) finalAccuracy.textContent = acc;
-  const finalWords = document.getElementById("finalWords");
+  const finalWords = currentDoc?.getElementById("finalWords");
   if (finalWords) finalWords.textContent = state.correctWords;
-  const finalStreak = document.getElementById("finalStreak");
+  const finalStreak = currentDoc?.getElementById("finalStreak");
   if (finalStreak) finalStreak.textContent = state.bestStreak;
 
-  const rankEl = document.getElementById("resultRank");
+  const rankEl = currentDoc?.getElementById("resultRank");
   if (rankEl) {
     rankEl.textContent = rank.text;
     rankEl.style.background = rank.bg;
@@ -538,14 +610,14 @@ function endGame() {
   }
 
   // Did the player win?
-  const playerWon = state.opponentPos < (parseFloat(playerCar.style.left) || 0);
-  const resultTitle = document.getElementById("resultTitle");
+  const playerWon =
+    state.opponentPos < (playerCar ? parseFloat(playerCar.style.left) || 0 : 0);
+  const resultTitle = currentDoc?.getElementById("resultTitle");
   if (resultTitle)
     resultTitle.textContent = playerWon ? "🏆 You Won!" : "🏁 Race Complete!";
 
-  resultsOverlay.hidden = false;
-
-  inputArea.hidden = true;
+  if (resultsOverlay) resultsOverlay.hidden = false;
+  if (inputArea) inputArea.hidden = true;
 }
 
 function resetGame() {
@@ -584,6 +656,11 @@ typeInput?.addEventListener("input", e => {
   // Space = word submitted
   if (val.endsWith(" ")) {
     const typed = val.trim();
+    if (!typed) {
+      typeInput.value = "";
+      return;
+    }
+
     state.typedWords.push(typed);
 
     if (typed === currentWord) {
@@ -625,17 +702,19 @@ typeInput?.addEventListener("input", e => {
     updateStats();
   } else {
     // Live feedback
-    const partialMatch = currentWord.startsWith(val);
+    const partialMatch = currentWord && currentWord.startsWith(val);
     typeInput.className = partialMatch
       ? "type-input correct"
       : "type-input wrong";
   }
 });
 
-// Prevent form submission
+// Prevent form submission and handle word-boundary backspacing
 typeInput?.addEventListener("keydown", e => {
   if (e.key === "Enter") {
     e.preventDefault();
+  } else if (e.key === "Backspace") {
+    handleBackspace(e);
   }
 });
 
@@ -653,3 +732,17 @@ closeResultsBtn?.addEventListener("click", () => {
 
 // ─── Init ──────────────────────────────────────────────────────────
 if (bestWpmEl) bestWpmEl.textContent = state.bestWpm;
+
+// ─── Exports for Testing ───────────────────────────────────────────
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    WORD_BANKS,
+    calculateWpm,
+    recalculateStreak,
+    stepBackWord,
+    handleBackspace,
+    getRank,
+    getOpponentSpeed,
+    state,
+  };
+}
