@@ -189,7 +189,11 @@ function playNote(note) {
   setKeyPressed(key, true);
 
   if (status) {
-    status.textContent = `Playing ${note}`;
+    if (activeNotes.size === 1) {
+      status.textContent = `Playing ${note}`;
+    } else {
+      status.textContent = `Playing ${[...activeNotes.keys()].join(", ")}`;
+    }
   }
 }
 
@@ -233,8 +237,12 @@ function stopNote(note) {
   const key = getKeyElement(note);
   setKeyPressed(key, false);
 
-  if (activeNotes.size === 0 && status) {
-    status.textContent = "Ready";
+  if (status) {
+    if (activeNotes.size === 0) {
+      status.textContent = "Ready";
+    } else {
+      status.textContent = `Playing ${[...activeNotes.keys()].join(", ")}`;
+    }
   }
 }
 
@@ -344,13 +352,18 @@ function handleKeydown(event) {
     return;
   }
 
-  const note = KEY_CODES[event.code];
+  const code = event.code || event.key;
+  const note = KEY_CODES[event.code] || KEY_CODES[code];
   if (!note) {
     return;
   }
 
   // Deduplicate if physical key is already tracked as pressed or note is already actively playing
-  if (pressedKeyboardKeys.has(event.code) || activeNotes.has(note)) {
+  if (
+    pressedKeyboardKeys.has(code) ||
+    (event.code && pressedKeyboardKeys.has(event.code)) ||
+    activeNotes.has(note)
+  ) {
     return;
   }
 
@@ -358,13 +371,15 @@ function handleKeydown(event) {
     event.preventDefault();
   }
 
-  pressedKeyboardKeys.add(event.code);
+  pressedKeyboardKeys.add(code);
+  if (event.code) pressedKeyboardKeys.add(event.code);
   const key = getKeyElement(note);
   pressKey(key);
 }
 
 function handleKeyup(event) {
-  const note = KEY_CODES[event.code];
+  const code = event.code || event.key;
+  const note = KEY_CODES[event.code] || KEY_CODES[code];
   if (!note) {
     return;
   }
@@ -373,11 +388,12 @@ function handleKeyup(event) {
     event.preventDefault();
   }
 
-  pressedKeyboardKeys.delete(event.code);
+  pressedKeyboardKeys.delete(code);
+  if (event.code) pressedKeyboardKeys.delete(event.code);
 
   // Only release the note if no other physical key or pointer is holding it
   const isHeldByKeyboard = [...pressedKeyboardKeys].some(
-    code => KEY_CODES[code] === note
+    c => KEY_CODES[c] === note
   );
   const isHeldByPointer = [...activePointers.values()].some(
     k => k && k.dataset && k.dataset.note === note

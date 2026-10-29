@@ -407,3 +407,37 @@ test("window blur and visibilitychange cleanly release all active chord notes", 
     assert.equal(k.classList.contains("active"), false);
   });
 });
+
+test("holding C4 and pressing E4 triggers C4 once and E4 once with no stutter or doubling", () => {
+  const { documentMock, keys, statusEl, pianoStudio } = createPianoSandbox();
+
+  // Press and hold C4 (KeyA)
+  documentMock.dispatchEvent({ type: "keydown", code: "KeyA", repeat: false });
+  assert.equal(pianoStudio.getActiveNotes().has("C4"), true);
+  assert.equal(pianoStudio.getActiveNotes().size, 1);
+  assert.equal(statusEl.textContent, "Playing C4");
+
+  // While holding C4, press E4 (KeyD)
+  documentMock.dispatchEvent({ type: "keydown", code: "KeyD", repeat: false });
+  assert.equal(pianoStudio.getActiveNotes().has("C4"), true);
+  assert.equal(pianoStudio.getActiveNotes().has("E4"), true);
+  assert.equal(pianoStudio.getActiveNotes().size, 2);
+  assert.equal(statusEl.textContent, "Playing C4, E4");
+
+  // While still holding both, repeat events for C4 or E4 should not trigger additional notes
+  documentMock.dispatchEvent({ type: "keydown", code: "KeyA", repeat: true });
+  documentMock.dispatchEvent({ type: "keydown", code: "KeyD", repeat: true });
+  assert.equal(pianoStudio.getActiveNotes().size, 2);
+
+  // Release E4, C4 stays playing cleanly
+  documentMock.dispatchEvent({ type: "keyup", code: "KeyD" });
+  assert.equal(pianoStudio.getActiveNotes().has("C4"), true);
+  assert.equal(pianoStudio.getActiveNotes().has("E4"), false);
+  assert.equal(pianoStudio.getActiveNotes().size, 1);
+  assert.equal(statusEl.textContent, "Playing C4");
+
+  // Release C4
+  documentMock.dispatchEvent({ type: "keyup", code: "KeyA" });
+  assert.equal(pianoStudio.getActiveNotes().size, 0);
+  assert.equal(statusEl.textContent, "Ready");
+});
