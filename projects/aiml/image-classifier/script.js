@@ -57,6 +57,46 @@ async function loadModel() {
   if (resultDiv)
     resultDiv.innerHTML = `<p class="loading">Loading AI Model...</p>`;
   try {
+    // If libraries not yet loaded or blocked, attempt dynamic load with fallback and integrity checks
+    if (
+      (typeof mobilenet === "undefined" || typeof knnClassifier === "undefined") &&
+      typeof window !== "undefined" &&
+      window.CradleModelLoader &&
+      window.CradleModelLoader.initializeClassifierDependencies
+    ) {
+      await window.CradleModelLoader.initializeClassifierDependencies({
+        includeKnn: true,
+      });
+    }
+
+    if (typeof mobilenet === "undefined" || !mobilenet.load) {
+      throw new Error(
+        "AI model libraries failed to load. Check network connection or adblocker."
+      );
+    }
+
+    model = await mobilenet.load();
+    knn =
+      typeof knnClassifier !== "undefined" && knnClassifier.create
+        ? knnClassifier.create()
+        : null;
+    isModelLoaded = true;
+    if (resultDiv)
+      resultDiv.innerHTML = `<p class="loading">AI Model Ready</p>`;
+  } catch (error) {
+    console.error("Failed to load MobileNet model:", error);
+    if (resultDiv)
+      resultDiv.innerHTML = `<p class="loading">Failed to load AI Model. Check your network or adblocker.</p>`;
+    showToast(
+      "Failed to load AI model. Please check network connectivity or adblockers."
+    );
+  }
+}
+
+/*
+  if (resultDiv)
+    resultDiv.innerHTML = `<p class="loading">Loading AI Model...</p>`;
+  try {
     model = await mobilenet.load();
     knn = knnClassifier.create();
     isModelLoaded = true;
@@ -68,6 +108,7 @@ async function loadModel() {
       resultDiv.innerHTML = `<p class="loading">Failed to load AI Model</p>`;
   }
 }
+*/
 loadModel();
 
 function resetPredictions() {

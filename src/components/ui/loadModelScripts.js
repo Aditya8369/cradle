@@ -13,7 +13,9 @@
  *      (sha256, sha384, sha512) and anonymous CORS on remote scripts.
  *   4. Controlled Loading: Request deduplication (in-flight cache), timeout
  *      enforcement with automatic DOM cleanup, and sequential dependency ordering.
- *   5. Isolation Strategy: Sandboxed iframe execution context (sandbox="allow-scripts"
+ *   5. Fallback & Mirror Redundancy: Seamlessly falls back to secondary trusted CDN
+ *      mirrors when primary CDNs are blocked by adblockers, network errors, or outages.
+ *   6. Isolation Strategy: Sandboxed iframe execution context (sandbox="allow-scripts"
  *      without allow-same-origin) and global namespace pollution detection.
  */
 
@@ -44,23 +46,76 @@ export const DEFAULT_SCRIPT_TIMEOUT_MS = 15000;
  * Registry of pre-verified, trusted model scripts and their Subresource Integrity hashes.
  */
 export const KNOWN_MODEL_INTEGRITY = Object.freeze({
-  // TensorFlow.js core
+  // TensorFlow.js core (jsdelivr)
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0":
     "sha384-vE8hbVJ4lezako5rlvE7bY0BVzWlFhZncPlckrqNwcUQpVtgbENTgZ8TBbnPjZre",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs":
     "sha384-vE8hbVJ4lezako5rlvE7bY0BVzWlFhZncPlckrqNwcUQpVtgbENTgZ8TBbnPjZre",
 
-  // TensorFlow MobileNet model
+  // TensorFlow.js unpkg fallback mirrors
+  "https://unpkg.com/@tensorflow/tfjs@4.22.0/dist/tf.min.js":
+    "sha384-vE8hbVJ4lezako5rlvE7bY0BVzWlFhZncPlckrqNwcUQpVtgbENTgZ8TBbnPjZre",
+  "https://unpkg.com/@tensorflow/tfjs@4.22.0":
+    "sha384-vE8hbVJ4lezako5rlvE7bY0BVzWlFhZncPlckrqNwcUQpVtgbENTgZ8TBbnPjZre",
+  "https://unpkg.com/@tensorflow/tfjs":
+    "sha384-vE8hbVJ4lezako5rlvE7bY0BVzWlFhZncPlckrqNwcUQpVtgbENTgZ8TBbnPjZre",
+
+  // TensorFlow MobileNet model (jsdelivr)
   "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1":
     "sha384-oBAqwJ0tv9zzKlbIZyBhhXlEvU/PMrSMqDyOHlEZVC8xWHx4yPySuS7vRikRcYFq",
   "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet":
     "sha384-oBAqwJ0tv9zzKlbIZyBhhXlEvU/PMrSMqDyOHlEZVC8xWHx4yPySuS7vRikRcYFq",
 
-  // TensorFlow KNN Classifier
+  // MobileNet unpkg fallback mirrors
+  "https://unpkg.com/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js":
+    "sha384-oBAqwJ0tv9zzKlbIZyBhhXlEvU/PMrSMqDyOHlEZVC8xWHx4yPySuS7vRikRcYFq",
+  "https://unpkg.com/@tensorflow-models/mobilenet@2.1.1":
+    "sha384-oBAqwJ0tv9zzKlbIZyBhhXlEvU/PMrSMqDyOHlEZVC8xWHx4yPySuS7vRikRcYFq",
+  "https://unpkg.com/@tensorflow-models/mobilenet":
+    "sha384-oBAqwJ0tv9zzKlbIZyBhhXlEvU/PMrSMqDyOHlEZVC8xWHx4yPySuS7vRikRcYFq",
+
+  // TensorFlow KNN Classifier (jsdelivr)
   "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.6":
     "sha384-QX5hO7OKW55Yg3mgMQWqTFoY7F2+KqUVUtYQj5Stb1s0eFhCVewoJBaaJEXVbzLI",
   "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier":
     "sha384-QX5hO7OKW55Yg3mgMQWqTFoY7F2+KqUVUtYQj5Stb1s0eFhCVewoJBaaJEXVbzLI",
+
+  // KNN Classifier unpkg fallback mirrors
+  "https://unpkg.com/@tensorflow-models/knn-classifier@1.2.6/dist/knn-classifier.min.js":
+    "sha384-QX5hO7OKW55Yg3mgMQWqTFoY7F2+KqUVUtYQj5Stb1s0eFhCVewoJBaaJEXVbzLI",
+  "https://unpkg.com/@tensorflow-models/knn-classifier@1.2.6":
+    "sha384-QX5hO7OKW55Yg3mgMQWqTFoY7F2+KqUVUtYQj5Stb1s0eFhCVewoJBaaJEXVbzLI",
+  "https://unpkg.com/@tensorflow-models/knn-classifier":
+    "sha384-QX5hO7OKW55Yg3mgMQWqTFoY7F2+KqUVUtYQj5Stb1s0eFhCVewoJBaaJEXVbzLI",
+});
+
+/**
+ * Registry of trusted fallback mirrors for critical third-party model libraries.
+ * When a primary CDN endpoint fails (network outage, adblocker, CSP/firewall block),
+ * loaders automatically try these mirrors sequentially with identical SRI validation.
+ */
+export const KNOWN_MODEL_FALLBACKS = Object.freeze({
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0": Object.freeze([
+    "https://unpkg.com/@tensorflow/tfjs@4.22.0/dist/tf.min.js",
+    "https://unpkg.com/@tensorflow/tfjs@4.22.0",
+  ]),
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs": Object.freeze([
+    "https://unpkg.com/@tensorflow/tfjs",
+  ]),
+  "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1": Object.freeze([
+    "https://unpkg.com/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js",
+    "https://unpkg.com/@tensorflow-models/mobilenet@2.1.1",
+  ]),
+  "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet": Object.freeze([
+    "https://unpkg.com/@tensorflow-models/mobilenet",
+  ]),
+  "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.6": Object.freeze([
+    "https://unpkg.com/@tensorflow-models/knn-classifier@1.2.6/dist/knn-classifier.min.js",
+    "https://unpkg.com/@tensorflow-models/knn-classifier@1.2.6",
+  ]),
+  "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier": Object.freeze([
+    "https://unpkg.com/@tensorflow-models/knn-classifier",
+  ]),
 });
 
 /**
@@ -271,6 +326,60 @@ export function validateScriptUrl(urlString, options = {}) {
 }
 
 /**
+ * Loads a remote script with automatic fallback to mirror URLs upon network failure,
+ * adblocker interruption, or timeout. Each candidate URL undergoes strict origin validation,
+ * HTTPS protocol checking, and Subresource Integrity (SRI) verification.
+ *
+ * @param {string|{src: string, integrity?: string}} primary - Primary script URL or config object.
+ * @param {Array<string|{src: string, integrity?: string}>} [fallbackUrls=[]] - Alternative URLs to try sequentially.
+ * @param {Object} [options={}] - Options forwarded to loadScriptAsync.
+ * @returns {Promise<{src: string, integrity: string|null}>}
+ */
+export async function loadScriptWithFallback(
+  primary,
+  fallbackUrls = [],
+  options = {}
+) {
+  const primaryObj = typeof primary === "string" ? { src: primary } : primary;
+  const rawList = [
+    primaryObj,
+    ...(Array.isArray(fallbackUrls) ? fallbackUrls : [fallbackUrls]),
+  ];
+  const candidates = rawList
+    .filter(Boolean)
+    .map(c => (typeof c === "string" ? { src: c } : c));
+
+  if (candidates.length === 0) {
+    throw new TypeError(
+      "loadScriptWithFallback requires at least one script candidate source."
+    );
+  }
+
+  const errors = [];
+  for (const candidate of candidates) {
+    const candidateOptions = {
+      ...options,
+      integrity: candidate.integrity || options.integrity,
+      fallbackUrls: undefined,
+    };
+
+    try {
+      return await loadScriptAsync(candidate.src, candidateOptions);
+    } catch (err) {
+      errors.push({ src: candidate.src, error: err.message });
+      console.warn(
+        `[CradleModelLoader] Script load attempt failed for "${candidate.src}": ${err.message}. Trying next fallback mirror.`
+      );
+    }
+  }
+
+  const errorSummary = errors.map(e => `[${e.src}]: ${e.error}`).join("; ");
+  throw new Error(
+    `Failed to load script and all configured fallback mirrors. Errors: ${errorSummary}`
+  );
+}
+
+/**
  * Dynamically loads an external model or utility script with strict trust boundaries.
  *
  * @param {string} src - Script URL to load.
@@ -282,9 +391,20 @@ export function validateScriptUrl(urlString, options = {}) {
  * @param {boolean} [options.async=true] - Set script.async attribute.
  * @param {boolean} [options.allowSameOrigin=true] - Allow local relative scripts.
  * @param {Array<string>} [options.customAllowedOrigins=[]] - Additional trusted hostnames.
+ * @param {Array<string|{src: string, integrity?: string}>} [options.fallbackUrls=[]] - Fallback mirrors.
  * @returns {Promise<{src: string, integrity: string|null}>}
  */
 export function loadScriptAsync(src, options = {}) {
+  // When caller explicitly specifies fallbackUrls, use fallback-aware loader
+  if (
+    options.fallbackUrls &&
+    Array.isArray(options.fallbackUrls) &&
+    options.fallbackUrls.length > 0
+  ) {
+    const { fallbackUrls, ...restOptions } = options;
+    return loadScriptWithFallback(src, fallbackUrls, restOptions);
+  }
+
   return new Promise((resolve, reject) => {
     let parsedUrl;
     try {
@@ -427,7 +547,7 @@ export function loadScriptAsync(src, options = {}) {
 /**
  * Sequentially loads a list of model scripts to maintain strict dependency ordering.
  *
- * @param {Array<string|{src: string, integrity?: string}>} scriptList - Array of scripts.
+ * @param {Array<string|{src: string, integrity?: string, fallbackUrls?: Array<string>}>} scriptList - Array of scripts.
  * @param {Object} [sharedOptions={}] - Shared options applied to each load.
  * @returns {Promise<Array<{src: string, integrity: string|null}>>}
  */
@@ -619,7 +739,7 @@ export function detectGlobalPollution(
 
 /**
  * Securely loads TensorFlow.js and MobileNet dependencies with verified SRI hashes,
- * origin validation, and timeout control.
+ * origin validation, fallback mirror redundancy, and timeout control.
  *
  * @param {Object} [options={}] - Optional load overrides.
  * @returns {Promise<void>}
@@ -628,21 +748,43 @@ export async function initializeClassifierDependencies(options = {}) {
   const TFJS_URL = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0";
   const MOBILENET_URL =
     "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1";
+  const KNN_URL =
+    "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.6";
+
+  const tfjsFallbacks =
+    options.tfjsFallbacks || KNOWN_MODEL_FALLBACKS[TFJS_URL] || [];
+  const mobilenetFallbacks =
+    options.mobilenetFallbacks || KNOWN_MODEL_FALLBACKS[MOBILENET_URL] || [];
+  const knnFallbacks =
+    options.knnFallbacks || KNOWN_MODEL_FALLBACKS[KNN_URL] || [];
+
+  const scriptSequence = [
+    {
+      src: TFJS_URL,
+      fallbackUrls: tfjsFallbacks,
+      integrity: KNOWN_MODEL_INTEGRITY[TFJS_URL],
+      crossOrigin: "anonymous",
+    },
+    {
+      src: MOBILENET_URL,
+      fallbackUrls: mobilenetFallbacks,
+      integrity: KNOWN_MODEL_INTEGRITY[MOBILENET_URL],
+      crossOrigin: "anonymous",
+    },
+  ];
+
+  if (options.includeKnn) {
+    scriptSequence.push({
+      src: KNN_URL,
+      fallbackUrls: knnFallbacks,
+      integrity: KNOWN_MODEL_INTEGRITY[KNN_URL],
+      crossOrigin: "anonymous",
+    });
+  }
 
   try {
     await loadScriptsSequentially(
-      [
-        {
-          src: TFJS_URL,
-          integrity: KNOWN_MODEL_INTEGRITY[TFJS_URL],
-          crossOrigin: "anonymous",
-        },
-        {
-          src: MOBILENET_URL,
-          integrity: KNOWN_MODEL_INTEGRITY[MOBILENET_URL],
-          crossOrigin: "anonymous",
-        },
-      ],
+      scriptSequence,
       {
         timeoutMs: options.timeoutMs ?? DEFAULT_SCRIPT_TIMEOUT_MS,
         ...options,
@@ -671,6 +813,7 @@ export function _resetLoaderState() {
 const CradleModelLoader = {
   ALLOWED_MODEL_HOSTS,
   KNOWN_MODEL_INTEGRITY,
+  KNOWN_MODEL_FALLBACKS,
   SRI_HASH_PATTERN,
   DEFAULT_SCRIPT_TIMEOUT_MS,
   isValidSriHash,
@@ -679,6 +822,7 @@ const CradleModelLoader = {
   isAllowedOrigin,
   validateScriptUrl,
   loadScriptAsync,
+  loadScriptWithFallback,
   loadScriptsSequentially,
   createSandboxedExecutionFrame,
   loadScriptIsolated,
