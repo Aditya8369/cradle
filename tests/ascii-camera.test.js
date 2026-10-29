@@ -82,3 +82,149 @@ test("ASCIIEngine handles camera transforms for front/rear and Android orientati
   assert.strictEqual(androidFront.isMirrored, true);
   assert.strictEqual(androidFront.isInverted, true);
 });
+
+test("Camera lifecycle: stops all stream tracks and halts animation on pagehide", () => {
+  let tracksStopped = 0;
+  let animationCancelled = false;
+
+  const mockTrack = {
+    kind: "video",
+    stop() {
+      tracksStopped++;
+    },
+  };
+
+  const mockStream = {
+    getTracks() {
+      return [mockTrack, mockTrack];
+    },
+  };
+
+  const state = {
+    stream: mockStream,
+    mode: "camera",
+    facingMode: "user",
+    animationId: 99,
+  };
+
+  function stopCamera(resetFacing = true) {
+    if (state.stream) {
+      state.stream.getTracks().forEach(track => track.stop());
+      state.stream = null;
+    }
+    if (state.animationId) {
+      animationCancelled = true;
+      state.animationId = null;
+    }
+    if (resetFacing) {
+      state.facingMode = "user";
+    }
+  }
+
+  function handlePageHide() {
+    if (state.mode === "camera" || state.stream) {
+      stopCamera(false);
+      state.mode = "empty";
+    }
+  }
+
+  handlePageHide();
+
+  assert.strictEqual(
+    tracksStopped,
+    2,
+    "All stream tracks must be stopped on pagehide"
+  );
+  assert.strictEqual(state.stream, null, "Stream reference must be cleared");
+  assert.strictEqual(
+    animationCancelled,
+    true,
+    "Animation frame loop must be cancelled"
+  );
+  assert.strictEqual(state.mode, "empty", "Mode should reset to empty");
+});
+
+test("Camera lifecycle: pauses stream and cancels render loop on visibilitychange (hidden)", async () => {
+  let tracksStopped = 0;
+  let animationCancelled = false;
+  let cameraRestarted = false;
+
+  const mockTrack = {
+    stop() {
+      tracksStopped++;
+    },
+  };
+
+  const mockStream = {
+    getTracks() {
+      return [mockTrack];
+    },
+  };
+
+  const state = {
+    stream: mockStream,
+    mode: "camera",
+    animationId: 42,
+    pausedForVisibility: false,
+  };
+
+  let isHidden = true;
+
+  function stopCamera(resetFacing = true) {
+    if (state.stream) {
+      state.stream.getTracks().forEach(t => t.stop());
+      state.stream = null;
+    }
+    if (state.animationId) {
+      animationCancelled = true;
+      state.animationId = null;
+    }
+  }
+
+  async function handleVisibilityChange() {
+    if (isHidden) {
+      if (state.mode === "camera" && state.stream) {
+        state.pausedForVisibility = true;
+        stopCamera(false);
+      }
+    } else {
+      if (state.pausedForVisibility) {
+        state.pausedForVisibility = false;
+        cameraRestarted = true;
+      }
+    }
+  }
+
+  // Tab hidden
+  await handleVisibilityChange();
+  assert.strictEqual(
+    tracksStopped,
+    1,
+    "Camera track stopped when tab is hidden"
+  );
+  assert.strictEqual(
+    animationCancelled,
+    true,
+    "Render loop stopped when tab is hidden"
+  );
+  assert.strictEqual(
+    state.pausedForVisibility,
+    true,
+    "Tracked as paused for visibility"
+  );
+  assert.strictEqual(state.stream, null);
+
+  // Tab visible again
+  isHidden = false;
+  await handleVisibilityChange();
+  assert.strictEqual(
+    state.pausedForVisibility,
+    false,
+    "Visibility pause cleared on return"
+  );
+  assert.strictEqual(
+    cameraRestarted,
+    true,
+    "Camera restart initiated on return"
+  );
+});

@@ -82,6 +82,7 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 - Live webcam capture via `getUserMedia` with an FPS-limited render loop
 - Front and rear camera switching with automatic selfie mirroring and native orientation correction
 - Android Chrome front-camera compensation to ensure right-side up rendering
+- Stream lifecycle teardown: automatic track stopping and render loop cancellation on `pagehide` and `visibilitychange` (tab hidden or closed) to release camera hardware and turn off indicator lights
 - Image upload and an embedded sample logo source
 - Five density palettes including block, binary, and minimal characters
 - Optional Sobel edge detection plus invert, contrast, and brightness controls
@@ -122,8 +123,9 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 - `startCamera()` / `stopCamera()` / `toggleCamera()` — webcam lifecycle management and front/rear switching
 - `updateVideoTransform()` / `isAndroidDevice()` — manages mirroring and native orientation transforms
 - `scheduleNextFrame()` / `processCurrentFrame()` — FPS-limited render loop with orientation-corrected canvas downsampling
+- `handlePageHide()` / `handleVisibilityChange()` — lifecycle handlers stopping all stream tracks and canceling the render loop when the tab is hidden or closed, with clean resumption on return
 - `loadUploadedImage()` / `loadSample()` — alternate input sources
-- `setupEvents()` — binds all controls, toggles, and export buttons
+- `setupEvents()` — binds all controls, toggles, export buttons, and lifecycle events
 
 ### `index.html`
 
@@ -142,6 +144,7 @@ Export buttons serialize the current output (TXT / HTML / SVG)
 - **Pure engine modules** — image processing and export serialization live in `asciiEngine.js` and `asciiExporter.js`, free of DOM dependencies and exposed through UMD-style globals so they can be reused and tested independently.
 - **Hidden analysis canvas** — frames are downsampled to a low-resolution grid on an off-screen canvas so character mapping stays fast enough for real-time webcam use.
 - **Read-optimized canvas contexts** — `willReadFrequently: true` avoids GPU readback stalls during per-frame pixel access.
+- **Hardware Camera Lifecycle Teardown** — Releasing all `MediaStream` tracks immediately on `pagehide` and `visibilitychange` ensures hardware camera indicators turn off immediately when the user switches tabs or navigates away.
 - **No external libraries** — rendering is implemented from scratch to keep the mini-project self-contained.
 
 ---
