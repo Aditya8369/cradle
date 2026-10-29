@@ -54,32 +54,35 @@ The game is split into a presentation layer and several pure logic modules. `scr
 User opens index.html
         ↓
 Page renders with default mode: Single Round
+Fighters display neutral "❓" with no move attributes in the DOM
         ↓
 User selects a game mode (Single Round / Best of 3 / Best of 5)
         ↓
-resetTournament() clears scores and tally dots
+resetTournament() clears scores, resets timers, and neutralizes tally dots
         ↓
-User clicks a choice button (Rock, Paper, or Scissors)
+User clicks a choice button (Rock, Paper, Scissors, Lizard, Spock)
+[Interaction event locks in player move and determines computer move — never in advance]
         ↓
-startCountdown(playerChoice) disables buttons and runs the countdown
+startCountdown(playerChoice, computerChoice) disables buttons and runs countdown
+Both fighter displays show "🤔" (no move data or classes written to DOM)
         ↓
 Four-step interval: "ROCK...", "PAPER...", "SCISSORS...", "SHOOT!"
 Each step shakes both fighter displays
         ↓
-Countdown finishes → computer picks a random choice
+Countdown finishes → computer and player choices are revealed and written to DOM
         ↓
 playGame(playerChoice, computerChoice)
-  ├─ Displays both choices with a pop animation
-  ├─ Determines win / loss / tie
+  ├─ Displays both choices with pop animation and sets data-choice attributes
+  ├─ Evaluates win / loss / tie via determineWinner()
   ├─ Updates scores, streak, and tally dots
   └─ Applies win-glow or lose-glow to the battle arena
         ↓
 Win: confetti launches; Lose: page shake animation plays
         ↓
 In Best of 3 / Best of 5: check if targetWins reached
-  └─ If yes → showVictoryModal(winner)
-        ↓
-Buttons re-enabled for the next round
+  ├─ If yes → showVictoryModal(winner)
+  └─ If no → prepareNextRound() clears arena back to "❓" and re-enables buttons
+In Single Round: prepareNextRound() clears arena back to "❓" and re-enables buttons
 ```
 
 ---
@@ -141,10 +144,12 @@ Buttons re-enabled for the next round
 
 ### `script.js`
 
-- `updateModeUI()` — toggles the lizard/spock buttons and stat rows between rule modes.
-- `startCountdown(playerChoice)` — disables buttons and runs the four-step `setInterval` countdown with `triggerShake()`.
-- `getComputerChoice()` — picks the computer's move at random from the active choice list.
-- `playGame(player, computer)` — reveals choices, evaluates the outcome via `determineWinner`, updates scores/streak/tournament wins, and triggers win/lose effects.
+- `updateModeUI()` — toggles the lizard/spock buttons, AI model choices, and stat rows between rule modes.
+- `startCountdown(playerChoice, computerChoice)` — disables buttons, keeps fighters in neutral thinking state (`"🤔"` with no move attributes in the DOM), and runs the four-step countdown with `triggerShake()`.
+- `getComputerChoice()` — determines computer move on the user-interaction event that locks in player choice, supporting both adaptive Markov bot and random bot modes.
+- `playGame(player, computer)` — writes player and computer choices to the DOM, evaluates the outcome via `determineWinner`, updates scores/streak/tournament wins, records stats/storage, and triggers win/lose effects.
+- `prepareNextRound()` — clears fighter displays back to neutral (`"❓"`), strips move data attributes/classes, and re-enables choice buttons before the player makes their next choice.
+- `clearPendingTimers()` — cancels any active intervals or delayed next-round timeouts.
 - `renderTally()` / `resetTournament()` — rebuilds the tally dots and resets tournament state.
 - `showVictoryModal(winner)` / `launchConfetti()` / `triggerShake()` / `toggleButtons()` — UI effects.
 - State variables: `playerScore`, `computerScore`, `streak`, `gameMode`, `targetWins`, `playerTournamentWins`, `computerTournamentWins`.
@@ -161,9 +166,10 @@ Buttons re-enabled for the next round
 ## Design Decisions
 
 - **Rules as data** — the win matrix and verbs live in `game-engine.js`, so adding a gesture is data, not new branching code.
+- **Move secrecy & anti-cheat timing** — computer choice is determined on the user-interaction event that locks in the player's choice and never pre-rendered into the DOM while the player is choosing. Neutral state (`"❓"`, no data attributes) is restored before choice buttons are re-enabled.
 - **UMD modules** — `game-engine.js`, `rpsAiEngine.js`, and `rpsStorage.js` export for both `window` and `module.exports` so the same code runs in the browser and in Node tests.
-- **Countdown via `setInterval`** — the fixed 400 ms countdown drives the shake animation and defers the reveal until the final step.
-- **Random active opponent** — `script.js` currently picks the computer move at random; the Markov bot in `rpsAiEngine.js` is exercised by the test suite and ready to swap in via the AI difficulty selector.
+- **Countdown via `setInterval`** — the fixed 400 ms countdown drives the shake animation and defers DOM revelation until the final step.
+- **Adaptive or Random opponent** — `script.js` supports both the Markov bot in `rpsAiEngine.js` and random selection via the AI difficulty selector.
 - **CSS-driven effects** — confetti, shakes, glows, and the modal transition are pure CSS, keeping the JavaScript to state and timing.
 
 ---
