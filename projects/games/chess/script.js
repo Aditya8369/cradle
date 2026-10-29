@@ -48,6 +48,10 @@ let enPassantTarget = null;
 let halfMoveClock = 0;
 let fullMoveNumber = 1;
 let aiWorker = null;
+let aiWorkerRetryCount = 0;
+let aiWorkerRetryTimer = null;
+const MAX_AI_RETRIES = 3;
+const INITIAL_AI_BACKOFF_DELAY = 500;
 let isComputerThinking = false;
 let pendingPromotion = null;
 let aiSearchId = 0;
@@ -246,7 +250,11 @@ function isValidMove(move) {
 function makeMove(move) {
   if (!isValidMove(move)) {
     console.error("Invalid move received:", move);
-    isComputerThinking = false;
+    if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
+  isComputerThinking = false;
     setStatus("AI returned an invalid move.");
     render();
     return;
@@ -256,7 +264,11 @@ function makeMove(move) {
 
   if (!movingPiece) {
     console.error("No piece found for move:", move);
-    isComputerThinking = false;
+    if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
+  isComputerThinking = false;
     setStatus("AI returned an invalid move.");
     render();
     return;
@@ -595,7 +607,11 @@ function triggerAI() {
           context: "onmessage",
         });
 
-        isComputerThinking = false;
+        if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
+  isComputerThinking = false;
         setStatus(
           "AI error: unexpected worker message. Switching to local mode."
         );
@@ -623,7 +639,12 @@ function triggerAI() {
       }
 
       if (data.type === "complete" || data.type === "timeout") {
-        isComputerThinking = false;
+        aiWorkerRetryCount = 0;
+        if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
+  isComputerThinking = false;
 
         if (data.move) {
           if (data.type === "timeout") {
@@ -648,7 +669,11 @@ function triggerAI() {
           context: "onmessage",
         });
 
-        isComputerThinking = false;
+        if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
+  isComputerThinking = false;
         setStatus(`AI error: ${data.message || "Unknown error."}`);
 
         const gm = document.getElementById("gameMode");
@@ -665,7 +690,30 @@ function triggerAI() {
         context: "onerror",
       });
 
-      isComputerThinking = false;
+      if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
+  isComputerThinking = false;
+      if (aiWorkerRetryCount < MAX_AI_RETRIES) {
+        const delay = Math.min(
+          INITIAL_AI_BACKOFF_DELAY * Math.pow(2, aiWorkerRetryCount),
+          4000
+        );
+        aiWorkerRetryCount++;
+        setStatus(
+          `AI error. Retrying in ${delay}ms (attempt ${aiWorkerRetryCount}/${MAX_AI_RETRIES})...`
+        );
+        aiWorker.terminate();
+        aiWorker = null;
+        aiWorkerRetryTimer = setTimeout(() => {
+          aiWorkerRetryTimer = null;
+          checkTriggerAI();
+        }, delay);
+        render();
+        return;
+      }
+
       setStatus("AI error. Switching to manual mode.");
 
       const gm = document.getElementById("gameMode");
@@ -701,6 +749,10 @@ function cancelAI() {
     aiWorker.postMessage({ type: "cancel" });
   }
 
+  if (aiWorkerRetryTimer) {
+    clearTimeout(aiWorkerRetryTimer);
+    aiWorkerRetryTimer = null;
+  }
   isComputerThinking = false;
 }
 

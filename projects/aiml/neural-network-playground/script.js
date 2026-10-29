@@ -400,12 +400,41 @@ function startTraining() {
   $("btnPause").disabled = false;
   document.body.classList.add("training-active");
   hideExportError();
+
   announceTrainingStatus(
     state.worker
       ? "Training started."
       : "Training started in compatibility mode. Web Workers are unavailable."
   );
   trainStep();
+}
+
+function _unusedStartBlock() {
+  /* removed duplicate
+  );
+  trainStep();
+
+  if (nnWorkerRetryCount < MAX_NN_WORKER_RETRIES) {
+    const delay = Math.min(
+      NN_WORKER_INITIAL_DELAY * Math.pow(2, nnWorkerRetryCount),
+      4000
+    );
+    nnWorkerRetryCount++;
+    if (nnWorkerRetryTimer) clearTimeout(nnWorkerRetryTimer);
+    nnWorkerRetryTimer = setTimeout(() => {
+      nnWorkerRetryTimer = null;
+      if (state.training && !state.worker) {
+        state.worker = createTrainingWorker();
+        if (state.worker) {
+          setupEvents();
+          syncWorkerState();
+        }
+      }
+    }, delay);
+  }
+}
+
+*/
 }
 
 function pauseTraining() {
@@ -424,6 +453,7 @@ function resetAll() {
   initNetwork();
   renderAll();
   hideExportError();
+
   announceTrainingStatus("Training reset.");
 }
 
@@ -492,6 +522,11 @@ function syncWorkerState() {
   });
 }
 
+let nnWorkerRetryCount = 0;
+let nnWorkerRetryTimer = null;
+const MAX_NN_WORKER_RETRIES = 3;
+const NN_WORKER_INITIAL_DELAY = 500;
+
 function handleWorkerError(event) {
   const message = event && event.message ? event.message : "unknown error";
   console.error("Neural network worker error:", message);
@@ -516,6 +551,25 @@ function handleWorkerError(event) {
     "Worker failed. Continuing training on the main thread."
   );
   trainStep();
+
+  if (nnWorkerRetryCount < MAX_NN_WORKER_RETRIES) {
+    const delay = Math.min(
+      NN_WORKER_INITIAL_DELAY * Math.pow(2, nnWorkerRetryCount),
+      4000
+    );
+    nnWorkerRetryCount++;
+    if (nnWorkerRetryTimer) clearTimeout(nnWorkerRetryTimer);
+    nnWorkerRetryTimer = setTimeout(() => {
+      nnWorkerRetryTimer = null;
+      if (state.training && !state.worker) {
+        state.worker = createTrainingWorker();
+        if (state.worker) {
+          setupEvents();
+          syncWorkerState();
+        }
+      }
+    }, delay);
+  }
 }
 
 function setupEvents() {
