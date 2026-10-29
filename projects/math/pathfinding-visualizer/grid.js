@@ -117,6 +117,21 @@ export class Grid {
   clearBoard() {
     this.clearWalls();
     this.clearPath();
+
+    if (
+      this.container &&
+      typeof this.container.querySelectorAll === "function"
+    ) {
+      const cells = this.container.querySelectorAll(".cell");
+      cells.forEach(cell => {
+        const r = parseInt(cell.dataset.r, 10);
+        const c = parseInt(cell.dataset.c, 10);
+        const isStart = r === this.startNode.r && c === this.startNode.c;
+        const isEnd = r === this.endNode.r && c === this.endNode.c;
+        cell.className =
+          "cell" + (isStart ? " start" : "") + (isEnd ? " end" : "");
+      });
+    }
   }
 
   clearGrid() {
