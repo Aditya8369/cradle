@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (btnClearWalls) {
     btnClearWalls.addEventListener("click", () => {
+      stopVisualization();
       grid.clearWalls();
       statusMessage.textContent = "Walls cleared.";
     });

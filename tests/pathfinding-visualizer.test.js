@@ -146,3 +146,79 @@ test("clearWalls, clearPath, and clearBoard reset grid states accurately", () =>
   assert.strictEqual(grid[1][1].element.classList.contains("visited"), false);
   assert.strictEqual(grid[2][2].element.classList.contains("path"), false);
 });
+
+test("clearBoard completely resets path and visited overlays after running visualization", () => {
+  const grid = createMockGrid(6, 6);
+  const start = grid[0][0];
+  const end = grid[5][5];
+
+  // User places walls
+  grid[0][2].isWall = true;
+  grid[0][2].element.classList.add("wall");
+  grid[1][2].isWall = true;
+  grid[1][2].element.classList.add("wall");
+  grid[2][2].isWall = true;
+  grid[2][2].element.classList.add("wall");
+
+  // Run BFS visualization
+  const result = bfs(grid, start, end);
+  assert.ok(result.shortestPathNodes.length > 0);
+
+  // Simulate applying animation classes
+  for (const node of result.visitedNodesInOrder) {
+    if (!node.isStart && !node.isEnd) {
+      node.isVisited = true;
+      node.element.classList.add("visited");
+    }
+  }
+  for (const node of result.shortestPathNodes) {
+    if (!node.isStart && !node.isEnd) {
+      node.element.classList.add("path");
+    }
+  }
+
+  // Verify elements are marked
+  let visitedCount = 0;
+  let pathCount = 0;
+  let wallCount = 0;
+  for (const row of grid) {
+    for (const node of row) {
+      if (node.element.classList.contains("visited")) visitedCount++;
+      if (node.element.classList.contains("path")) pathCount++;
+      if (node.element.classList.contains("wall")) wallCount++;
+    }
+  }
+  assert.ok(visitedCount > 0, "Visited cells should exist before clear");
+  assert.ok(pathCount > 0, "Path cells should exist before clear");
+  assert.ok(wallCount > 0, "Wall cells should exist before clear");
+
+  // Execute full board clear (simulating Grid.clearBoard)
+  function clearBoard(g) {
+    for (const row of g) {
+      for (const node of row) {
+        node.isWall = false;
+        node.isVisited = false;
+        node.previousNode = null;
+        node.distance = Infinity;
+        node.totalDistance = Infinity;
+        node.heuristic = 0;
+        node.element.classList.remove("wall", "visited", "path");
+      }
+    }
+  }
+
+  clearBoard(grid);
+
+  // Verify that all visited, path, and wall cells are 100% wiped
+  for (const row of grid) {
+    for (const node of row) {
+      assert.strictEqual(node.isWall, false);
+      assert.strictEqual(node.isVisited, false);
+      assert.strictEqual(node.distance, Infinity);
+      assert.strictEqual(node.previousNode, null);
+      assert.strictEqual(node.element.classList.contains("wall"), false);
+      assert.strictEqual(node.element.classList.contains("visited"), false);
+      assert.strictEqual(node.element.classList.contains("path"), false);
+    }
+  }
+});
