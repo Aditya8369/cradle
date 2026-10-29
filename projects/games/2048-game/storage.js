@@ -51,6 +51,9 @@
       if (typeof window !== "undefined" && window.CradleStorage) {
         return window.CradleStorage;
       }
+      if (typeof root !== "undefined" && root.CradleStorage) {
+        return root.CradleStorage;
+      }
       if (typeof getStorageFn === "function") {
         return getStorageFn();
       }
@@ -159,6 +162,10 @@
           } else if (typeof storage.set === "function") {
             storage.set(BEST_KEY_PREFIX + size, numScore);
           }
+        } else if (typeof localStorage !== "undefined") {
+          try {
+            localStorage.setItem(BEST_KEY_PREFIX + size, String(numScore));
+          } catch {}
         }
         return true;
       }
@@ -170,22 +177,43 @@
       if (!isValidSize(size)) return 0;
 
       const storage = resolveStorage();
-      if (!storage) return 0;
+      if (storage) {
+        let rawBest =
+          typeof storage.getRaw === "function"
+            ? storage.getRaw(BEST_KEY_PREFIX + size, null)
+            : null;
+        if (rawBest === null && typeof storage.get === "function") {
+          rawBest = storage.get(BEST_KEY_PREFIX + size, null);
+        }
 
-      const rawBest =
-        typeof storage.getRaw === "function"
-          ? storage.getRaw(BEST_KEY_PREFIX + size, null)
-          : null;
-      const rawLegacy =
-        typeof storage.getRaw === "function"
-          ? storage.getRaw(LEGACY_BEST_KEY_PREFIX + size, null)
-          : null;
+        let rawLegacy =
+          typeof storage.getRaw === "function"
+            ? storage.getRaw(LEGACY_BEST_KEY_PREFIX + size, null)
+            : null;
+        if (rawLegacy === null && typeof storage.get === "function") {
+          rawLegacy = storage.get(LEGACY_BEST_KEY_PREFIX + size, null);
+        }
 
-      const raw = rawBest !== null ? rawBest : rawLegacy;
-      if (raw === null || raw === "") return 0;
+        const raw = rawBest !== null ? rawBest : rawLegacy;
+        if (raw !== null && raw !== "") {
+          const parsed = parseInt(raw, 10);
+          return isValidScore(parsed) ? parsed : 0;
+        }
+      }
 
-      const parsed = parseInt(raw, 10);
-      return isValidScore(parsed) ? parsed : 0;
+      if (typeof localStorage !== "undefined") {
+        try {
+          const raw =
+            localStorage.getItem(BEST_KEY_PREFIX + size) ??
+            localStorage.getItem(LEGACY_BEST_KEY_PREFIX + size);
+          if (raw !== null && raw !== "") {
+            const parsed = parseInt(raw, 10);
+            return isValidScore(parsed) ? parsed : 0;
+          }
+        } catch {}
+      }
+
+      return 0;
     }
 
     return {
