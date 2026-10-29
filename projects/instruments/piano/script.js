@@ -34,6 +34,60 @@ const engine =
       ? require("./pianoEngine.js")
       : null;
 
+let isAudioBlocked = false;
+
+function showAudioBlockedUI(message) {
+  isAudioBlocked = true;
+  if (!status) return;
+  status.classList.add("audio-blocked");
+  status.setAttribute("role", "alert");
+  status.textContent =
+    message || "Audio blocked by browser. Click here to enable sound.";
+  status.style.cursor = "pointer";
+  status.title = "Click to enable audio playback";
+}
+
+function clearAudioBlockedUI() {
+  if (!isAudioBlocked) return;
+  isAudioBlocked = false;
+  if (!status) return;
+  status.classList.remove("audio-blocked");
+  status.removeAttribute("role");
+  status.style.cursor = "";
+  status.title = "";
+  if (activeNotes.size === 0) {
+    status.textContent = "Ready";
+  }
+}
+
+async function resumeAudio() {
+  if (!audioContext) {
+    getAudioContext();
+  }
+  if (!audioContext) {
+    showAudioBlockedUI("Web Audio API is not supported in this browser.");
+    return false;
+  }
+  if (audioContext.state === "running") {
+    clearAudioBlockedUI();
+    return true;
+  }
+  try {
+    await audioContext.resume();
+    if (audioContext.state === "running") {
+      clearAudioBlockedUI();
+      return true;
+    } else {
+      showAudioBlockedUI("Audio is suspended. Click here to enable sound.");
+      return false;
+    }
+  } catch (error) {
+    console.warn("AudioContext resume failed:", error);
+    showAudioBlockedUI("Audio blocked by browser. Click here to enable sound.");
+    return false;
+  }
+}
+
 function getAudioContext() {
   if (!audioContext) {
     const AudioCtx =
@@ -41,15 +95,42 @@ function getAudioContext() {
       (typeof globalThis !== "undefined" &&
         (globalThis.AudioContext || globalThis.webkitAudioContext));
     if (AudioCtx) {
-      audioContext = new AudioCtx();
+      try {
+        audioContext = new AudioCtx();
+      } catch (err) {
+        console.warn("Failed to create AudioContext:", err);
+        showAudioBlockedUI("Audio initialization failed. Click here to retry.");
+        return null;
+      }
     }
   }
 
   if (audioContext && audioContext.state === "suspended") {
-    audioContext.resume().catch(() => {});
+    audioContext
+      .resume()
+      .then(() => {
+        clearAudioBlockedUI();
+      })
+      .catch(err => {
+        console.warn("AudioContext resume rejected:", err);
+        showAudioBlockedUI(
+          "Audio blocked by browser. Click here to enable sound."
+        );
+      });
   }
 
   return audioContext;
+}
+
+if (status) {
+  status.addEventListener("click", () => {
+    if (
+      isAudioBlocked ||
+      (audioContext && audioContext.state === "suspended")
+    ) {
+      resumeAudio();
+    }
+  });
 }
 
 function getMasterBus(context) {
@@ -238,7 +319,9 @@ function stopNote(note) {
   setKeyPressed(key, false);
 
   if (status) {
-    if (activeNotes.size === 0) {
+    if (isAudioBlocked) {
+      // Preserve blocked banner until audio is successfully resumed
+    } else if (activeNotes.size === 0) {
       status.textContent = "Ready";
     } else {
       status.textContent = `Playing ${[...activeNotes.keys()].join(", ")}`;
@@ -455,6 +538,10 @@ if (win) {
     releaseKey,
     handleKeydown,
     handleKeyup,
+    resumeAudio,
+    isAudioBlocked: () => isAudioBlocked,
+    showAudioBlockedUI,
+    clearAudioBlockedUI,
     getActiveNotes: () => activeNotes,
     getPressedKeyboardKeys: () => pressedKeyboardKeys,
     getActivePointers: () => activePointers,
@@ -469,6 +556,10 @@ if (typeof module !== "undefined" && module.exports) {
     releaseKey,
     handleKeydown,
     handleKeyup,
+    resumeAudio,
+    isAudioBlocked: () => isAudioBlocked,
+    showAudioBlockedUI,
+    clearAudioBlockedUI,
     getActiveNotes: () => activeNotes,
     getPressedKeyboardKeys: () => pressedKeyboardKeys,
     getActivePointers: () => activePointers,

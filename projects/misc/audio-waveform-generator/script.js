@@ -21,7 +21,53 @@ const ctx = canvas ? canvas.getContext("2d") : null;
 const canvasMeta = document.getElementById("canvasMeta");
 const pianoEl = document.getElementById("piano");
 
+/* ──── Audio State ────────────────────────────────────────────────── */
+
+let audioCtx = null;
+let oscillator = null;
+let gainNode = null;
+let analyser = null;
+let dataArray = null;
+let animId = null;
+let isPlaying = false;
+
+let currentWave = "sine";
+let currentFreq = 440;
+let currentVol = 0.6;
+let audioBlocked = false;
+
 /* ──── Audio Helpers ──────────────────────────────────────────────── */
+
+function showAudioBlocked() {
+  audioBlocked = true;
+  if (statusText) {
+    statusText.textContent = "Audio blocked — click to enable";
+    statusText.style.color = "#f87171";
+    statusText.style.cursor = "pointer";
+    statusText.title = "Click to enable audio playback";
+  }
+}
+
+function clearAudioBlocked() {
+  if (!audioBlocked) return;
+  audioBlocked = false;
+  if (statusText) {
+    statusText.style.cursor = "";
+    statusText.title = "";
+    if (!isPlaying) {
+      statusText.textContent = "Stopped";
+      statusText.style.color = "#64748b";
+    }
+  }
+}
+
+if (statusText) {
+  statusText.addEventListener("click", () => {
+    if (audioBlocked || (audioCtx && audioCtx.state === "suspended")) {
+      ensureResumed();
+    }
+  });
+}
 
 function initAudio() {
   if (audioCtx) return;
@@ -46,10 +92,19 @@ function initAudio() {
   oscillator.start();
 }
 
-function ensureResumed() {
+async function ensureResumed() {
   if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume();
+    try {
+      await audioCtx.resume();
+      clearAudioBlocked();
+      return true;
+    } catch (err) {
+      console.warn("AudioContext resume failed:", err);
+      showAudioBlocked();
+      return false;
+    }
   }
+  return true;
 }
 
 function updateOscillator() {

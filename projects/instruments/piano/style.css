@@ -91,6 +91,20 @@ button {
   line-height: 1.5;
 }
 
+.status.audio-blocked {
+  background: #3b180d;
+  border-color: #ef4444;
+  color: #fca5a5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status.audio-blocked:hover {
+  background: #501d0f;
+  border-color: #f87171;
+  color: #ffffff;
+}
+
 .status {
   flex-shrink: 0;
   min-width: 120px;

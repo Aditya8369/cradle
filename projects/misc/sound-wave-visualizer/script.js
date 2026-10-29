@@ -161,7 +161,27 @@ function applyAnalyserSettings() {
 async function startRecording() {
   try {
     await initAudio();
-    if (audioCtx.state === "suspended") await audioCtx.resume();
+    if (audioCtx.state === "suspended") {
+      try {
+        await audioCtx.resume();
+      } catch (err) {
+        console.warn("AudioContext resume failed:", err);
+        setStatus("error", "Audio blocked — click to enable");
+        if (ui && ui.status) {
+          ui.status.style.cursor = "pointer";
+          ui.status.title = "Click to enable audio";
+          ui.status.onclick = async () => {
+            try {
+              await audioCtx.resume();
+              setStatus("stopped", "Audio ready");
+            } catch (e) {
+              console.error("Audio resume retry failed:", e);
+            }
+          };
+        }
+        return;
+      }
+    }
 
     mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     sourceNode = audioCtx.createMediaStreamSource(mediaStream);

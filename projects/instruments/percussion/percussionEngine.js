@@ -34,6 +34,26 @@
 
   let audioContext = null;
 
+  let onBlockedCallback = null;
+
+  async function resumeAudio() {
+    const context = getAudioContext();
+    if (!context) return false;
+    if (context.state === "running") {
+      if (typeof onBlockedCallback === "function") onBlockedCallback(false);
+      return true;
+    }
+    try {
+      await context.resume();
+      if (typeof onBlockedCallback === "function") onBlockedCallback(false);
+      return true;
+    } catch (err) {
+      console.warn("Percussion AudioContext resume rejected:", err);
+      if (typeof onBlockedCallback === "function") onBlockedCallback(true);
+      return false;
+    }
+  }
+
   function getAudioContext() {
     if (typeof window === "undefined") {
       return null;
@@ -50,7 +70,15 @@
     }
 
     if (audioContext.state === "suspended") {
-      audioContext.resume().catch(() => {});
+      audioContext
+        .resume()
+        .then(() => {
+          if (typeof onBlockedCallback === "function") onBlockedCallback(false);
+        })
+        .catch(err => {
+          console.warn("Percussion AudioContext resume rejected:", err);
+          if (typeof onBlockedCallback === "function") onBlockedCallback(true);
+        });
     }
 
     return audioContext;
@@ -284,5 +312,10 @@
     getPads,
     playPad,
     playPadFromKey,
+    resumeAudio,
+    getAudioContext,
+    setOnBlockedCallback: fn => {
+      onBlockedCallback = fn;
+    },
   };
 });

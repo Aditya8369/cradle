@@ -29,6 +29,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let selectedFret = 0;
   let activePointers = new Map();
+  let audioBlocked = false;
+
+  function showAudioBlocked(msg) {
+    audioBlocked = true;
+    if (status) {
+      status.classList.add("audio-blocked");
+      status.textContent =
+        msg || "Audio blocked by browser. Click to enable sound.";
+      status.style.cursor = "pointer";
+      status.title = "Click to enable sound";
+    }
+  }
+
+  function clearAudioBlocked() {
+    if (!audioBlocked) return;
+    audioBlocked = false;
+    if (status) {
+      status.classList.remove("audio-blocked");
+      status.style.cursor = "";
+      status.title = "";
+      status.textContent =
+        selectedFret === 0 ? "Open position" : `Fret ${selectedFret} selected`;
+    }
+  }
+
+  if (status) {
+    status.addEventListener("click", async () => {
+      if (
+        audioBlocked ||
+        (guitar.audioContext && guitar.audioContext.state === "suspended")
+      ) {
+        try {
+          await guitar.resume();
+          clearAudioBlocked();
+          status.textContent = "Audio enabled";
+          setTimeout(() => {
+            if (!audioBlocked && status) {
+              status.textContent =
+                selectedFret === 0
+                  ? "Open position"
+                  : `Fret ${selectedFret} selected`;
+            }
+          }, 1200);
+        } catch (err) {
+          console.warn("Guitar AudioContext resume failed:", err);
+          showAudioBlocked("Audio resume failed. Click again to retry.");
+        }
+      }
+    });
+  }
 
   function setStatus(text) {
     if (status) {
@@ -69,7 +119,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return result;
     } catch (error) {
       console.error("Guitar playback error:", error);
-      setStatus("Audio unavailable");
+      if (guitar.audioContext && guitar.audioContext.state === "suspended") {
+        showAudioBlocked();
+      } else {
+        setStatus("Audio unavailable");
+      }
     }
   }
 
@@ -224,7 +278,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("Strum error:", error);
-      setStatus("Audio unavailable");
+      if (guitar.audioContext && guitar.audioContext.state === "suspended") {
+        showAudioBlocked();
+      } else {
+        setStatus("Audio unavailable");
+      }
     }
   }
 
