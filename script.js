@@ -4,7 +4,11 @@ import {
 } from "./src/components/ui/utils/categoryFilter.js";
 import { filterProjects } from "./src/utils/projectSearch.js";
 import { getThumbnailUrl } from "./src/utils/assetUrl.js";
-import { createFilterWorker } from "./src/utils/filterWorker.js";
+import {
+  createFilterWorker,
+  DEFAULT_WORKER_RETRY_CONFIG,
+  calculateBackoffDelay,
+} from "./src/utils/filterWorker.js";
 
 const projectsGrid = document.getElementById("projects-grid");
 const searchInput = document.getElementById("search");
@@ -142,6 +146,8 @@ if (sortProjects) {
 
 let filterWorker = null;
 let filterWorkerFailed = false;
+let workerRetryCount = 0;
+let workerRetryTimer = null;
 
 function debouncedApplyFilters() {
   window.clearTimeout(filterDebounceTimer);
@@ -157,17 +163,51 @@ function debouncedApplyFilters() {
 
 function handleFilterWorkerFailure(error, reason = "Worker error") {
   console.warn(`${reason}, falling back to main thread:`, error);
+  filterWorker = null;
+
+  // Immediate fallback to main thread to satisfy current search query
+  applyFilters();
+
+  if (workerRetryCount < DEFAULT_WORKER_RETRY_CONFIG.maxRetries) {
+    const delay = calculateBackoffDelay(
+      workerRetryCount,
+      DEFAULT_WORKER_RETRY_CONFIG
+    );
+    console.warn(
+      `Scheduling FilterWorker restart attempt ${workerRetryCount + 1}/${DEFAULT_WORKER_RETRY_CONFIG.maxRetries} in ${delay}ms`
+    );
+    workerRetryCount++;
+
+    if (workerRetryTimer) {
+      window.clearTimeout(workerRetryTimer);
+    }
+    workerRetryTimer = window.setTimeout(() => {
+      workerRetryTimer = null;
+      initializeFilterWorker();
+    }, delay);
+  } else {
+    console.warn(
+      `FilterWorker exceeded maximum retry limit (${DEFAULT_WORKER_RETRY_CONFIG.maxRetries}). Permanently falling back to main thread.`
+    );
+    filterWorkerFailed = true;
+  }
+}
+
+/*
+  console.warn(`${reason}, falling back to main thread:`, error);
   filterWorkerFailed = true;
   filterWorker = null;
   applyFilters();
 }
 
+*/
 function initializeFilterWorker() {
   if (!window.Worker || filterWorkerFailed) return;
 
   filterWorker = createFilterWorker({
     // No workerFactory: the default builds `new Worker("./scripts/worker.js")`.
     onResult: projects => {
+      workerRetryCount = 0;
       renderProjects(sortProjectList(projects));
     },
     onFailure: error => {
