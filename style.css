@@ -19,6 +19,7 @@
 
   --accent: var(--cradle-accent, #1e3a8a);
   --accent-hover: var(--cradle-accent-hover, #2563eb);
+  --color-accent: var(--accent-hover, #2563eb);
 
   --shadow: rgba(0, 0, 0, 0.4);
 
@@ -41,6 +42,7 @@ html.light-theme {
 
   --accent: var(--cradle-accent, #2563eb);
   --accent-hover: var(--cradle-accent-hover, #1d4ed8);
+  --color-accent: var(--accent-hover, #1d4ed8);
 
   --shadow: rgba(0, 0, 0, 0.08);
 }
@@ -736,4 +738,42 @@ footer {
 .shortcut-desc {
   font-size: 0.95rem;
   color: var(--text-secondary);
+}
+
+/* ── Keyboard Focus Indicators (WCAG 2.1 Focus Visible) ──────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-accent, var(--accent-hover, #2563eb));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+[tabindex="0"]:focus-visible,
+.cradle-btn:focus-visible,
+.cradle-card:focus-visible,
+.cradle-card--clickable:focus-visible,
+.cradle-navbar__link:focus-visible,
+.cradle-navbar__brand:focus-visible,
+.cradle-navbar__drawer-link:focus-visible,
+.cradle-navbar__hamburger:focus-visible,
+.cradle-theme-toggle:focus-visible,
+.theme-toggle:focus-visible,
+.back-to-top:focus-visible,
+.shortcuts-close-btn:focus-visible,
+.footer-link:focus-visible,
+#sort-projects:focus-visible,
+.clear-search:focus-visible {
+  outline: 2px solid var(--color-accent, var(--accent-hover, #2563eb));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+[tabindex="0"]:focus:not(:focus-visible) {
+  outline: none;
 }

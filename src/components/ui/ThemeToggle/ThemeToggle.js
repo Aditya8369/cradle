@@ -65,8 +65,9 @@
       }
 
       .cradle-theme-toggle:focus-visible {
-        outline: 2px solid var(--cradle-accent-hover, #2563eb);
-        outline-offset: 3px;
+        outline: 2px solid var(--color-accent, var(--cradle-accent-hover, #2563eb));
+        outline-offset: 2px;
+        border-radius: 4px;
       }
       .cradle-theme-toggle:focus:not(:focus-visible) {
         outline: none;

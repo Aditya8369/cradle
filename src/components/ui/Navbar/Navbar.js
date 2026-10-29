@@ -148,9 +148,15 @@
         font-weight: 700;
       }
 
-      .cradle-navbar__link:focus-visible {
-        outline: 2px solid var(--cradle-accent-hover, #2563eb);
+      .cradle-navbar__link:focus-visible,
+      .cradle-navbar__brand:focus-visible {
+        outline: 2px solid var(--color-accent, var(--cradle-accent-hover, #2563eb));
         outline-offset: 2px;
+        border-radius: 4px;
+      }
+      .cradle-navbar__link:focus:not(:focus-visible),
+      .cradle-navbar__brand:focus:not(:focus-visible) {
+        outline: none;
       }
 
       /* ── Actions slot ──────────────────────────────────── */
@@ -176,9 +182,12 @@
       }
 
       .cradle-navbar__hamburger:focus-visible {
-        outline: 2px solid var(--cradle-accent-hover, #2563eb);
-        outline-offset: 4px;
+        outline: 2px solid var(--color-accent, var(--cradle-accent-hover, #2563eb));
+        outline-offset: 2px;
         border-radius: 4px;
+      }
+      .cradle-navbar__hamburger:focus:not(:focus-visible) {
+        outline: none;
       }
 
       .cradle-navbar__hamburger-line {
@@ -260,8 +269,12 @@
       }
 
       .cradle-navbar__drawer-link:focus-visible {
-        outline: 2px solid var(--cradle-accent-hover, #2563eb);
+        outline: 2px solid var(--color-accent, var(--cradle-accent-hover, #2563eb));
         outline-offset: 2px;
+        border-radius: 4px;
+      }
+      .cradle-navbar__drawer-link:focus:not(:focus-visible) {
+        outline: none;
       }
 
       /* ── Responsive breakpoint ─────────────────────────── */
