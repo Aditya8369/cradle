@@ -173,3 +173,37 @@ test("2048 storage handles default arguments and legacy keys gracefully", () => 
   localStorage.removeItem("cradle_2048_best_score_4");
   localStorage.removeItem("2048_best_score_4");
 });
+
+test("2048 high score persists when score reaches 512 and page reloads", () => {
+  const gameStorage = require("../projects/games/2048-game/storage.js");
+
+  localStorage.removeItem("cradle_2048_best_score_4");
+  localStorage.removeItem("cradle_2048_game_state_4");
+
+  // Step 1: Start fresh game session, best score is initially 0
+  assert.strictEqual(gameStorage.getBestScore(4), 0);
+
+  // Step 2: Player achieves score 512
+  const updated = gameStorage.saveBestScore(4, 512);
+  assert.strictEqual(updated, true);
+  assert.strictEqual(gameStorage.getBestScore(4), 512);
+
+  // Step 3: Simulate browser tab close / page refresh (re-reading from storage)
+  const scoreAfterRefresh = gameStorage.getBestScore(4);
+  assert.strictEqual(
+    scoreAfterRefresh,
+    512,
+    "Best score must not reset to 0 after page refresh"
+  );
+
+  // Step 4: Player achieves lower score in subsequent game, high score is preserved
+  assert.strictEqual(gameStorage.saveBestScore(4, 256), false);
+  assert.strictEqual(gameStorage.getBestScore(4), 512);
+
+  // Step 5: Player beats previous high score with 2048
+  assert.strictEqual(gameStorage.saveBestScore(4, 2048), true);
+  assert.strictEqual(gameStorage.getBestScore(4), 2048);
+
+  // Cleanup
+  localStorage.removeItem("cradle_2048_best_score_4");
+});
