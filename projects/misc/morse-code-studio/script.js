@@ -100,7 +100,12 @@ function updateCopyButton(text) {
   }
 }
 
-function stopAudio() {
+function stopAudio(options = {}) {
+  const shouldClose =
+    typeof options === "boolean"
+      ? options
+      : Boolean(options && (options.closeContext || options.destroy));
+
   isPlaying = false;
   playbackSessionId++;
 
@@ -158,9 +163,18 @@ function stopAudio() {
 
   if (audioContext && audioContext.state !== "closed") {
     try {
-      audioContext.suspend().catch(() => {});
+      if (shouldClose) {
+        if (typeof audioContext.close === "function") {
+          audioContext.close().catch(() => {});
+        }
+        audioContext = null;
+      } else {
+        if (typeof audioContext.suspend === "function") {
+          audioContext.suspend().catch(() => {});
+        }
+      }
     } catch {
-      // Ignored if suspend throws synchronously
+      // Ignored if suspend or close throws synchronously
     }
   }
 
@@ -168,6 +182,10 @@ function stopAudio() {
     playBtn.disabled = false;
     playBtn.textContent = "▶ Play";
   }
+}
+
+function handlePageExit() {
+  stopAudio({ closeContext: true });
 }
 
 async function playMorse() {
@@ -185,7 +203,7 @@ async function playMorse() {
   const currentSession = ++playbackSessionId;
 
   try {
-    if (!audioContext) {
+    if (!audioContext || audioContext.state === "closed") {
       const AudioCtx =
         (win && (win.AudioContext || win.webkitAudioContext)) ||
         (typeof globalThis !== "undefined" &&
@@ -251,7 +269,7 @@ async function playMorse() {
 
 function beep(context, duration, frequency) {
   return new Promise(resolve => {
-    if (!isPlaying) {
+    if (!isPlaying || !context || context.state === "closed") {
       resolve();
       return;
     }
@@ -334,11 +352,14 @@ if (speedSlider && speedValue) {
 }
 
 if (win) {
-  win.addEventListener("pagehide", stopAudio);
-  win.addEventListener("beforeunload", stopAudio);
+  win.addEventListener("pagehide", handlePageExit);
+  win.addEventListener("beforeunload", handlePageExit);
+  win.addEventListener("unload", handlePageExit);
+  win.addEventListener("popstate", handlePageExit);
   win.stopMorseAudio = stopAudio;
   win.MorseStudio = {
     stopAudio,
+    handlePageExit,
     playMorse,
     beep,
     wait,
@@ -370,22 +391,27 @@ if (doc) {
     }
   });
 
-  doc.addEventListener("click", e => {
+  const onNavigationTrigger = e => {
+    const target = e.target;
     const backBtn =
-      e.target &&
-      e.target.closest &&
-      e.target.closest(
-        ".cradle-back-home, [data-cradle-back-to-home], .back-home, #backHome"
+      target &&
+      target.closest &&
+      target.closest(
+        ".cradle-back-home, [data-cradle-back-to-home], .back-home, #backHome, a[href*='index.html'], a[href='/']"
       );
     if (backBtn) {
-      stopAudio();
+      handlePageExit();
     }
-  });
+  };
+
+  doc.addEventListener("click", onNavigationTrigger, { capture: true });
+  doc.addEventListener("pointerdown", onNavigationTrigger, { capture: true });
 }
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     stopAudio,
+    handlePageExit,
     playMorse,
     beep,
     wait,

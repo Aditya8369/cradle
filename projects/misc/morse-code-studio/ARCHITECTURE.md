@@ -118,7 +118,7 @@ with proportional pauses at the selected speed via the Web Audio API
 - `encodeText()` — uses `MorseEngine.textToMorse` (falling back to a local `MORSE` map) and writes the result to the output.
 - `decodeText()` — uses `MorseEngine.morseToText` (with a local `REVERSE` map fallback) and writes decoded text.
 - `playMorse()` — iterates over the output symbols and plays dit/dah beeps with proportional pauses.
-- `stopAudio()` — halts active playback, disconnects and stops running oscillators and gain nodes, cancels scheduled audio ramps, clears pending timeouts, resets UI state, and suspends the AudioContext upon page navigation, `pagehide`, `beforeunload`, or when `document.hidden` is true.
+- `stopAudio(options)` — halts active playback, disconnects and stops running oscillators and gain nodes, cancels scheduled audio ramps, clears pending timeouts, resets UI state, and suspends or closes the AudioContext (via `{ closeContext: true }` on page exit and navigation hooks: `pagehide`, `beforeunload`, `unload`, `popstate`, or `pointerdown`/`click` on navigation links).
 - `beep(ctx, duration)` — plays a 650 Hz sine tone via an oscillator and gain node.
 - `clearFields()` and `copyOutput()` — clear both editors and copy the output via the Clipboard API with "Copied!" feedback.
 - The speed slider updates the displayed millisecond value live.
@@ -133,7 +133,7 @@ with proportional pauses at the selected speed via the Web Audio API
 - **Engine/UI separation** — all translation and timing logic lives in `morseEngine.js` (UMD-wrapped for Node.js tests) while `script.js` only binds the DOM.
 - **Web Audio API synthesis** — tones are generated with an oscillator rather than pre-recorded audio files, keeping the project dependency-free.
 - **Proportional timing** — dit = 1 unit, dah = 3 units, symbol pause = 1, letter pause = 3, word pause = 7, giving a standard Morse rhythm.
-- **Audio lifecycle management & navigation teardown** — audio playback hooks into `pagehide`, `beforeunload`, `visibilitychange`, and navigation links to immediately stop active `OscillatorNode` instances, cancel gain ramps, and suspend `AudioContext`. This prevents orphaned audio from continuing to play in the background when users navigate away or switch tabs.
+- **Audio lifecycle management & navigation teardown** — audio playback hooks into `pagehide`, `beforeunload`, `unload`, `popstate`, `visibilitychange`, and capture-phase navigation links to immediately stop active `OscillatorNode` instances, cancel gain ramps, and close or suspend `AudioContext`. This guarantees orphaned audio does not continue playing in the background when users navigate away or switch tabs.
 - **Fallback maps in script.js** — a local `MORSE`/`REVERSE` map keeps the UI functional even if the engine module fails to load.
 
 ## Dependencies
