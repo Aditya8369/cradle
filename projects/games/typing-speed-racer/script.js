@@ -319,8 +319,8 @@ function shuffleArray(arr) {
   return a;
 }
 
-function generateWords(count) {
-  const bank = WORD_BANKS[state.difficulty] || WORD_BANKS.medium;
+function generateWords(count, selectedDifficulty = state.difficulty) {
+  const bank = WORD_BANKS[selectedDifficulty] || WORD_BANKS.medium;
   const words = [];
   for (let i = 0; i < count; i++) {
     words.push(bank[Math.floor(Math.random() * bank.length)]);
@@ -513,7 +513,8 @@ function startGame() {
   state = {
     ...state,
     running: true,
-    words: generateWords(60),
+    difficulty: difficulty?.value || "medium",
+    words: generateWords(60, difficulty?.value || "medium"),
     currentIndex: 0,
     typedWords: [],
     correctWords: 0,
@@ -522,7 +523,7 @@ function startGame() {
     bestStreak: 0,
     timeLimit: parseInt(timeLimit?.value || "60", 10),
     timeLeft: parseInt(timeLimit?.value || "60", 10),
-    difficulty: difficulty?.value || "medium",
+    
     timerId: null,
     startTime: Date.now(),
     wpm: 0,
