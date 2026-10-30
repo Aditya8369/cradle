@@ -476,6 +476,13 @@
     "thumbnailHash": "8e179392"
   },
   {
+    "title": "Weather",
+    "category": "productivity",
+    "path": "projects/productivity/weather/",
+    "dateAdded": "2026-10-30T16:37:38.613Z",
+    "thumbnailHash": "564597ef"
+  },
+  {
     "title": "Wordle Clone",
     "category": "games",
     "path": "projects/games/wordle-clone/",
