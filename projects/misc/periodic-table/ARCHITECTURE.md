@@ -15,6 +15,7 @@ Interactive Periodic Table is a client-side web application for exploring elemen
 - Provide an intuitive, interactive periodic table interface with instant search and filtering capabilities.
 - Demonstrate real-time state-of-matter calculation across a wide temperature slider (-273°C to 5727°C).
 - Render visual representations of Bohr electron orbital configurations using the HTML5 Canvas API.
+- Provide cycle-guarded relationship traversal with hard iteration limits to safely process decay chains, chemical bonds, and element topologies.
 - Maintain a zero-dependency, self-contained architecture using vanilla HTML, CSS, and JavaScript.
 
 ---
@@ -26,7 +27,7 @@ projects/misc/periodic-table/
 ├── index.html          # Main HTML entry point, layout structure, control panel, modal markup
 ├── style.css           # Visual styles, CSS Grid periodic layout, theme tokens, category colors
 ├── elements.js         # Comprehensive dataset of all 118 chemical elements
-├── periodicEngine.js   # Core engine for thermal phase calculations, temperature conversion, shell parsing
+├── periodicEngine.js   # Core engine for thermal phase calculations, temperature conversion, shell parsing, relationship traversal
 ├── periodicStorage.js  # Persistence handler for element bookmarks and filter settings
 ├── script.js           # Table grid rendering, filter handlers, modal interaction, canvas Bohr model
 └── ARCHITECTURE.md     # Project architecture documentation
@@ -36,10 +37,10 @@ projects/misc/periodic-table/
 
 ## System / Project Architecture Overview
 
-The application is structured into three main layers:
+The application is structured into four main layers:
 
 1. **Data Layer (`elements.js`)**: Static array of element objects containing physical constants, atomic numbers, electron shell configurations, and summaries.
-2. **Engine Layer (`periodicEngine.js`)**: Pure functions for phase state determination, temperature unit conversions, electron configuration string parsing, and search indexing.
+2. **Engine Layer (`periodicEngine.js`)**: Pure functions for phase state determination, temperature unit conversions, electron configuration string parsing, search indexing, and cycle-guarded relationship graph traversal.
 3. **Storage Layer (`periodicStorage.js`)**: Manages element bookmarks and user settings in localStorage with in-memory fallback.
 4. **Presentation Layer (`index.html`, `style.css`, `script.js`)**: Responsive 18-column grid layout with CSS custom properties for category color coding, glassmorphism styling, and HTML5 Canvas drawing.
 
@@ -52,7 +53,7 @@ The application is structured into three main layers:
 | `index.html`         | Page markup, search input, view mode buttons, temperature slider, table container, detail modal         |
 | `style.css`          | 18-column CSS grid layout, category color variables, element tile micro-animations, modal styles        |
 | `elements.js`        | Full dataset of 118 elements with atomic properties, melting/boiling points, and shell arrays           |
-| `periodicEngine.js`  | Pure calculation engine: phase state, temperature conversion, shell parsing, filtering, stats           |
+| `periodicEngine.js`  | Pure calculation engine: phase state, temperature conversion, shell parsing, filtering, stats, graph traversal |
 | `periodicStorage.js` | Bookmark and settings persistence backed by localStorage with an in-memory fallback                     |
 | `script.js`          | Grid rendering logic, state-of-matter calculator, search & category filters, canvas Bohr model renderer |
 
@@ -91,6 +92,7 @@ User clicks an element tile → Modal opens → HTML5 Canvas draws Bohr model fo
 - **Bohr Model Visualizer**: Interactive canvas rendering electron shells and electron distribution for each element.
 - **Temperature Slider**: Dynamic state of matter visualization (Solid, Liquid, Gas, Synthetic) calculated in real-time as temperature changes from 0 K (-273°C) up to 6000 K (5727°C).
 - **View Modes**: Switch between Standard view, Electronegativity Heatmap, and Atomic Mass Gradient views.
+- **Cycle-Guarded Relationship Traversal**: Bounded traversal engine (`traverseRelationships`, `detectCycle`, `getRelationshipPath`, `getDecayChain`) protecting against malformed cycles and runaway processing with controlled failure objects (`{ success: false, hasCycle, exceededLimit, error, cycleNode }`).
 
 ---
 
@@ -118,7 +120,10 @@ User clicks an element tile → Modal opens → HTML5 Canvas draws Bohr model fo
 - `parseShellElectrons(configStr)` — parses electron configuration strings into per-shell electron counts.
 - `filterElements(elements, options)` — filters by search, category, block, and phase.
 - `calculateElementStats(elements, tempK)` — tallies solid/liquid/gas/synthetic counts and category distribution.
-- `traverseRelationships(start, relationships, options)` — relationship traversal with cycle detection and bounded iteration limits to protect against runaway processing.
+- `traverseRelationships(startId, relationships, options)` — traverses element relationship graphs (decay series, group relationships) with cycle detection and iteration limits (`maxIterations: 1000`, `maxDepth: 100`), returning controlled failures on cycles or runaway paths without throwing uncaught exceptions.
+- `detectCycle(startId, relationships, options)` — checks for reachable cycles in element graphs.
+- `getRelationshipPath(startId, targetId, relationships, options)` — bounded shortest-path discovery between two elements.
+- `getDecayChain(startElement, decayMap, options)` — safely traces radioactive decay chains without infinite loops.
 
 ### `periodicStorage.js`
 
@@ -140,7 +145,8 @@ User clicks an element tile → Modal opens → HTML5 Canvas draws Bohr model fo
 - **CSS Grid for 18 Groups**: Used `grid-column` and `grid-row` matching standard IUPAC group numbers to place elements without needing empty placeholder elements.
 - **HTML5 Canvas for Bohr Models**: Rendered dynamically via canvas rather than inline SVGs to maintain performance and smooth rendering.
 - **Zero Build Step**: Ensured full compatibility with standard browser execution via simple script tags.
-- **Engine/UI separation**: Pure logic (phase math, parsing, stats) lives in `periodicEngine.js` (UMD-style wrapper, Node.js compatible) while `script.js` handles DOM work.
+- **Engine/UI separation**: Pure logic (phase math, parsing, stats, graph traversal) lives in `periodicEngine.js` (UMD-style wrapper, Node.js compatible) while `script.js` handles DOM work.
+- **Controlled Failures for Relationship Traversal**: Rather than throwing uncaught errors or locking the browser thread when traversing malformed graphs (e.g., radioactive decay loops or unbounded dynamic generators), `traverseRelationships` tracks active path sets and cumulative iteration counts, returning a structured `{ success: false, hasCycle, exceededLimit, cycleNode, error }` object when safety thresholds are breached.
 
 ---
 
@@ -153,14 +159,8 @@ None. Uses native browser APIs exclusively.
 ## Future Improvements
 
 - Add 3D crystal structure viewer using Three.js.
-- Add element isotope breakdown and radioisotope decay chain viewer.
+- Add element isotope breakdown and radioisotope decay chain viewer powered by `traverseRelationships`.
 - Add compound builder / reaction calculator.
-
----
-
-## Known Limitations
-
-- F-block elements (Lanthanides and Actinides) are rendered below the main grid to maintain desktop grid legibility.
 
 ---
 

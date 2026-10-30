@@ -224,12 +224,38 @@
     return stats;
   }
 
-  exports.convertTemperature = convertTemperature;
-  exports.calculatePhaseState = calculatePhaseState;
-  exports.parseShellElectrons = parseShellElectrons;
-  exports.filterElements = filterElements;
   const DEFAULT_MAX_TRAVERSAL_ITERATIONS = 1000;
   const DEFAULT_MAX_TRAVERSAL_DEPTH = 100;
+
+  function normalizeNode(n) {
+    if (n === null || n === undefined) return null;
+    if (typeof n === "string") {
+      const trimmed = n.trim();
+      return trimmed !== "" ? trimmed : null;
+    }
+    if (typeof n === "number") {
+      return !isNaN(n) ? n : null;
+    }
+    if (typeof n === "object") {
+      return n.symbol || n.number || n.id || n.name || null;
+    }
+    return null;
+  }
+
+  function extractNeighborList(val) {
+    if (val === null || val === undefined) return [];
+    if (val instanceof Set) {
+      val = Array.from(val);
+    }
+    if (typeof val === "string" || typeof val === "number") {
+      const norm = normalizeNode(val);
+      return norm !== null ? [norm] : [];
+    }
+    if (Array.isArray(val)) {
+      return val.map(normalizeNode).filter(x => x !== null);
+    }
+    return [];
+  }
 
   /**
    * Traverses element relationships (decay chains, periodic groups/periods, chemical bonding,
@@ -244,6 +270,7 @@
    * @param {number} [options.maxDepth=100] - Hard cap on traversal depth.
    * @param {string} [options.strategy='bfs'] - Traversal strategy ('bfs' or 'dfs').
    * @param {boolean} [options.allowCycles=false] - Whether to permit re-visiting nodes across paths without failing.
+   * @param {boolean} [options.failOnMaxDepth=false] - If true, exceeding maxDepth returns controlled failure instead of pruning.
    * @param {boolean} [options.throwOnError=false] - If true, throws Error on limit/cycle; otherwise returns controlled failure.
    * @returns {{
    *   success: boolean,
@@ -269,11 +296,14 @@
 
     const strategy = options.strategy === "dfs" ? "dfs" : "bfs";
     const allowCycles = options.allowCycles === true;
+    const failOnMaxDepth = options.failOnMaxDepth === true;
     const throwOnError = options.throwOnError === true;
 
     let iterations = 0;
     const visited = new Set();
     const visitedOrder = [];
+    let encounteredCycle = false;
+    let detectedCycleNode = null;
 
     function fail(errorMessage, extra = {}) {
       const result = {
@@ -294,52 +324,81 @@
       return result;
     }
 
-    if (
-      startId === null ||
-      startId === undefined ||
-      (typeof startId !== "string" && typeof startId !== "number")
-    ) {
+    const normalizedStart = normalizeNode(startId);
+    if (normalizedStart === null) {
       return fail("Invalid start node provided for relationship traversal.");
     }
 
-    if (!relationships || (typeof relationships !== "object" && typeof relationships !== "function")) {
-      return fail("Invalid relationships parameter. Must be an object, Map, Array, or function.");
+    if (
+      !relationships ||
+      (typeof relationships !== "object" && typeof relationships !== "function")
+    ) {
+      return fail(
+        "Invalid relationships parameter. Must be an object, Map, Array, or function."
+      );
     }
 
     function getNeighbors(node) {
       if (typeof relationships === "function") {
         try {
-          const res = relationships(node);
-          return Array.isArray(res) ? res : [];
+          return extractNeighborList(relationships(node));
         } catch {
           return [];
         }
       }
       if (relationships instanceof Map) {
-        const res = relationships.get(node);
-        return Array.isArray(res) ? res : [];
+        let res = relationships.get(node);
+        if (res === undefined && typeof node === "number") {
+          res = relationships.get(String(node));
+        } else if (
+          res === undefined &&
+          typeof node === "string" &&
+          !isNaN(Number(node))
+        ) {
+          res = relationships.get(Number(node));
+        }
+        return extractNeighborList(res);
       }
       if (Array.isArray(relationships)) {
         const item = relationships.find(
-          el => el && (el.number === node || el.symbol === node || el.id === node || el.name === node)
+          el =>
+            el &&
+            (el.number === node ||
+              el.symbol === node ||
+              el.id === node ||
+              el.name === node ||
+              String(el.number) === String(node) ||
+              (typeof el.symbol === "string" &&
+                typeof node === "string" &&
+                el.symbol.toLowerCase() === node.toLowerCase()))
         );
         if (item) {
-          const related = item.related || item.neighbors || item.decayTo || item.connections;
-          return Array.isArray(related) ? related : [];
+          const related =
+            item.related ||
+            item.neighbors ||
+            item.decayTo ||
+            item.connections ||
+            item.next;
+          return extractNeighborList(related);
         }
         return [];
       }
       if (typeof relationships === "object") {
-        const res = relationships[node];
-        return Array.isArray(res) ? res : [];
+        let res = relationships[node];
+        if (res === undefined && typeof node === "number") {
+          res = relationships[String(node)];
+        }
+        return extractNeighborList(res);
       }
       return [];
     }
 
     if (strategy === "bfs") {
-      const queue = [{ node: startId, depth: 0, pathSet: new Set([startId]) }];
-      visited.add(startId);
-      visitedOrder.push(startId);
+      const queue = [
+        { node: normalizedStart, depth: 0, pathSet: new Set([normalizedStart]) },
+      ];
+      visited.add(normalizedStart);
+      visitedOrder.push(normalizedStart);
 
       while (queue.length > 0) {
         iterations++;
@@ -352,6 +411,12 @@
 
         const current = queue.shift();
         if (current.depth >= maxDepth) {
+          if (failOnMaxDepth) {
+            return fail(
+              `Depth limit exceeded: traversal reached maximum depth of ${maxDepth}.`,
+              { exceededLimit: true, exceededDepth: true }
+            );
+          }
           continue;
         }
 
@@ -365,11 +430,16 @@
             );
           }
 
-          if (!allowCycles && current.pathSet.has(neighbor)) {
-            return fail(
-              `Malformed cycle detected: node "${neighbor}" was re-encountered in active path.`,
-              { hasCycle: true, cycleNode: neighbor }
-            );
+          if (current.pathSet.has(neighbor)) {
+            encounteredCycle = true;
+            if (!detectedCycleNode) detectedCycleNode = neighbor;
+
+            if (!allowCycles) {
+              return fail(
+                `Malformed cycle detected: node "${neighbor}" was re-encountered in active path.`,
+                { hasCycle: true, cycleNode: neighbor }
+              );
+            }
           }
 
           if (!visited.has(neighbor)) {
@@ -400,14 +470,25 @@
         }
 
         if (depth > maxDepth) {
+          if (failOnMaxDepth) {
+            return fail(
+              `Depth limit exceeded: traversal reached maximum depth of ${maxDepth}.`,
+              { exceededLimit: true, exceededDepth: true }
+            );
+          }
           return null;
         }
 
-        if (!allowCycles && activePath.has(node)) {
-          return fail(
-            `Malformed cycle detected: node "${node}" was re-encountered in active path.`,
-            { hasCycle: true, cycleNode: node }
-          );
+        if (activePath.has(node)) {
+          encounteredCycle = true;
+          if (!detectedCycleNode) detectedCycleNode = node;
+
+          if (!allowCycles) {
+            return fail(
+              `Malformed cycle detected: node "${node}" was re-encountered in active path.`,
+              { hasCycle: true, cycleNode: node }
+            );
+          }
         }
 
         activePath.add(node);
@@ -418,7 +499,10 @@
 
         const neighbors = getNeighbors(node);
         for (const neighbor of neighbors) {
-          if (!visited.has(neighbor) || (!allowCycles && activePath.has(neighbor))) {
+          if (
+            !visited.has(neighbor) ||
+            (!allowCycles && activePath.has(neighbor))
+          ) {
             const errResult = dfsVisit(neighbor, depth + 1);
             if (errResult && errResult.success === false) {
               return errResult;
@@ -430,7 +514,7 @@
         return null;
       }
 
-      const dfsErr = dfsVisit(startId, 0);
+      const dfsErr = dfsVisit(normalizedStart, 0);
       if (dfsErr && dfsErr.success === false) {
         return dfsErr;
       }
@@ -441,15 +525,198 @@
       visited: Array.from(visited),
       path: Array.from(visitedOrder),
       iterations,
-      hasCycle: false,
+      hasCycle: encounteredCycle,
       exceededLimit: false,
       error: null,
-      cycleNode: null,
+      cycleNode: detectedCycleNode,
     };
   }
 
+  /**
+   * Convenience check to test whether an element relationship graph contains cycles.
+   *
+   * @param {string|number} startId - Starting element or identifier.
+   * @param {Object|Map|Function|Array} relationships - Relationship graph.
+   * @param {Object} [options={}] - Options passed to traverseRelationships.
+   * @returns {{ hasCycle: boolean, cycleNode: string|number|null, iterations: number, error: string|null }}
+   */
+  function detectCycle(startId, relationships, options = {}) {
+    const res = traverseRelationships(startId, relationships, {
+      ...options,
+      allowCycles: false,
+      throwOnError: false,
+    });
+    return {
+      hasCycle: res.hasCycle,
+      cycleNode: res.cycleNode,
+      iterations: res.iterations,
+      error: res.error,
+    };
+  }
+
+  /**
+   * Traces a directional path between startId and targetId while preventing runaway iterations.
+   *
+   * @param {string|number} startId - Source element symbol or number.
+   * @param {string|number} targetId - Destination element symbol or number.
+   * @param {Object|Map|Function|Array} relationships - Adjacency graph.
+   * @param {Object} [options={}] - Traversal options.
+   * @returns {{ success: boolean, path: Array<string|number>, iterations: number, error: string|null }}
+   */
+  function getRelationshipPath(startId, targetId, relationships, options = {}) {
+    const maxIterations =
+      typeof options.maxIterations === "number" && options.maxIterations > 0
+        ? options.maxIterations
+        : DEFAULT_MAX_TRAVERSAL_ITERATIONS;
+    const maxDepth =
+      typeof options.maxDepth === "number" && options.maxDepth > 0
+        ? options.maxDepth
+        : DEFAULT_MAX_TRAVERSAL_DEPTH;
+
+    const normStart = normalizeNode(startId);
+    const normTarget = normalizeNode(targetId);
+
+    if (normStart === null || normTarget === null) {
+      return {
+        success: false,
+        path: [],
+        iterations: 0,
+        error: "Invalid start or target node provided.",
+      };
+    }
+
+    if (normStart === normTarget) {
+      return {
+        success: true,
+        path: [normStart],
+        iterations: 0,
+        error: null,
+      };
+    }
+
+    let iterations = 0;
+    const queue = [
+      {
+        node: normStart,
+        path: [normStart],
+        pathSet: new Set([normStart]),
+      },
+    ];
+    const visited = new Set([normStart]);
+
+    while (queue.length > 0) {
+      iterations++;
+      if (iterations > maxIterations) {
+        return {
+          success: false,
+          path: [],
+          iterations,
+          exceededLimit: true,
+          error: `Iteration limit exceeded: path search halted after ${maxIterations} iterations.`,
+        };
+      }
+
+      const current = queue.shift();
+      if (current.path.length - 1 >= maxDepth) {
+        continue;
+      }
+
+      let neighbors = [];
+      if (typeof relationships === "function") {
+        try {
+          neighbors = extractNeighborList(relationships(current.node));
+        } catch {
+          neighbors = [];
+        }
+      } else if (relationships instanceof Map) {
+        neighbors = extractNeighborList(relationships.get(current.node));
+      } else if (typeof relationships === "object") {
+        neighbors = extractNeighborList(relationships[current.node]);
+      }
+
+      for (const neighbor of neighbors) {
+        iterations++;
+        if (iterations > maxIterations) {
+          return {
+            success: false,
+            path: [],
+            iterations,
+            exceededLimit: true,
+            error: `Iteration limit exceeded: path search halted after ${maxIterations} iterations.`,
+          };
+        }
+
+        if (current.pathSet.has(neighbor)) {
+          return {
+            success: false,
+            path: [],
+            iterations,
+            hasCycle: true,
+            cycleNode: neighbor,
+            error: `Malformed cycle detected: node "${neighbor}" was re-encountered.`,
+          };
+        }
+
+        const newPath = [...current.path, neighbor];
+        if (
+          neighbor === normTarget ||
+          String(neighbor) === String(normTarget)
+        ) {
+          return {
+            success: true,
+            path: newPath,
+            iterations,
+            error: null,
+          };
+        }
+
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          const nextPathSet = new Set(current.pathSet);
+          nextPathSet.add(neighbor);
+          queue.push({
+            node: neighbor,
+            path: newPath,
+            pathSet: nextPathSet,
+          });
+        }
+      }
+    }
+
+    return {
+      success: false,
+      path: [],
+      iterations,
+      error: `No path found between "${normStart}" and "${normTarget}".`,
+    };
+  }
+
+  /**
+   * Follows a linear decay chain from parent element to daughter element,
+   * guarding against malformed decay loops and runaway processing.
+   *
+   * @param {string|number} startElement - Initial radioactive element.
+   * @param {Object|Map|Function|Array} decayMap - Decay relationship mapping.
+   * @param {Object} [options={}] - Traversal options.
+   * @returns {Object} Controlled traversal result.
+   */
+  function getDecayChain(startElement, decayMap, options = {}) {
+    return traverseRelationships(startElement, decayMap, {
+      ...options,
+      strategy: "dfs",
+      allowCycles: false,
+    });
+  }
+
+  exports.convertTemperature = convertTemperature;
+  exports.calculatePhaseState = calculatePhaseState;
+  exports.parseShellElectrons = parseShellElectrons;
+  exports.filterElements = filterElements;
   exports.calculateElementStats = calculateElementStats;
   exports.traverseRelationships = traverseRelationships;
+  exports.detectCycle = detectCycle;
+  exports.getRelationshipPath = getRelationshipPath;
+  exports.getDecayChain = getDecayChain;
   exports.DEFAULT_MAX_TRAVERSAL_ITERATIONS = DEFAULT_MAX_TRAVERSAL_ITERATIONS;
   exports.DEFAULT_MAX_TRAVERSAL_DEPTH = DEFAULT_MAX_TRAVERSAL_DEPTH;
 })(typeof exports === "undefined" ? (window.PeriodicEngine = {}) : exports);
