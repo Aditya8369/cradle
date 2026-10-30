@@ -90,12 +90,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hook into drawing engine to broadcast
   const originalDraw = engine.draw.bind(engine);
   engine.draw = function (e) {
+    const prevX = this.lastX;
+    const prevY = this.lastY;
     const coords = this.getCoordinates(e);
-    // We need previous coords, which are lastX, lastY
     originalDraw(e);
     window.stateSync.broadcastDraw(
-      this.lastX,
-      this.lastY,
+      prevX,
+      prevY,
       coords.x,
       coords.y,
       this.color,
@@ -134,6 +135,22 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("btn-clear")
     .addEventListener("click", () => engine.clear());
+
+  // Keyboard shortcuts for Undo (Ctrl+Z / Cmd+Z) and Redo (Ctrl+Y / Cmd+Y / Cmd+Shift+Z)
+  window.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+      if (e.shiftKey) {
+        engine.redo();
+      } else {
+        if (engine.undo()) window.stateSync.broadcastUndo();
+      }
+      e.preventDefault();
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+      engine.redo();
+      e.preventDefault();
+    }
+  });
 
   document
     .getElementById("btn-create-offer")

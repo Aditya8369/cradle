@@ -20,7 +20,7 @@ The project is a static page with ES modules. There is no signaling server, acco
 collaborative-whiteboard/
 |--  index.html          # Canvas, toolbar, and manual signaling fields
 |--  style.css           # Responsive layout, theme colors, and toolbar styling
-|--  drawing-engine.js   # Canvas rendering, brush settings, undo/redo history
+|--  drawing-engine.js   # Canvas rendering, brush settings, stroke-based undo/redo history
 |--  state-sync.js       # Command serialization and remote command handling
 |--  webrtc-manager.js   # Peer connection, data channel, UI bootstrap
 |--  ARCHITECTURE.md     # This document
@@ -48,13 +48,13 @@ There is no central authority. Each peer applies its own local strokes immediate
 
 ## Component Breakdown
 
-| Component       | Responsibility                                                                                                        |
-| --------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `DrawingEngine` | Sizes the canvas, handles pointer input, draws segments, stores snapshots for undo/redo, and applies remote segments. |
-| `StateSync`     | Builds `DRAW`, `SYNC`, and `CLEAR` commands, sends them, and dispatches incoming messages to the engine.              |
-| `WebRTCManager` | Creates the `RTCPeerConnection`, exchanges SDP, manages the data channel, and reports connection state.               |
-| `index.html`    | Provides the canvas, color and brush controls, undo/redo/clear buttons, and local and remote SDP text areas.          |
-| `style.css`     | Defines the responsive workspace, toolbar, connection status, and light/dark palette.                                 |
+| Component       | Responsibility                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DrawingEngine` | Sizes the canvas, handles pointer input, tracks vector stroke paths with point arrays, renders segments, and manages deterministic LIFO local stroke-by-stroke undo/redo. |
+| `StateSync`     | Builds `DRAW`, `SYNC`, and `CLEAR` commands, sends them, and dispatches incoming messages to the engine.                                                                  |
+| `WebRTCManager` | Creates the `RTCPeerConnection`, exchanges SDP, manages the data channel, and reports connection state.                                                                   |
+| `index.html`    | Provides the canvas, color and brush controls, undo/redo/clear buttons, and local and remote SDP text areas.                                                              |
+| `style.css`     | Defines the responsive workspace, toolbar, connection status, and light/dark palette.                                                                                     |
 
 ## Data Flow / Execution Flow
 
@@ -63,18 +63,18 @@ There is no central authority. Each peer applies its own local strokes immediate
 3. The host sends that SDP to the guest through an external channel such as chat.
 4. The guest pastes the offer, presses Accept, and generates an answer. The host pastes the answer back and completes the connection.
 5. When the data channel opens, the status indicator changes to connected.
-6. A local pointer move draws a segment and calls `StateSync.sendDraw()` with the coordinates, color, and width.
+6. A local pointer move draws a segment and calls `StateSync.broadcastDraw()` with previous and current coordinates, color, and width.
 7. The remote peer receives the JSON command, `StateSync` calls `engine.drawRemote()`, and the segment appears without touching the remote undo history.
-8. Undo on the local peer restores a previous snapshot and broadcasts the current canvas as a `SYNC` command, so the other peer converges on the same image.
-9. Clear broadcasts a `CLEAR` command after resetting the local canvas.
+8. Undo on the local peer removes the last local stroke from the stroke stack, redraws the remaining strokes, and broadcasts the current canvas as a `SYNC` command, so the other peer converges on the same image.
+9. Clear broadcasts a `CLEAR` command after resetting the local canvas and stroke stacks.
 
 ## Key Features
 
 - **Serverless collaboration** - WebRTC data channels carry drawing commands directly between browsers.
 - **Manual signaling** - Local and remote SDP text areas make the offer/answer exchange visible and debuggable.
 - **Freehand drawing** - Mouse and touch events produce smooth line segments with configurable color and width.
-- **Local undo and redo** - Snapshot history supports stepping backward and forward through local edits.
-- **Remote-safe application** - Incoming segments bypass the local history so they cannot be undone accidentally.
+- **Local stroke-by-stroke undo and redo** - Vector stroke stack supports removing exactly one stroke at a time (last-in, first-out) without wiping prior strokes or blanking the canvas.
+- **Remote-safe application** - Incoming segments bypass the local undo history so they cannot be undone accidentally.
 - **State synchronization** - A full-canvas `SYNC` command resolves divergence after undo.
 - **Canvas clear** - Clears the surface locally and notifies the peer.
 - **Connection status** - The UI reports whether the data channel is open.
@@ -99,29 +99,30 @@ There is no central authority. Each peer applies its own local strokes immediate
 
 ### `drawing-engine.js`
 
-- **`resizeCanvas()`** - preserves the current image while resizing the backing store.
-- **`startDrawing()` / `draw()` / `stopDrawing()`** - manage local pointer state and segment rendering.
+- **`resizeCanvas()`** - resizes backing store to container dimensions and redraws all active strokes crisply.
+- **`startDrawing()` / `draw()` / `stopDrawing()`** - manage local pointer and touch state, accumulate stroke coordinates, and commit completed strokes to the stroke stack.
 - **`getCoordinates()`** - converts client coordinates into canvas space.
-- **`drawSegment()`** - applies the current stroke style and draws a line.
-- **`saveState()`** - pushes a `toDataURL` snapshot and truncates the redo branch.
-- **`undo()` / `redo()`** - move the history pointer and restore the corresponding image.
-- **`drawRemote()`** - renders a remote segment without saving local history.
-- **`clear()`** - resets the canvas and history.
+- **`renderStroke()`** - renders a single stroke object with its recorded points, color, and line width.
+- **`redraw()`** - clears canvas and replays all strokes in stack order.
+- **`saveState()`** - pushes a `toDataURL` snapshot to `history` for WebRTC state sync compatibility.
+- **`undo()` / `redo()`** - pop and push individual strokes between `strokes` and `redoStack`, and redraw remaining strokes one by one.
+- **`drawRemote()`** - renders a remote segment without entering local undo history.
+- **`clear()`** - resets stroke stacks and clears canvas.
 
 ### `state-sync.js`
 
-- **`sendDraw()`** - packages a segment as `{ type: "DRAW", payload: ... }`.
-- **`sendClear()`** - broadcasts a clear action.
+- **`broadcastDraw()`** - packages a segment as `{ type: "DRAW", payload: ... }`.
+- **`broadcastClear()`** - broadcasts a clear action.
 - **`broadcastUndo()`** - sends the current canvas snapshot as a `SYNC` command.
-- **`handleMessage()`** - parses incoming JSON and dispatches `DRAW`, `SYNC`, or `CLEAR` to the engine.
+- **`handleIncomingCommand()`** - parses incoming JSON and dispatches `DRAW`, `SYNC`, or `CLEAR` to the engine.
 
 ### `webrtc-manager.js`
 
 - **`WebRTCManager`** - wraps the peer connection, ICE configuration, and data channel.
 - **`createOffer()`** - creates the channel and offer, then waits for ICE gathering.
 - **`acceptConnection()`** - parses the remote description and creates an answer when needed.
-- **`send()`** - guards against a missing or closed data channel.
-- **Bootstrap** - creates the engine and sync objects and binds the toolbar and signaling controls.
+- **`sendData()`** - guards against a missing or closed data channel.
+- **Bootstrap** - creates the engine and sync objects, binds keyboard shortcuts (Ctrl+Z / Ctrl+Y), and wires toolbar controls.
 
 ### `style.css`
 
@@ -136,7 +137,7 @@ There is no central authority. Each peer applies its own local strokes immediate
 ## Design Decisions
 
 - **WebRTC data channel over WebSocket**: A data channel keeps the app serverless and demonstrates NAT traversal, at the cost of manual signaling.
-- **Snapshot history**: Storing `toDataURL` snapshots is simple and reliable for a prototype. A command log would use less memory but requires more bookkeeping.
+- **Stroke-based vector history**: Storing strokes as point arrays provides deterministic, synchronous, single-stroke-at-a-time undo and redo without asynchronous image decoding glitches or canvas blanking.
 - **Remote draws skip history**: Only local actions enter the undo stack. This prevents one peer from undoing another peer's work.
 - **Full-state undo sync**: Sending the whole canvas after undo is bandwidth-heavy but avoids implementing a CRDT or inverse commands.
 - **Explicit signaling UI**: Exposing SDP makes the connection process transparent and avoids hiding a server dependency.
@@ -155,7 +156,6 @@ The project has no npm packages, CDN scripts, fonts, or backend. A TURN server w
 ## Future Improvements
 
 - Add an automatic signaling channel using WebSocket or a shareable room code.
-- Replace snapshot history with an operation log and inverse commands.
 - Add collaborative cursors and presence indicators.
 - Support an eraser tool and shape primitives.
 - Compress `SYNC` payloads and send incremental snapshots.
@@ -179,7 +179,7 @@ The project has no npm packages, CDN scripts, fonts, or backend. A TURN server w
 - Both peers must use a modern browser with WebRTC support. Check `RTCPeerConnection` before debugging signaling.
 - ICE gathering can take a few seconds. The offer and answer are only complete after gathering finishes.
 - Keep `DRAW` payloads small. Coordinates are in canvas pixels, so both peers should use the same canvas dimensions.
-- The engine's history pointer and length must stay consistent when adding new commands. Review `saveState()`, `undo()`, and `redo()` together.
+- The engine's stroke stacks and history pointer must stay consistent when adding new commands. Review `startDrawing()`, `draw()`, `stopDrawing()`, `undo()`, and `redo()` together.
 - Run `npm run validate:architecture` from the repository root after editing this file.
 
 ## License & Attribution
