@@ -73,6 +73,30 @@ function rulesFor(root, name) {
   return entry.issues.map(i => i.rule);
 }
 
+
+test("missing, empty, or generic <title> is reported", () => {
+  const root = makeRoot({
+    "games/no-title": goodMini({
+      "index.html": GOOD_HTML.replace(/<title>.*?<\/title>/, ""),
+    }),
+    "games/empty-title": goodMini({
+      "index.html": GOOD_HTML.replace(
+        /<title>.*?<\/title>/,
+        "<title>   </title>"
+      ),
+    }),
+    "games/generic-title": goodMini({
+      "index.html": GOOD_HTML.replace(
+        /<title>.*?<\/title>/,
+        "<title>Untitled</title>"
+      ),
+    }),
+  });
+  assert.ok(rulesFor(root, "no-title").includes("missing-title"));
+  assert.ok(rulesFor(root, "empty-title").includes("missing-title"));
+  assert.ok(rulesFor(root, "generic-title").includes("generic-title"));
+});
+
 test("a compliant mini produces no problems", () => {
   const root = makeRoot({ "games/good-mini": goodMini() });
   const { results, summary } = validateAll(root);

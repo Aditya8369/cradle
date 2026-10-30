@@ -80,6 +80,21 @@ for (const project of diskProjects) {
       issues.push("Missing <head> section");
     }
 
+    
+    // ── <title> tag ──────────────────────────────────────────
+    const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+
+    await t.test("<title> tag exists and is descriptive", () => {
+      assert.ok(titleMatch !== null, `Missing <title> tag in ${relIndexPath}`);
+      const titleText = titleMatch[1].trim();
+      assert.ok(titleText.length > 0, `<title> tag is empty in ${relIndexPath}`);
+      assert.ok(
+        !/^(document|untitled|index|mini|project|app)$/i.test(titleText) &&
+          titleText.length >= 2,
+        `<title> "${titleText}" is generic or non-descriptive in ${relIndexPath}`
+      );
+    });
+
     // ── Canonical link ───────────────────────────────────────
     const canonicals = getCanonicalValues(html);
 

@@ -12,6 +12,7 @@ const {
   validateProjectIndexEntries,
   validateProjectNavigation,
   validateProjectFavicons,
+  validateProjectTitles,
   validateMiniProjects,
 } = require("../scripts/validate-mini-projects");
 
@@ -271,6 +272,79 @@ test("validateProjectFavicons reports missing or broken favicon references in mi
   );
   assert.equal(
     issues.some(i => i.type === "INVALID_FAVICON" && i.project === "empty-fav"),
+    true
+  );
+});
+
+
+test("validateProjectTitles reports missing, empty, and generic titles", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cradle-mini-titles-"));
+  const miniMissing = path.join(root, "missing-title");
+  const miniEmpty = path.join(root, "empty-title");
+  const miniGeneric = path.join(root, "generic-title");
+  const miniValid = path.join(root, "valid-title");
+
+  fs.mkdirSync(miniMissing, { recursive: true });
+  fs.mkdirSync(miniEmpty, { recursive: true });
+  fs.mkdirSync(miniGeneric, { recursive: true });
+  fs.mkdirSync(miniValid, { recursive: true });
+
+  fs.writeFileSync(
+    path.join(miniMissing, "index.html"),
+    "<!doctype html><html><head></head><body></body></html>"
+  );
+  fs.writeFileSync(
+    path.join(miniEmpty, "index.html"),
+    "<!doctype html><html><head><title>   </title></head><body></body></html>"
+  );
+  fs.writeFileSync(
+    path.join(miniGeneric, "index.html"),
+    "<!doctype html><html><head><title>Untitled</title></head><body></body></html>"
+  );
+  fs.writeFileSync(
+    path.join(miniValid, "index.html"),
+    "<!doctype html><html><head><title>Descriptive Game</title></head><body></body></html>"
+  );
+
+  const diskProjects = [
+    {
+      name: "missing-title",
+      relPath: "projects/test/missing-title/",
+      absPath: miniMissing,
+    },
+    {
+      name: "empty-title",
+      relPath: "projects/test/empty-title/",
+      absPath: miniEmpty,
+    },
+    {
+      name: "generic-title",
+      relPath: "projects/test/generic-title/",
+      absPath: miniGeneric,
+    },
+    {
+      name: "valid-title",
+      relPath: "projects/test/valid-title/",
+      absPath: miniValid,
+    },
+  ];
+
+  const issues = validateProjectTitles(diskProjects);
+  assert.equal(issues.length, 3);
+  assert.equal(
+    issues.some(
+      i => i.type === "MISSING_TITLE" && i.project === "missing-title"
+    ),
+    true
+  );
+  assert.equal(
+    issues.some(i => i.type === "EMPTY_TITLE" && i.project === "empty-title"),
+    true
+  );
+  assert.equal(
+    issues.some(
+      i => i.type === "GENERIC_TITLE" && i.project === "generic-title"
+    ),
     true
   );
 });
