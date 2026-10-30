@@ -26,10 +26,26 @@ function clearAudioBlocked() {
   }
 }
 
+function showSampleError(err) {
+  if (status) {
+    status.classList.add("audio-blocked");
+    status.setAttribute("role", "alert");
+    status.textContent = `Sample Error: ${err.message || err}`;
+    status.style.cursor = "pointer";
+    status.title = "Click to retry or dismiss error";
+  }
+}
+
 if (typeof PercussionEngine.setOnBlockedCallback === "function") {
   PercussionEngine.setOnBlockedCallback(blocked => {
     if (blocked) showAudioBlocked();
     else clearAudioBlocked();
+  });
+}
+
+if (typeof PercussionEngine.onSampleError === "function") {
+  PercussionEngine.onSampleError(err => {
+    showSampleError(err);
   });
 }
 

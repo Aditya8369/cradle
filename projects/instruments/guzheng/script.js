@@ -27,6 +27,16 @@ function clearAudioBlocked() {
   }
 }
 
+
+if (typeof GuzhengEngine.onSampleError === "function") {
+  GuzhengEngine.onSampleError(err => {
+    showAudioBlocked();
+    if (status) {
+      status.textContent = `Sample Error: ${err.message}`;
+    }
+  });
+}
+
 if (typeof GuzhengEngine.setOnBlockedCallback === "function") {
   GuzhengEngine.setOnBlockedCallback(blocked => {
     if (blocked) showAudioBlocked();

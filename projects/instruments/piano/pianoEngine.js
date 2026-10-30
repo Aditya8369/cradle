@@ -210,12 +210,53 @@
   let audioContext = null;
   const activeVoices = new Map();
 
+  class SampleLoadError extends Error {
+    constructor(
+      message,
+      { type = "UNKNOWN", url = "", status = null, originalError = null } = {}
+    ) {
+      super(message);
+      this.name = "SampleLoadError";
+      this.type = type; // 'NOT_FOUND' | 'CORS' | 'NETWORK' | 'DECODE' | 'FORBIDDEN' | 'SERVER_ERROR' | 'INVALID_INPUT' | 'ABORTED'
+      this.url = url;
+      this.status = status;
+      this.originalError = originalError;
+    }
+  }
+
+  const sampleBuffers = new Map();
+  const sampleLoadErrors = new Map();
+  const sampleErrorListeners = [];
+
+  function onSampleError(callback) {
+    if (typeof callback === "function") {
+      sampleErrorListeners.push(callback);
+    }
+    return () => {
+      const idx = sampleErrorListeners.indexOf(callback);
+      if (idx !== -1) sampleErrorListeners.splice(idx, 1);
+    };
+  }
+
+  function emitSampleError(error) {
+    sampleErrorListeners.forEach(listener => {
+      try {
+        listener(error);
+      } catch (cbErr) {
+        console.error("Error in PianoEngine sample error listener:", cbErr);
+      }
+    });
+  }
+
+
   function getAudioContext() {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" && typeof globalThis === "undefined") {
       return null;
     }
 
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const AudioContext =
+      (typeof window !== "undefined" && (window.AudioContext || window.webkitAudioContext)) ||
+      (typeof globalThis !== "undefined" && (globalThis.AudioContext || globalThis.webkitAudioContext));
 
     if (!AudioContext) {
       return null;
@@ -390,6 +431,34 @@
 
     const time = context.currentTime;
 
+    const sampleBuffer = sampleBuffers.get(note);
+    if (sampleBuffer) {
+      try {
+        const source = context.createBufferSource();
+        const gain = context.createGain();
+        gain.gain.setValueAtTime(0.8, time);
+        source.buffer = sampleBuffer;
+        source.connect(gain);
+        gain.connect(context.destination);
+        source.start(time);
+        const voice = {
+          isSample: true,
+          source,
+          output: gain,
+          oscillators: [],
+        };
+        source.onended = () => {
+          if (activeVoices.get(note) === voice) {
+            activeVoices.delete(note);
+          }
+        };
+        activeVoices.set(note, voice);
+        return true;
+      } catch (err) {
+        console.warn(`Failed to play sample for note "${note}", falling back to synthesis:`, err);
+      }
+    }
+
     const frequency = NOTE_FREQUENCIES[note];
 
     const voice = createVoice(context, frequency, time);
@@ -418,6 +487,24 @@
 
     const time = context.currentTime;
 
+    if (voice.isSample) {
+      if (voice.output && voice.output.gain) {
+        voice.output.gain.cancelScheduledValues(time);
+        voice.output.gain.setValueAtTime(
+          Math.max(voice.output.gain.value, 0.0001),
+          time
+        );
+        voice.output.gain.exponentialRampToValueAtTime(0.0001, time + 0.1);
+      }
+      if (voice.source) {
+        try {
+          voice.source.stop(time + 0.12);
+        } catch (_) {}
+      }
+      activeVoices.delete(note);
+      return true;
+    }
+
     voice.output.gain.cancelScheduledValues(time);
 
     voice.output.gain.setValueAtTime(
@@ -445,17 +532,23 @@
       return false;
     }
 
+    const voice = activeVoices.get(note);
+
+    if (!voice) {
+      return false;
+    }
+
+    if (voice.isSample) {
+      return true;
+    }
+
     const context = getAudioContext();
 
     if (!context) {
       return false;
     }
 
-    const voice = activeVoices.get(note);
-
-    if (!voice) {
-      return false;
-    }
+    voice.output.gain.cancelScheduledValues(context.currentTime);
 
     const time = context.currentTime;
 
@@ -1007,7 +1100,258 @@
     return Math.round(69 + 12 * Math.log2(freq / 440));
   }
 
+
+  async function loadSample(note, url, options = {}) {
+    if (!isValidNote(note)) {
+      const err = new SampleLoadError(
+        `Invalid piano note identifier "${note}". Must be a valid note name between C3 and E6 (e.g. "C4", "F#4").`,
+        { type: "INVALID_INPUT", url }
+      );
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    const context = options.audioContext || getAudioContext();
+    if (!context) {
+      const err = new SampleLoadError(
+        `Cannot load audio sample: AudioContext is not available or supported in this environment.`,
+        { type: "INVALID_INPUT", url }
+      );
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    const fetchFn =
+      options.fetchFn ||
+      (typeof fetch === "function" ? fetch : null) ||
+      (typeof globalThis !== "undefined" && typeof globalThis.fetch === "function"
+        ? globalThis.fetch
+        : null);
+
+    if (!fetchFn) {
+      const err = new SampleLoadError(
+        `Fetch API is not available in the current environment to load audio sample "${url}".`,
+        { type: "NETWORK", url }
+      );
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    if (!url || typeof url !== "string" || !url.trim()) {
+      const err = new SampleLoadError(
+        `Invalid audio sample URL provided for note "${note}": expected non-empty string.`,
+        { type: "INVALID_INPUT", url }
+      );
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    const trimmedUrl = url.trim();
+
+    let response;
+    try {
+      const fetchOpts = {
+        mode: options.corsMode || "cors",
+        ...options.fetchOptions,
+      };
+      response = await fetchFn(trimmedUrl, fetchOpts);
+    } catch (fetchErr) {
+      const isAborted = fetchErr.name === "AbortError";
+      const msg = fetchErr.message || "";
+      const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+      const isCors =
+        !isOffline &&
+        (fetchErr.name === "SecurityError" ||
+          msg.toLowerCase().includes("cors") ||
+          msg.toLowerCase().includes("cross-origin") ||
+          msg.includes("Failed to fetch") ||
+          msg.includes("NetworkError"));
+
+      let errType = isAborted ? "ABORTED" : isCors ? "CORS" : "NETWORK";
+      let errMsg = isAborted
+        ? `Audio sample request for note "${note}" (${trimmedUrl}) was aborted.`
+        : isCors
+          ? `Failed to load audio sample for note "${note}" from "${trimmedUrl}": Cross-Origin Request Blocked (CORS restriction). The audio sample server must allow cross-origin requests via Access-Control-Allow-Origin headers.`
+          : `Failed to load audio sample for note "${note}" from "${trimmedUrl}": Network failure (${msg || "connection refused or host unreachable"}). Verify network connectivity and server availability.`;
+
+      const err = new SampleLoadError(errMsg, {
+        type: errType,
+        url: trimmedUrl,
+        originalError: fetchErr,
+      });
+
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (typeof options.onError === "function") options.onError(err);
+      if (!options.silent) console.error(`[PianoEngine] ${errMsg}`);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: errMsg, errorDetails: err, type: errType, url: trimmedUrl };
+    }
+
+    if (!response.ok) {
+      const status = response.status;
+      const statusText = response.statusText || "";
+      let errType = "HTTP_ERROR";
+      let errMsg = "";
+
+      if (status === 404) {
+        errType = "NOT_FOUND";
+        errMsg = `Failed to load audio sample for note "${note}" from "${trimmedUrl}": File not found (HTTP 404). Ensure the sample audio file exists at the specified URL.`;
+      } else if (status === 403) {
+        errType = "FORBIDDEN";
+        errMsg = `Failed to load audio sample for note "${note}" from "${trimmedUrl}": Access denied (HTTP 403). Permissions or credentials required.`;
+      } else if (status >= 500) {
+        errType = "SERVER_ERROR";
+        errMsg = `Failed to load audio sample for note "${note}" from "${trimmedUrl}": Server error (HTTP ${status} ${statusText}). The audio host encountered an internal error.`;
+      } else {
+        errMsg = `Failed to load audio sample for note "${note}" from "${trimmedUrl}": HTTP ${status} (${statusText || "Request failed"}).`;
+      }
+
+      const err = new SampleLoadError(errMsg, {
+        type: errType,
+        url: trimmedUrl,
+        status,
+        originalError: new Error(`HTTP ${status} ${statusText}`),
+      });
+
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (typeof options.onError === "function") options.onError(err);
+      if (!options.silent) console.error(`[PianoEngine] ${errMsg}`);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: errMsg, errorDetails: err, type: errType, url: trimmedUrl, status };
+    }
+
+    let arrayBuffer;
+    try {
+      arrayBuffer = await response.arrayBuffer();
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        const err = new SampleLoadError(
+          `Failed to load audio sample for note "${note}" from "${trimmedUrl}": Received empty audio payload (0 bytes).`,
+          { type: "DECODE", url: trimmedUrl }
+        );
+        sampleLoadErrors.set(note, err);
+        emitSampleError(err);
+        if (options.throwOnError) throw err;
+        return { success: false, note, error: err.message, errorDetails: err, type: "DECODE", url: trimmedUrl };
+      }
+    } catch (readErr) {
+      const err = new SampleLoadError(
+        `Failed to read audio data stream for note "${note}" from "${trimmedUrl}": ${readErr.message}`,
+        { type: "NETWORK", url: trimmedUrl, originalError: readErr }
+      );
+      sampleLoadErrors.set(note, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, note, error: err.message, errorDetails: err, type: "NETWORK", url: trimmedUrl };
+    }
+
+    return new Promise((resolve, reject) => {
+      function onDecodeSuccess(decoded) {
+        sampleBuffers.set(note, decoded);
+        sampleLoadErrors.delete(note);
+        resolve({
+          success: true,
+          note,
+          buffer: decoded,
+          url: trimmedUrl,
+          error: null,
+        });
+      }
+
+      function onDecodeFailure(decodeErr) {
+        const err = new SampleLoadError(
+          `Failed to decode audio sample for note "${note}" from "${trimmedUrl}": The audio file is corrupted or in an unsupported format.`,
+          { type: "DECODE", url: trimmedUrl, originalError: decodeErr }
+        );
+        sampleLoadErrors.set(note, err);
+        emitSampleError(err);
+        if (typeof options.onError === "function") options.onError(err);
+        if (!options.silent) console.error(`[PianoEngine] ${err.message}`);
+        if (options.throwOnError) {
+          reject(err);
+        } else {
+          resolve({
+            success: false,
+            note,
+            buffer: null,
+            error: err.message,
+            errorDetails: err,
+            type: "DECODE",
+            url: trimmedUrl,
+          });
+        }
+      }
+
+      try {
+        const bufferCopy = arrayBuffer.slice(0);
+        const promise = context.decodeAudioData(
+          bufferCopy,
+          onDecodeSuccess,
+          onDecodeFailure
+        );
+
+        if (promise && typeof promise.then === "function") {
+          promise.then(onDecodeSuccess).catch(onDecodeFailure);
+        }
+      } catch (exc) {
+        onDecodeFailure(exc);
+      }
+    });
+  }
+
+  async function loadSamples(sampleMap, options = {}) {
+    const results = {};
+    if (!sampleMap || typeof sampleMap !== "object") {
+      return results;
+    }
+
+    await Promise.all(
+      Object.entries(sampleMap).map(async ([note, url]) => {
+        results[note] = await loadSample(note, url, {
+          ...options,
+          throwOnError: false,
+        });
+      })
+    );
+
+    return results;
+  }
+
+  function getSample(note) {
+    return sampleBuffers.get(note) || null;
+  }
+
+  function hasSample(note) {
+    return sampleBuffers.has(note);
+  }
+
+  function getSampleErrors() {
+    return new Map(sampleLoadErrors);
+  }
+
+  function clearSamples() {
+    sampleBuffers.clear();
+    sampleLoadErrors.clear();
+  }
+
   return {
+    SampleLoadError,
+    loadSample,
+    loadSamples,
+    getSample,
+    hasSample,
+    getSampleErrors,
+    clearSamples,
+    onSampleError,
     NOTE_FREQUENCIES,
     KEY_TO_NOTE,
     NOTE_TO_KEY,
