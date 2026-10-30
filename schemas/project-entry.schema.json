@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProjectEntry",
+  "description": "JSON Schema for an individual Cradle project metadata entry.",
+  "type": "object",
+  "required": ["title", "category", "path"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable display title of the project."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "aiml",
+        "dev-tools",
+        "editor",
+        "file-tools",
+        "games",
+        "instruments",
+        "math",
+        "misc",
+        "productivity"
+      ],
+      "description": "Supported project category."
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^projects/[a-z0-9-]+/[a-z0-9-]+/$",
+      "description": "Relative project folder path starting with 'projects/' and ending with a trailing slash."
+    },
+    "dateAdded": {
+      "type": ["string", "null"],
+      "description": "ISO 8601 date string when project was first introduced, or null."
+    },
+    "thumbnailHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}$",
+      "description": "First 8 hex characters of the SHA-256 hash of thumbnail.svg."
+    }
+  },
+  "additionalProperties": false
+}
+

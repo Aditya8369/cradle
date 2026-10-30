@@ -8,6 +8,79 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 const PROJECTS_DIR = path.join(REPO_ROOT, "projects");
 const OUTPUT_FILE = path.join(REPO_ROOT, "data", "projects.json");
 
+/**
+ * Standard list of supported project categories in Cradle.
+ */
+const SUPPORTED_CATEGORIES = Object.freeze([
+  "aiml",
+  "dev-tools",
+  "editor",
+  "file-tools",
+  "games",
+  "instruments",
+  "math",
+  "misc",
+  "productivity",
+]);
+
+/**
+ * JSON Schema for an individual project entry.
+ */
+const PROJECT_ENTRY_SCHEMA = Object.freeze({
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "ProjectEntry",
+  description: "JSON Schema for an individual Cradle project metadata entry.",
+  type: "object",
+  required: ["title", "category", "path"],
+  properties: {
+    title: {
+      type: "string",
+      minLength: 1,
+      description: "Human-readable display title of the project.",
+    },
+    category: {
+      type: "string",
+      enum: SUPPORTED_CATEGORIES,
+      description: "Supported project category.",
+    },
+    path: {
+      type: "string",
+      pattern: "^projects/[a-z0-9-]+/[a-z0-9-]+/$",
+      description:
+        "Relative project folder path starting with 'projects/' and ending with a trailing slash.",
+    },
+    dateAdded: {
+      type: ["string", "null"],
+      description:
+        "ISO 8601 date string when project was first introduced, or null.",
+    },
+    thumbnailHash: {
+      type: "string",
+      pattern: "^[0-9a-f]{8}$",
+      description: "First 8 hex characters of the SHA-256 hash of thumbnail.svg.",
+    },
+  },
+  additionalProperties: false,
+});
+
+/**
+ * JSON Schema for the complete Cradle projects registry array.
+ */
+const PROJECTS_REGISTRY_SCHEMA = Object.freeze({
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "ProjectsRegistry",
+  description:
+    "JSON Schema for the complete Cradle projects registry array (data/projects.json).",
+  type: "array",
+  items: PROJECT_ENTRY_SCHEMA,
+});
+
+const ALLOWED_PROJECT_FIELDS = Object.freeze(
+  new Set(["title", "category", "path", "dateAdded", "thumbnailHash"])
+);
+
+const PROJECT_PATH_REGEX = /^projects\/([a-z0-9-]+)\/([a-z0-9-]+)\/$/;
+
 // Date a project was first added, taken from the commit that introduced its
 // folder. This is what powers the "New" badge (isNewProject in script.js);
 // without it every project's dateAdded is undefined and the badge never shows.
@@ -196,6 +269,39 @@ const CATEGORY_STYLES = {
       <circle cx="600" cy="337" r="150" stroke-dasharray="8 8" />
     </g>`,
   },
+  editor: {
+    bgStart: "#1a0b2e",
+    bgEnd: "#2e1065",
+    accent: "#f59e0b",
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />`,
+    pattern: `<g opacity="0.12" stroke="#f59e0b" stroke-width="1.5" fill="none">
+      <rect x="100" y="100" width="300" height="200" rx="8" />
+      <line x1="140" y1="150" x2="360" y2="150" />
+      <line x1="140" y1="190" x2="300" y2="190" />
+      <line x1="140" y1="230" x2="340" y2="230" />
+    </g>`,
+  },
+  instruments: {
+    bgStart: "#1c0a1a",
+    bgEnd: "#4a044e",
+    accent: "#ec4899",
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />`,
+    pattern: `<g opacity="0.15" stroke="#ec4899" stroke-width="1.5" fill="none">
+      <circle cx="300" cy="300" r="120" />
+      <circle cx="900" cy="300" r="120" />
+      <path d="M 300,180 L 900,180 M 300,420 L 900,420" />
+    </g>`,
+  },
+  math: {
+    bgStart: "#03071e",
+    bgEnd: "#1e1b4b",
+    accent: "#6366f1",
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />`,
+    pattern: `<g opacity="0.12" stroke="#6366f1" stroke-width="1.5" fill="none">
+      <circle cx="600" cy="337" r="250" />
+      <polygon points="600,100 800,450 400,450" />
+    </g>`,
+  },
 };
 
 const defaultStyle = {
@@ -330,6 +436,321 @@ function generateSvgThumbnail(title, categoryName, projectAbsPath) {
   fs.writeFileSync(path.join(projectAbsPath, THUMBNAIL_FILE), svgContent);
 }
 
+/**
+ * Validates a single project entry against the JSON schema and repository constraints.
+ *
+ * @param {object} entry - The project entry object to validate.
+ * @param {object} [options] - Validation options.
+ * @param {string} [options.repoRoot] - Repository root directory for disk existence checks.
+ * @param {boolean} [options.checkDisk=true] - Whether to verify directory existence on disk.
+ * @param {boolean} [options.checkEntrypoint=false] - Whether to verify presence of index.html file.
+ * @param {string[]} [options.supportedCategories] - Array of allowed category names.
+ * @returns {{ valid: boolean, errors: string[] }} Validation result with actionable errors.
+ */
+function validateProjectEntry(entry, options = {}) {
+  const errors = [];
+  const repoRoot = options.repoRoot || REPO_ROOT;
+  const checkDisk = options.checkDisk !== false;
+  const checkEntrypoint = options.checkEntrypoint === true;
+  const allowedCategories = options.supportedCategories || SUPPORTED_CATEGORIES;
+
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+    return {
+      valid: false,
+      errors: [
+        `Project entry must be a valid non-null object, received ${
+          entry === null
+            ? "null"
+            : Array.isArray(entry)
+              ? "array"
+              : typeof entry
+        }.`,
+      ],
+    };
+  }
+
+  // Check for unexpected extra properties (strict JSON schema enforcement)
+  for (const key of Object.keys(entry)) {
+    if (!ALLOWED_PROJECT_FIELDS.has(key)) {
+      errors.push(
+        `Unexpected additional property "${key}" in project entry for "${
+          entry.title || entry.path || "unnamed"
+        }". Allowed properties are: ${[...ALLOWED_PROJECT_FIELDS].join(", ")}.`
+      );
+    }
+  }
+
+  // Required Field: title
+  const hasTitle =
+    "title" in entry && entry.title !== undefined && entry.title !== null;
+  if (!hasTitle) {
+    errors.push(
+      `Missing required field "title" in project entry at "${
+        entry.path || "unknown path"
+      }". Each project must specify a non-empty string title.`
+    );
+  } else if (typeof entry.title !== "string") {
+    errors.push(
+      `Invalid type for field "title" in project entry at "${
+        entry.path || "unknown path"
+      }": expected string, received ${typeof entry.title}.`
+    );
+  } else if (entry.title.trim() === "") {
+    errors.push(
+      `Required field "title" cannot be empty or whitespace only in project entry at "${
+        entry.path || "unknown path"
+      }". Provide a human-readable project title.`
+    );
+  }
+
+  // Required Field: category
+  const hasCategory =
+    "category" in entry &&
+    entry.category !== undefined &&
+    entry.category !== null;
+  if (!hasCategory) {
+    errors.push(
+      `Missing required field "category" for project "${
+        entry.title || entry.path || "unnamed"
+      }". Each project must declare an approved category.`
+    );
+  } else if (typeof entry.category !== "string") {
+    errors.push(
+      `Invalid type for field "category" in project entry "${
+        entry.title || entry.path || "unnamed"
+      }": expected string, received ${typeof entry.category}.`
+    );
+  } else if (entry.category.trim() === "") {
+    errors.push(
+      `Required field "category" cannot be empty or whitespace only in project entry "${
+        entry.title || entry.path || "unnamed"
+      }".`
+    );
+  } else if (!allowedCategories.includes(entry.category)) {
+    errors.push(
+      `Unsupported category "${entry.category}" for project "${
+        entry.title || entry.path || "unnamed"
+      }". Supported categories are: [${allowedCategories.join(
+        ", "
+      )}]. Ensure the project directory is located within an approved category folder.`
+    );
+  }
+
+  // Required Field: path
+  const hasPath =
+    "path" in entry && entry.path !== undefined && entry.path !== null;
+  if (!hasPath) {
+    errors.push(
+      `Missing required field "path" for project "${
+        entry.title || "unnamed"
+      }". Each project must specify a relative path starting with "projects/".`
+    );
+  } else if (typeof entry.path !== "string") {
+    errors.push(
+      `Invalid type for field "path" in project entry "${
+        entry.title || "unnamed"
+      }": expected string, received ${typeof entry.path}.`
+    );
+  } else if (entry.path.trim() === "") {
+    errors.push(
+      `Required field "path" cannot be empty or whitespace only in project entry "${
+        entry.title || "unnamed"
+      }". Path must be formatted as "projects/<category>/<project-name>/".`
+    );
+  } else {
+    const rawPath = entry.path;
+
+    if (rawPath.includes("\\")) {
+      errors.push(
+        `Invalid path format for "${rawPath}": project paths must use forward slashes (/), not backslashes (\\).`
+      );
+    }
+
+    if (rawPath.includes("..")) {
+      errors.push(
+        `Security violation: path traversal ("..") is forbidden in project path "${rawPath}".`
+      );
+    }
+
+    if (!rawPath.startsWith("projects/")) {
+      errors.push(
+        `Invalid project path "${rawPath}": path must begin with "projects/".`
+      );
+    }
+
+    if (!rawPath.endsWith("/")) {
+      errors.push(
+        `Invalid project path "${rawPath}": path must end with a trailing slash "/".`
+      );
+    }
+
+    const pathMatch = rawPath.match(PROJECT_PATH_REGEX);
+    if (!pathMatch) {
+      errors.push(
+        `Invalid project path format "${rawPath}": expected format "projects/<category>/<project-slug>/". Segments must contain only lowercase alphanumeric characters and hyphens.`
+      );
+    } else {
+      const [, pathCategory] = pathMatch;
+      if (
+        typeof entry.category === "string" &&
+        entry.category &&
+        pathCategory !== entry.category
+      ) {
+        errors.push(
+          `Path category mismatch for project "${
+            entry.title || rawPath
+          }": path indicates category "${pathCategory}", but entry declared category "${
+            entry.category
+          }". Expected path to start with "projects/${entry.category}/".`
+        );
+      }
+    }
+
+    // Disk existence check
+    if (checkDisk) {
+      const fullPath = path.resolve(repoRoot, rawPath);
+      if (!fs.existsSync(fullPath)) {
+        errors.push(
+          `Project path does not exist on disk: "${rawPath}" (resolved: "${fullPath}"). Check that the directory exists.`
+        );
+      } else if (!fs.statSync(fullPath).isDirectory()) {
+        errors.push(
+          `Project path is not a directory: "${rawPath}" (resolved: "${fullPath}").`
+        );
+      } else if (checkEntrypoint) {
+        const entrypointPath = path.join(fullPath, "index.html");
+        if (!fs.existsSync(entrypointPath)) {
+          errors.push(
+            `Project entrypoint missing for "${rawPath}": expected "${path.relative(
+              repoRoot,
+              entrypointPath
+            )}".`
+          );
+        } else if (!fs.statSync(entrypointPath).isFile()) {
+          errors.push(
+            `Project entrypoint is not a file for "${rawPath}": "${path.relative(
+              repoRoot,
+              entrypointPath
+            )}".`
+          );
+        }
+      }
+    }
+  }
+
+  // Optional Field: dateAdded
+  if (entry.dateAdded !== undefined && entry.dateAdded !== null) {
+    if (typeof entry.dateAdded !== "string") {
+      errors.push(
+        `Invalid type for "dateAdded" in project "${
+          entry.title || entry.path || "unnamed"
+        }": expected ISO 8601 string or null, received ${typeof entry.dateAdded}.`
+      );
+    } else if (isNaN(Date.parse(entry.dateAdded))) {
+      errors.push(
+        `Invalid "dateAdded" timestamp "${entry.dateAdded}" for project "${
+          entry.title || entry.path || "unnamed"
+        }": must be a valid parseable ISO 8601 date string.`
+      );
+    }
+  }
+
+  // Optional Field: thumbnailHash
+  if (entry.thumbnailHash !== undefined && entry.thumbnailHash !== null) {
+    if (
+      typeof entry.thumbnailHash !== "string" ||
+      !/^[0-9a-f]{8}$/.test(entry.thumbnailHash)
+    ) {
+      errors.push(
+        `Invalid "thumbnailHash" for project "${
+          entry.title || entry.path || "unnamed"
+        }": expected an 8-character lowercase hexadecimal hash, received ${JSON.stringify(
+          entry.thumbnailHash
+        )}.`
+      );
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Validates an entire array of project entries against the schema and registry rules.
+ * Detects duplicate titles, duplicate paths, and entry-level schema violations.
+ *
+ * @param {Array} projects - Array of project entry objects.
+ * @param {object} [options] - Validation options passed to validateProjectEntry.
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+function validateProjectsRegistry(projects, options = {}) {
+  const errors = [];
+
+  if (!Array.isArray(projects)) {
+    return {
+      valid: false,
+      errors: [
+        `Projects registry must be a JSON array, received ${
+          projects === null ? "null" : typeof projects
+        }.`,
+      ],
+    };
+  }
+
+  const seenPaths = new Set();
+  const seenTitles = new Set();
+
+  for (let i = 0; i < projects.length; i++) {
+    const entry = projects[i];
+    const prefix = `Project [${i}]`;
+
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      errors.push(
+        `${prefix}: must be a non-null object, received ${
+          entry === null
+            ? "null"
+            : Array.isArray(entry)
+              ? "array"
+              : typeof entry
+        }.`
+      );
+      continue;
+    }
+
+    const { valid, errors: entryErrors } = validateProjectEntry(entry, options);
+    if (!valid) {
+      errors.push(...entryErrors);
+    }
+
+    if (typeof entry.path === "string" && entry.path.trim()) {
+      if (seenPaths.has(entry.path)) {
+        errors.push(
+          `Duplicate project path detected: "${entry.path}". Every project must have a unique path.`
+        );
+      } else {
+        seenPaths.add(entry.path);
+      }
+    }
+
+    if (typeof entry.title === "string" && entry.title.trim()) {
+      if (seenTitles.has(entry.title)) {
+        errors.push(
+          `Duplicate project title detected: "${entry.title}". Every project must have a unique title.`
+        );
+      } else {
+        seenTitles.add(entry.title);
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
 function buildProjectsRegistry({
   projectsDir = PROJECTS_DIR,
   repoRoot = REPO_ROOT,
@@ -361,18 +782,7 @@ function buildProjectsRegistry({
       absPath: fullProjectPath,
     } = proj;
 
-    // Validation checks
-    if (!title || title.trim() === "") {
-      errors.push(
-        `Project in category '${categoryName}' has a missing or empty title.`
-      );
-    }
-    if (!categoryName || categoryName.trim() === "") {
-      errors.push(`Project '${proj.name}' has a missing or empty category.`);
-    }
-    if (!fs.existsSync(fullProjectPath)) {
-      errors.push(`Project path does not exist on disk: ${projectPathStr}`);
-    }
+    // Duplicate detection checks
     if (seenPaths.has(projectPathStr)) {
       errors.push(`Duplicate project path detected: ${projectPathStr}`);
     } else {
@@ -424,6 +834,17 @@ function buildProjectsRegistry({
     if (thumbnailHash) {
       entry.thumbnailHash = thumbnailHash;
     }
+
+    // JSON schema and path/category validation
+    const entryValidation = validateProjectEntry(entry, {
+      repoRoot,
+      checkDisk: true,
+      checkEntrypoint: false,
+    });
+    if (!entryValidation.valid) {
+      errors.push(...entryValidation.errors);
+    }
+
     projects.push(entry);
   }
 
@@ -504,6 +925,18 @@ function validateProjectsSync({
     if (entrypointIssue) {
       issues.push(entrypointIssue);
     }
+  }
+
+  // Validate existing projects against JSON Schema (in-memory schema check)
+  const registryValidation = validateProjectsRegistry(existingProjects, {
+    repoRoot,
+    checkDisk: true,
+    checkEntrypoint: false,
+  });
+  if (!registryValidation.valid) {
+    registryValidation.errors.forEach(err =>
+      issues.push(`Registry schema error: ${err}`)
+    );
   }
 
   const { projects: expectedProjects, errors } = buildProjectsRegistry({
@@ -612,6 +1045,7 @@ function generateProjects({
   projectsDir = PROJECTS_DIR,
   repoRoot = REPO_ROOT,
   outputFile = OUTPUT_FILE,
+  throwOnError = false,
 } = {}) {
   const { projects, errors } = buildProjectsRegistry({
     projectsDir,
@@ -620,10 +1054,26 @@ function generateProjects({
     generateThumbnails: true,
   });
 
-  // Report validation errors and fail build if any exist
-  if (errors.length > 0) {
+  // Run registry-wide schema validation before writing output
+  const registryValidation = validateProjectsRegistry(projects, {
+    repoRoot,
+    checkDisk: true,
+    checkEntrypoint: false,
+  });
+
+  const allErrors = [...new Set([...errors, ...registryValidation.errors])];
+
+  // Report validation errors and reject output generation if any exist
+  if (allErrors.length > 0) {
     console.error("❌ Project Metadata Validation Failed:");
-    errors.forEach(err => console.error(`  - ${err}`));
+    allErrors.forEach(err => console.error(`  - ${err}`));
+    if (throwOnError) {
+      throw new Error(
+        `Project Metadata Validation Failed with ${allErrors.length} error(s):\n${allErrors.join(
+          "\n"
+        )}`
+      );
+    }
     process.exit(1);
   }
 
@@ -642,6 +1092,10 @@ if (require.main === module) {
 }
 
 module.exports = {
+  SUPPORTED_CATEGORIES,
+  PROJECT_ENTRY_SCHEMA,
+  PROJECTS_REGISTRY_SCHEMA,
+  ALLOWED_PROJECT_FIELDS,
   CATEGORY_STYLES,
   defaultStyle,
   titleCase,
@@ -653,6 +1107,9 @@ module.exports = {
   getThumbnailHash,
   ensureFullHistory,
   loadExistingDates,
+  validateProjectEntry,
+  validateProjectsRegistry,
+  validateProjectEntrypoint,
   buildProjectsRegistry,
   validateProjectsSync,
   generateProjects,
