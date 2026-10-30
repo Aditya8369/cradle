@@ -13,6 +13,224 @@
     root.ResumeEngine = factory();
   }
 })(typeof self !== "undefined" ? self : this, function () {
+
+  class ResumeValidationError extends Error {
+    constructor(message, details = {}) {
+      super(message);
+      this.name = "ResumeValidationError";
+      this.code = details.code || "CIRCULAR_REFERENCE";
+      this.path = details.path || null;
+      this.details = details;
+      this.success = false;
+      this.isValid = false;
+    }
+  }
+
+  /**
+   * Detects circular object references across nested structures.
+   * Tracks traversal stack to distinguish genuine cycles from shared DAG references.
+   *
+   * @param {*} value - The value/object to inspect
+   * @param {Object} [options] - Options (maxDepth)
+   * @returns {{ hasCircular: boolean, path: string|null, error: string|null }}
+   */
+  function detectCircularReferences(value, options = {}) {
+    const maxDepth = typeof options.maxDepth === "number" ? options.maxDepth : 100;
+
+    function traverse(val, currentPath, depth, stack) {
+      if (depth > maxDepth) {
+        return {
+          hasCircular: true,
+          path: currentPath,
+          error: `Maximum nesting depth of ${maxDepth} exceeded at ${currentPath}.`,
+        };
+      }
+
+      if (val === null || typeof val !== "object") {
+        return null;
+      }
+
+      if (stack.has(val)) {
+        return {
+          hasCircular: true,
+          path: currentPath,
+          error: `Circular reference detected at path "${currentPath}".`,
+        };
+      }
+
+      stack.add(val);
+
+      try {
+        if (Array.isArray(val)) {
+          for (let i = 0; i < val.length; i++) {
+            const itemPath = `${currentPath}[${i}]`;
+            const cycle = traverse(val[i], itemPath, depth + 1, stack);
+            if (cycle) return cycle;
+          }
+        } else {
+          const keys = Object.keys(val);
+          for (const key of keys) {
+            const propPath = currentPath === "root" ? key : `${currentPath}.${key}`;
+            let propVal;
+            try {
+              propVal = val[key];
+            } catch (_) {
+              continue;
+            }
+            const cycle = traverse(propVal, propPath, depth + 1, stack);
+            if (cycle) return cycle;
+          }
+        }
+      } finally {
+        stack.delete(val);
+      }
+
+      return null;
+    }
+
+    const cycle = traverse(value, "root", 0, new Set());
+    if (cycle) {
+      return {
+        hasCircular: true,
+        path: cycle.path,
+        error: cycle.error,
+      };
+    }
+
+    return {
+      hasCircular: false,
+      path: null,
+      error: null,
+    };
+  }
+
+  /**
+   * Helper returning true if input structure contains any circular reference.
+   */
+  function hasCircularReference(value, options = {}) {
+    return detectCircularReferences(value, options).hasCircular;
+  }
+
+  /**
+   * Validates resume object payload before serialization.
+   * Emits controlled validation error descriptors if malformed or circular.
+   */
+  function validateResumeData(data, options = {}) {
+    const throwOnError = options.throwOnError === true;
+
+    if (data === undefined || data === null) {
+      const errorMsg = "Invalid resume data: payload cannot be null or undefined.";
+      const result = {
+        isValid: false,
+        success: false,
+        hasCircular: false,
+        error: errorMsg,
+        errors: [errorMsg],
+        code: "INVALID_INPUT",
+        path: null,
+      };
+      if (throwOnError) {
+        const err = new ResumeValidationError(errorMsg, { code: "INVALID_INPUT" });
+        Object.assign(err, result);
+        throw err;
+      }
+      return result;
+    }
+
+    const cycleInfo = detectCircularReferences(data, options);
+    if (cycleInfo.hasCircular) {
+      const errorMsg = `Validation error: Circular object reference detected at ${cycleInfo.path}.`;
+      const result = {
+        isValid: false,
+        success: false,
+        hasCircular: true,
+        error: errorMsg,
+        errors: [errorMsg],
+        path: cycleInfo.path,
+        code: "CIRCULAR_REFERENCE",
+      };
+      if (throwOnError) {
+        const err = new ResumeValidationError(errorMsg, {
+          code: "CIRCULAR_REFERENCE",
+          path: cycleInfo.path,
+        });
+        Object.assign(err, result);
+        throw err;
+      }
+      return result;
+    }
+
+    return {
+      isValid: true,
+      success: true,
+      hasCircular: false,
+      error: null,
+      errors: [],
+    };
+  }
+
+  /**
+   * Serializes resume data to a JSON string.
+   * Intercepts circular structures before serialization to produce a controlled validation error
+   * instead of allowing JSON.stringify to throw an uncaught exception.
+   */
+  function serializeResume(data, options = {}) {
+    const throwOnError = options.throwOnError === true;
+    const indent = typeof options.indent === "number" ? options.indent : 2;
+
+    const validation = validateResumeData(data, { ...options, throwOnError: false });
+
+    if (!validation.isValid) {
+      if (throwOnError) {
+        const err = new ResumeValidationError(validation.error, {
+          code: validation.code,
+          path: validation.path,
+        });
+        Object.assign(err, validation);
+        throw err;
+      }
+      return {
+        success: false,
+        isValid: false,
+        error: validation.error,
+        errors: validation.errors,
+        code: validation.code,
+        path: validation.path,
+        data: null,
+      };
+    }
+
+    try {
+      const json = JSON.stringify(data, options.replacer || null, indent);
+      if (options.returnResult) {
+        return {
+          success: true,
+          isValid: true,
+          error: null,
+          errors: [],
+          data: json,
+        };
+      }
+      return json;
+    } catch (err) {
+      const msg = `Serialization error: ${err.message}`;
+      if (throwOnError) {
+        const serializeErr = new ResumeValidationError(msg, {
+          code: "SERIALIZATION_FAILED",
+          originalError: err,
+        });
+        throw serializeErr;
+      }
+      return {
+        success: false,
+        isValid: false,
+        error: msg,
+        errors: [msg],
+        data: null,
+      };
+    }
+  }
+
   /**
    * Parse inline Markdown styles (links, bold, italic).
    */
@@ -32,6 +250,24 @@
   function parseMarkdownToHTML(markdown) {
     if (!markdown)
       return '<div class="resume-empty">No markdown content entered</div>';
+
+    if (typeof markdown === "object" && markdown !== null) {
+      const cycle = detectCircularReferences(markdown);
+      if (cycle.hasCircular) {
+        return '<div class="resume-error" role="alert">Validation error: Circular reference detected in resume input.</div>';
+      }
+      if (typeof markdown.markdown === "string") {
+        markdown = markdown.markdown;
+      } else if (typeof markdown.content === "string") {
+        markdown = markdown.content;
+      } else if (typeof markdown.text === "string") {
+        markdown = markdown.text;
+      } else {
+        markdown = String(markdown);
+      }
+    } else if (typeof markdown !== "string") {
+      markdown = String(markdown);
+    }
 
     const lines = markdown.replace(/\r\n/g, "\n").split("\n");
     const html = [];
@@ -87,7 +323,26 @@
    * Calculate text statistics.
    */
   function calculateWordCount(markdown) {
-    if (!markdown || !markdown.trim()) {
+    if (!markdown) {
+      return { words: 0, characters: 0, readTimeMinutes: 0 };
+    }
+
+    if (typeof markdown === "object" && markdown !== null) {
+      const cycle = detectCircularReferences(markdown);
+      if (cycle.hasCircular) {
+        return { words: 0, characters: 0, readTimeMinutes: 0, error: cycle.error };
+      }
+      markdown =
+        typeof markdown.markdown === "string"
+          ? markdown.markdown
+          : typeof markdown.content === "string"
+            ? markdown.content
+            : "";
+    } else if (typeof markdown !== "string") {
+      markdown = String(markdown);
+    }
+
+    if (!markdown.trim()) {
       return { words: 0, characters: 0, readTimeMinutes: 0 };
     }
 
@@ -103,6 +358,22 @@
    */
   function calculateATSScore(markdown) {
     if (!markdown) return 0;
+
+    if (typeof markdown === "object" && markdown !== null) {
+      const cycle = detectCircularReferences(markdown);
+      if (cycle.hasCircular) {
+        return { score: 0, breakdown: {}, error: cycle.error };
+      }
+      markdown =
+        typeof markdown.markdown === "string"
+          ? markdown.markdown
+          : typeof markdown.content === "string"
+            ? markdown.content
+            : "";
+    } else if (typeof markdown !== "string") {
+      markdown = String(markdown);
+    }
+
     const lower = markdown.toLowerCase();
 
     let score = 0;
@@ -154,6 +425,16 @@
   }
 
   return {
+    ResumeValidationError,
+    detectCircularReferences,
+    hasCircularReference,
+    validateResumeData,
+    validateResume: validateResumeData,
+    validate: validateResumeData,
+    serializeResume,
+    serializeResumeData: serializeResume,
+    serializeToJSON: serializeResume,
+    serialize: serializeResume,
     parseInlineMarkdown,
     parseMarkdownToHTML,
     calculateWordCount,
