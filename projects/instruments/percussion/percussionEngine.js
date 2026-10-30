@@ -32,9 +32,39 @@
     Object.fromEntries(PADS.map(pad => [pad.id, pad.label]))
   );
 
-  let audioContext = null;
+  class SampleLoadError extends Error {
+    constructor(message, { type = "UNKNOWN", url = "", status = null, originalError = null } = {}) {
+      super(message);
+      this.name = "SampleLoadError";
+      this.type = type; // 'NOT_FOUND' | 'CORS' | 'NETWORK' | 'DECODE' | 'FORBIDDEN' | 'SERVER_ERROR' | 'INVALID_INPUT' | 'ABORTED'
+      this.url = url;
+      this.status = status;
+      this.originalError = originalError;
+    }
+  }
 
+  let audioContext = null;
   let onBlockedCallback = null;
+
+  const sampleBuffers = new Map();
+  const sampleLoadErrors = new Map();
+  const sampleErrorListeners = [];
+
+  function onSampleError(callback) {
+    if (typeof callback === "function") {
+      sampleErrorListeners.push(callback);
+    }
+  }
+
+  function emitSampleError(error) {
+    for (const listener of sampleErrorListeners) {
+      try {
+        listener(error);
+      } catch (e) {
+        console.error("Error in sample error listener:", e);
+      }
+    }
+  }
 
   async function resumeAudio() {
     const context = getAudioContext();
@@ -55,11 +85,13 @@
   }
 
   function getAudioContext() {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" && typeof globalThis === "undefined") {
       return null;
     }
 
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const AudioContext =
+      (typeof window !== "undefined" && (window.AudioContext || window.webkitAudioContext)) ||
+      (typeof globalThis !== "undefined" && (globalThis.AudioContext || globalThis.webkitAudioContext));
 
     if (!AudioContext) {
       return null;
@@ -102,10 +134,10 @@
 
     osc.type = "sine";
     osc.frequency.setValueAtTime(150, time);
-    osc.frequency.exponentialRampToValueAtTime(45, time + 0.18);
+    osc.frequency.exponentialRampToValueAtTime(32, time + 0.35);
 
-    gain.gain.setValueAtTime(0.9, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.35);
+    gain.gain.setValueAtTime(1, time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.4);
 
     osc.connect(gain);
     gain.connect(destination);
@@ -120,10 +152,10 @@
 
     const noiseFilter = context.createBiquadFilter();
     noiseFilter.type = "highpass";
-    noiseFilter.frequency.setValueAtTime(1000, time);
+    noiseFilter.frequency.setValueAtTime(800, time);
 
     const noiseGain = context.createGain();
-    noiseGain.gain.setValueAtTime(0.55, time);
+    noiseGain.gain.setValueAtTime(0.7, time);
     noiseGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.2);
 
     noise.connect(noiseFilter);
@@ -131,25 +163,27 @@
     noiseGain.connect(destination);
 
     const osc = context.createOscillator();
+    const oscGain = context.createGain();
+
     osc.type = "triangle";
     osc.frequency.setValueAtTime(180, time);
+    osc.frequency.exponentialRampToValueAtTime(60, time + 0.12);
 
-    const oscGain = context.createGain();
-    oscGain.gain.setValueAtTime(0.5, time);
-    oscGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.12);
+    oscGain.gain.setValueAtTime(0.6, time);
+    oscGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.15);
 
     osc.connect(oscGain);
     oscGain.connect(destination);
 
     noise.start(time);
     noise.stop(time + 0.2);
+
     osc.start(time);
-    osc.stop(time + 0.12);
+    osc.stop(time + 0.15);
   }
 
-  function playHiHat(context, destination, time, open) {
-    const duration = open ? 0.55 : 0.09;
-
+  function playHiHat(context, destination, time, isOpen) {
+    const duration = isOpen ? 0.35 : 0.05;
     const noise = context.createBufferSource();
     noise.buffer = createNoiseBuffer(context, duration);
 
@@ -169,19 +203,19 @@
     noise.stop(time + duration);
   }
 
-  function playTom(context, destination, time, high) {
+  function playTom(context, destination, time, isHigh) {
     const osc = context.createOscillator();
     const gain = context.createGain();
 
-    const startFreq = high ? 260 : 150;
-    const endFreq = high ? 120 : 70;
+    const startFreq = isHigh ? 220 : 130;
+    const endFreq = isHigh ? 80 : 50;
 
     osc.type = "sine";
     osc.frequency.setValueAtTime(startFreq, time);
-    osc.frequency.exponentialRampToValueAtTime(endFreq, time + 0.25);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, time + 0.3);
 
-    gain.gain.setValueAtTime(0.7, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
+    gain.gain.setValueAtTime(0.8, time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.35);
 
     osc.connect(gain);
     gain.connect(destination);
@@ -191,7 +225,9 @@
   }
 
   function playClap(context, destination, time) {
-    [0, 0.02, 0.04].forEach(offset => {
+    const burstOffsets = [0, 0.012, 0.024];
+
+    burstOffsets.forEach(offset => {
       const noise = context.createBufferSource();
       noise.buffer = createNoiseBuffer(context, 0.08);
 
@@ -274,20 +310,279 @@
     return PADS.map(pad => ({ ...pad }));
   }
 
+  /**
+   * Loads an audio sample from a URL with detailed error classification.
+   */
+  async function loadSample(padId, url, options = {}) {
+    if (!isValidPad(padId)) {
+      const err = new SampleLoadError(
+        `Invalid pad identifier "${padId}". Supported pads are: ${PADS.map(p => p.id).join(", ")}.`,
+        { type: "INVALID_INPUT", url }
+      );
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    const context = getAudioContext();
+    if (!context) {
+      const err = new SampleLoadError(
+        `Cannot load audio sample: AudioContext is not available or supported in this environment.`,
+        { type: "INVALID_INPUT", url }
+      );
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    // Use shared loader if available, or execute inline logic
+    const fetchFn =
+      options.fetchFn ||
+      (typeof fetch === "function" ? fetch : null) ||
+      (typeof globalThis !== "undefined" && typeof globalThis.fetch === "function"
+        ? globalThis.fetch
+        : null);
+
+    if (!fetchFn) {
+      const err = new SampleLoadError(
+        `Fetch API is not available in the current environment to load audio sample "${url}".`,
+        { type: "NETWORK", url }
+      );
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    if (!url || typeof url !== "string" || !url.trim()) {
+      const err = new SampleLoadError(
+        `Invalid audio sample URL provided for pad "${padId}": expected non-empty string.`,
+        { type: "INVALID_INPUT", url }
+      );
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: err.message, errorDetails: err, type: err.type, url };
+    }
+
+    const trimmedUrl = url.trim();
+
+    let response;
+    try {
+      const fetchOpts = {
+        mode: options.corsMode || "cors",
+        ...options.fetchOptions,
+      };
+      response = await fetchFn(trimmedUrl, fetchOpts);
+    } catch (fetchErr) {
+      const isAborted = fetchErr.name === "AbortError";
+      const msg = fetchErr.message || "";
+      const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+      const isCors =
+        !isOffline &&
+        (fetchErr.name === "SecurityError" ||
+          msg.toLowerCase().includes("cors") ||
+          msg.toLowerCase().includes("cross-origin") ||
+          msg.includes("Failed to fetch") ||
+          msg.includes("NetworkError"));
+
+      let errType = isAborted ? "ABORTED" : isCors ? "CORS" : "NETWORK";
+      let errMsg = isAborted
+        ? `Audio sample request for pad "${padId}" (${trimmedUrl}) was aborted.`
+        : isCors
+          ? `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": Cross-Origin Request Blocked (CORS restriction). The audio sample server must allow cross-origin requests via Access-Control-Allow-Origin headers.`
+          : `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": Network failure (${msg || "connection refused or host unreachable"}). Verify network connectivity and server availability.`;
+
+      const err = new SampleLoadError(errMsg, {
+        type: errType,
+        url: trimmedUrl,
+        originalError: fetchErr,
+      });
+
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (typeof options.onError === "function") options.onError(err);
+      if (!options.silent) console.error(`[PercussionEngine] ${errMsg}`);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: errMsg, errorDetails: err, type: errType, url: trimmedUrl };
+    }
+
+    if (!response.ok) {
+      const status = response.status;
+      const statusText = response.statusText || "";
+      let errType = "HTTP_ERROR";
+      let errMsg = "";
+
+      if (status === 404) {
+        errType = "NOT_FOUND";
+        errMsg = `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": File not found (HTTP 404). Ensure the sample audio file exists at the specified URL.`;
+      } else if (status === 403) {
+        errType = "FORBIDDEN";
+        errMsg = `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": Access denied (HTTP 403). Permissions or credentials required.`;
+      } else if (status >= 500) {
+        errType = "SERVER_ERROR";
+        errMsg = `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": Server error (HTTP ${status} ${statusText}). The audio host encountered an internal error.`;
+      } else {
+        errMsg = `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": HTTP ${status} (${statusText || "Request failed"}).`;
+      }
+
+      const err = new SampleLoadError(errMsg, {
+        type: errType,
+        url: trimmedUrl,
+        status,
+        originalError: new Error(`HTTP ${status} ${statusText}`),
+      });
+
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (typeof options.onError === "function") options.onError(err);
+      if (!options.silent) console.error(`[PercussionEngine] ${errMsg}`);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: errMsg, errorDetails: err, type: errType, url: trimmedUrl, status };
+    }
+
+    let arrayBuffer;
+    try {
+      arrayBuffer = await response.arrayBuffer();
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        const err = new SampleLoadError(
+          `Failed to load audio sample for pad "${padId}" from "${trimmedUrl}": Received empty audio payload (0 bytes).`,
+          { type: "DECODE", url: trimmedUrl }
+        );
+        sampleLoadErrors.set(padId, err);
+        emitSampleError(err);
+        if (options.throwOnError) throw err;
+        return { success: false, padId, error: err.message, errorDetails: err, type: "DECODE", url: trimmedUrl };
+      }
+    } catch (readErr) {
+      const err = new SampleLoadError(
+        `Failed to read audio data stream for pad "${padId}" from "${trimmedUrl}": ${readErr.message}`,
+        { type: "NETWORK", url: trimmedUrl, originalError: readErr }
+      );
+      sampleLoadErrors.set(padId, err);
+      emitSampleError(err);
+      if (options.throwOnError) throw err;
+      return { success: false, padId, error: err.message, errorDetails: err, type: "NETWORK", url: trimmedUrl };
+    }
+
+    return new Promise((resolve, reject) => {
+      function onDecodeSuccess(decoded) {
+        sampleBuffers.set(padId, decoded);
+        sampleLoadErrors.delete(padId);
+        resolve({
+          success: true,
+          padId,
+          buffer: decoded,
+          url: trimmedUrl,
+          error: null,
+        });
+      }
+
+      function onDecodeFailure(decodeErr) {
+        const err = new SampleLoadError(
+          `Failed to decode audio sample for pad "${padId}" from "${trimmedUrl}": The audio file is corrupted or in an unsupported format.`,
+          { type: "DECODE", url: trimmedUrl, originalError: decodeErr }
+        );
+        sampleLoadErrors.set(padId, err);
+        emitSampleError(err);
+        if (typeof options.onError === "function") options.onError(err);
+        if (!options.silent) console.error(`[PercussionEngine] ${err.message}`);
+        if (options.throwOnError) {
+          reject(err);
+        } else {
+          resolve({
+            success: false,
+            padId,
+            buffer: null,
+            error: err.message,
+            errorDetails: err,
+            type: "DECODE",
+            url: trimmedUrl,
+          });
+        }
+      }
+
+      try {
+        const bufferCopy = arrayBuffer.slice(0);
+        const promise = context.decodeAudioData(
+          bufferCopy,
+          onDecodeSuccess,
+          onDecodeFailure
+        );
+
+        if (promise && typeof promise.then === "function") {
+          promise.then(onDecodeSuccess).catch(onDecodeFailure);
+        }
+      } catch (exc) {
+        onDecodeFailure(exc);
+      }
+    });
+  }
+
+  async function loadSamples(sampleMap, options = {}) {
+    const results = {};
+    if (!sampleMap || typeof sampleMap !== "object") {
+      return results;
+    }
+
+    await Promise.all(
+      Object.entries(sampleMap).map(async ([padId, url]) => {
+        results[padId] = await loadSample(padId, url, {
+          ...options,
+          throwOnError: false,
+        });
+      })
+    );
+
+    return results;
+  }
+
+  function getSample(padId) {
+    return sampleBuffers.get(padId) || null;
+  }
+
+  function hasSample(padId) {
+    return sampleBuffers.has(padId);
+  }
+
+  function getSampleErrors() {
+    return new Map(sampleLoadErrors);
+  }
+
+  function clearSamples() {
+    sampleBuffers.clear();
+    sampleLoadErrors.clear();
+  }
+
   function playPad(padId) {
     if (!isValidPad(padId)) {
       return false;
     }
 
     const context = getAudioContext();
-
     if (!context) {
       return false;
     }
 
     const time = context.currentTime;
-    PLAYERS[padId](context, context.destination, time);
 
+    // Use loaded sample if present; otherwise fall back smoothly to synthesized audio
+    const sampleBuffer = sampleBuffers.get(padId);
+    if (sampleBuffer) {
+      try {
+        const source = context.createBufferSource();
+        source.buffer = sampleBuffer;
+        source.connect(context.destination);
+        source.start(time);
+        return true;
+      } catch (err) {
+        console.warn(`Failed to play sample buffer for pad "${padId}", falling back to synthesis:`, err);
+      }
+    }
+
+    PLAYERS[padId](context, context.destination, time);
     return true;
   }
 
@@ -305,11 +600,19 @@
     PADS,
     KEY_TO_PAD,
     PAD_TO_KEY,
+    SampleLoadError,
     getPadFromKey,
     getKeyFromPad,
     getPadLabel,
     isValidPad,
     getPads,
+    loadSample,
+    loadSamples,
+    getSample,
+    hasSample,
+    getSampleErrors,
+    clearSamples,
+    onSampleError,
     playPad,
     playPadFromKey,
     resumeAudio,

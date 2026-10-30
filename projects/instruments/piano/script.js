@@ -34,6 +34,13 @@ const engine =
       ? require("./pianoEngine.js")
       : null;
 
+if (engine && typeof engine.onSampleError === "function") {
+  engine.onSampleError(err => {
+    showAudioBlockedUI(`Sample load error: ${err.message}`);
+  });
+}
+
+
 let isAudioBlocked = false;
 
 function showAudioBlockedUI(message) {
@@ -591,6 +598,14 @@ if (win) {
 
   win.PianoStudio = {
     playNote,
+    SampleLoadError: engine?.SampleLoadError,
+    loadSample: (n, u, o) => engine?.loadSample(n, u, o),
+    loadSamples: (m, o) => engine?.loadSamples(m, o),
+    getSample: n => engine?.getSample(n),
+    hasSample: n => engine?.hasSample(n),
+    getSampleErrors: () => engine?.getSampleErrors(),
+    clearSamples: () => engine?.clearSamples(),
+    onSampleError: fn => engine?.onSampleError(fn),
     stopNote,
     pressKey,
     releaseKey,
@@ -613,6 +628,14 @@ if (win) {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     playNote,
+    SampleLoadError: engine?.SampleLoadError,
+    loadSample: (n, u, o) => engine?.loadSample(n, u, o),
+    loadSamples: (m, o) => engine?.loadSamples(m, o),
+    getSample: n => engine?.getSample(n),
+    hasSample: n => engine?.hasSample(n),
+    getSampleErrors: () => engine?.getSampleErrors(),
+    clearSamples: () => engine?.clearSamples(),
+    onSampleError: fn => engine?.onSampleError(fn),
     stopNote,
     pressKey,
     releaseKey,

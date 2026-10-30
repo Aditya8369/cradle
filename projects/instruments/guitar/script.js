@@ -2,6 +2,12 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const guitar = new GuitarEngine();
+  if (typeof guitar.onSampleError === "function") {
+    guitar.onSampleError(err => {
+      showAudioBlocked(`Sample load failed: ${err.message}`);
+    });
+  }
+
 
   const strings = [...document.querySelectorAll("[data-string]")];
 

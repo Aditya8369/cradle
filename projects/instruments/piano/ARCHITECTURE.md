@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Virtual Piano is a standalone interactive musical instrument mini for Cradle. It provides a playable piano keyboard that supports mouse, touch, computer keyboard, and MIDI controller interaction, delivering real-time synthesized piano notes using the Web Audio API.
+The Virtual Piano is a standalone interactive musical instrument mini for Cradle. It provides a playable piano keyboard that supports mouse, touch, computer keyboard, and MIDI controller interaction, delivering real-time synthesized piano notes using the Web Audio API alongside optional external audio sample loading with comprehensive error handling and fallback synthesis.
 
 The project is self-contained with no frontend frameworks or external audio libraries.
 
@@ -16,6 +16,7 @@ The project is self-contained with no frontend frameworks or external audio libr
 - Implement realistic note synthesis using a combination of oscillators and noise buffers
 - Support multi-note polyphony through an active voice management system
 - Enable robust, validated mappings between physical computer keys, MIDI controllers, and musical notes
+- Provide robust audio sample loading with diagnostics for missing files (404), CORS restrictions, network failures, and decode errors
 - Ensure low-latency audio playback across modern browsers
 
 ---
@@ -27,7 +28,7 @@ piano/
 ├── index.html      # UI shell and piano keyboard layout
 ├── script.js       # Browser controller, event handling, and UI synchronization
 ├── style.css       # Keyboard styling, key states, and responsive layout
-├── pianoEngine.js  # Core audio engine, note frequencies, and synthesis logic
+├── pianoEngine.js  # Core audio engine, note frequencies, synthesis logic, and sample loader
 ├── thumbnail.svg   # Project artwork
 └── ARCHITECTURE.md # This file
 ```
@@ -36,7 +37,7 @@ piano/
 
 ## System / Project Architecture Overview
 
-The project follows a decoupled architecture where the UI and audio logic are separated. `index.html` and `style.css` define the visual representation. `script.js` acts as the controller, capturing user inputs (pointer, keyboard, or Web MIDI) and communicating with `pianoEngine.js`. The engine handles the low-level Web Audio API calls, managing the creation and destruction of oscillators to produce sound.
+The project follows a decoupled architecture where the UI and audio logic are separated. `index.html` and `style.css` define the visual representation. `script.js` acts as the controller, capturing user inputs (pointer, keyboard, or Web MIDI) and communicating with `pianoEngine.js`. The engine handles the low-level Web Audio API calls, managing the creation and destruction of oscillators and sample buffer playback to produce sound.
 
 ---
 
@@ -47,7 +48,7 @@ The project follows a decoupled architecture where the UI and audio logic are se
 | `index.html`     | Defines the piano keyboard DOM and status display                             |
 | `script.js`      | Manages input events, UI state (active keys), and coordinates with the engine |
 | `style.css`      | Handles the visual appearance of white/black keys and active states           |
-| `pianoEngine.js` | Owns note frequencies, MIDI/keyboard validation, and additive synthesis logic  |
+| `pianoEngine.js` | Owns note frequencies, MIDI/keyboard validation, synthesis, and sample loading |
 
 ---
 
@@ -58,88 +59,50 @@ User triggers input (Mouse/Touch/Keyboard/MIDI)
 ↓
 script.js captures event and maps to musical note (via engine.getNoteFromKey or engine.getNoteFromMidi)
 ↓
-script.js calls PianoEngine.startNote(note)
+script.js updates UI (adds .active class to key element)
 ↓
-PianoEngine creates an AudioContext and a set of oscillators (Fundamental + Harmonics)
+script.js calls engine.startNote(note) / engine.playNote(note)
 ↓
-A "Hammer Attack" noise buffer is played to simulate the physical strike
+engine checks for loaded audio sample buffer:
+  ├─ If sample buffer exists: creates AudioBufferSourceNode and connects to destination
+  └─ If no sample or playback error: falls back smoothly to additive synthesis oscillators
 ↓
-Audio is routed through a gain node (Envelope) and dynamics compressor to the destination
+Sound plays through destination / master compressor node
 ↓
-User releases input
+User releases input → script.js calls engine.stopNote(note)
 ↓
-script.js calls PianoEngine.stopNote(note)
+engine applies exponential release ramp and stops voices
 ↓
-Engine triggers an exponential decay ramp to silence the note smoothly
+script.js removes .active class from key element
 ```
 
 ---
 
-## Key Features
-
-- **Polyphonic Playback**: Multiple notes can be played simultaneously (e.g., chords like C4 + D4 + E4) cleanly without cutting each other off or doubling audio output.
-- **Strict Input Deduplication & Repeat Suppression**: Filters out OS keyboard repeat events (`event.repeat`) and checks active note states (`pressedKeyboardKeys`, `activeNotes`) to prevent duplicate triggers or stuttering when playing multiple keys simultaneously.
-- **Master Bus Dynamics Compression**: Passes combined synthesized voice outputs through a DynamicsCompressorNode before `context.destination` to prevent polyphonic signal clipping and acoustic distortion during simultaneous chord playback.
-- **Keyboard & MIDI Mapping Validation**: Validates custom keyboard and MIDI mappings before applying them. Detects duplicate assignments, missing notes, out-of-range MIDI numbers (0–127), and malformed inputs without uncaught exceptions, maintaining current active mappings intact on failure.
-- **Controlled Error Reporting & Safe Dynamic Application**: Returns structured validation results (`{ isValid, errors, warnings, duplicateKeys, duplicateNotes, missingNotes, invalidMappings, sanitizedMapping }`) without throwing, ensuring predictable recovery.
-- **Web MIDI Controller Support**: Automatically discovers connected Web MIDI input devices and routes incoming note-on/note-off messages to active piano voices.
-- **Hybrid Synthesis**: Combines triangle and sine oscillators with a noise-based attack for a more natural piano sound.
-- **Comprehensive Mapping**: Supports a wide range of notes from C3 to E6 (MIDI 48–88).
-- **Input Flexibility**: Works with pointer events (mouse/touch), dedicated keyboard mappings, and hardware MIDI controllers.
-- **Low Latency**: Direct use of Web Audio API for immediate sonic response.
-
----
-
-## Technologies Used
-
-| Technology        | Purpose                                              |
-| ----------------- | ---------------------------------------------------- |
-| HTML5             | Keyboard structure and semantic UI                   |
-| CSS3              | Piano layout, key positioning, and responsive design |
-| JavaScript (ES6+) | Event management and coordination logic              |
-| Web Audio API     | Real-time sound synthesis and audio routing          |
-| Web MIDI API      | Hardware MIDI controller input and mapping           |
-
----
-
-## File Responsibilities
-
-### `index.html`
-
-- Defines the layout of the piano keys.
-- Provides a status bar to indicate the currently played note.
-
-### `script.js`
-
-- `playNote()`: Coordinates visual highlights and audio triggers, verifying voice deduplication before initiating oscillators.
-- `stopNote()`: Coordinates visual resets and smooth decay release of active notes.
-- `handleKeydown()`: Suppresses OS repeated keydown events (`event.repeat`), maps keys dynamically via `engine.getNoteFromKey()`, and deduplicates chord inputs.
-- `handleKeyup()`: Releases notes only when no other physical key or pointer is holding the same pitch.
-- `initMidiAccess()` / `handleMidiMessage()`: Initializes Web MIDI access and routes controller messages.
-- `getMasterBus()`: Configures a shared `DynamicsCompressorNode` and master gain to normalize polyphonic chord output.
-- `resumeAudio()`: Detects AudioContext resume and autoplay rejection failures, displaying an interactive recovery alert on the status element to re-enable audio upon user gesture.
-- Handles pointer capture and page lifecycle events (`pagehide`, `blur`, `visibilitychange`) to cleanly release held notes and prevent stuck oscillators.
+## Core Engine & Mapping Subsystems
 
 ### `pianoEngine.js`
 
-- `NOTE_FREQUENCIES`: Constants mapping notes (e.g., "A4") to Hz.
-- `validateKeyboardMapping(mapping, options)`: Validates keyboard layout mappings, checking for type safety, valid notes, duplicate keys, duplicate notes, and missing notes without throwing exceptions.
-- `applyKeyboardMapping(mapping, options)` / `setKeyboardMapping()`: Validates and atomically applies new keyboard mappings, preserving existing mappings on validation failure.
-- `resetKeyboardMapping()`: Restores default keyboard mappings.
-- `validateMidiMapping(mapping, options)`: Validates MIDI controller mappings (supporting `{ [midi]: note }` and `{ [note]: midi }`), checking integer ranges (0–127), valid note names, duplicate assignments, and missing notes.
-- `applyMidiMapping(mapping, options)` / `setMidiMapping()`: Validates and atomically applies new MIDI mappings, preserving existing mappings on failure.
-- `resetMidiMapping()`: Restores factory default MIDI mappings.
-- `noteToMidiNumber()`, `midiNumberToNote()`, `midiToFrequency()`, `frequencyToMidi()`: Conversion utilities for MIDI numbers, notes, and frequencies.
-- `playNoteFromMidi()` / `stopNoteFromMidi()`: Triggers and releases notes via MIDI note numbers.
-- `createVoice()`: Implements additive synthesis by layering harmonics.
-- `createHammerAttack()`: Generates a short burst of filtered noise for realism.
-- `startNote()` / `stopNote()`: Public API for controlling the audio lifecycle.
-
-### `style.css`
-
-- Styles the `.key` elements to look like a piano.
-- Uses absolute positioning for black keys to overlap white keys.
-- Defines the `.active` class for visual feedback during playback.
+- **Harmonic Series Definition**: Maps each note (`C3`–`E6`) to exact fundamental frequencies.
+- **Mapping Management**:
+  - `validateKeyboardMapping(mapping, options)` / `validateMidiMapping(mapping, options)`: Inspects incoming configuration structures for duplicates, invalid keys, unsupported notes, and format errors.
+  - `applyKeyboardMapping(mapping, options)` / `applyMidiMapping(mapping, options)`: Atomically updates mapping state if validation succeeds.
+  - `resetKeyboardMapping()` / `resetMidiMapping()`: Restores defaults.
+- **Sample Loading & Diagnostics**:
+  - `loadSample(note, url, options)`: Asynchronously loads and decodes an audio sample for a piano note. Surfaces structured `SampleLoadError` instances:
+    - Missing files (`HTTP 404`): Surfaces `type: "NOT_FOUND"`.
+    - CORS blocks: Detects origin / access control restrictions, surfacing `type: "CORS"`.
+    - Network failures: Identifies offline states or unreachable hosts, surfacing `type: "NETWORK"`.
+    - Decoding errors: Identifies corrupted audio files or unsupported formats, surfacing `type: "DECODE"`.
+    - Invalid inputs: Identifies missing URLs or invalid note identifiers, surfacing `type: "INVALID_INPUT"`.
+  - `loadSamples(sampleMap, options)`: Batch-loads samples across multiple notes.
+  - `getSample(note)` / `hasSample(note)`: Queries loaded sample buffers.
+  - `getSampleErrors()`: Returns a snapshot Map of note sample load errors.
+  - `onSampleError(callback)`: Registers error listeners to propagate diagnostics to UI alerts.
+  - `clearSamples()`: Clears cached sample buffers and error records.
+- **Polyphony & Voice Lifecycle**:
+  - `createVoice()`: Implements additive synthesis by layering harmonics.
+  - `createHammerAttack()`: Generates a short burst of filtered noise for realism.
+  - `startNote()` / `stopNote()`: Public API for controlling audio playback and polyphonic voice tracking.
 
 ---
 
@@ -149,7 +112,8 @@ Engine triggers an exponential decay ramp to silence the note smoothly
 - **Noise-based Attack**: Added a high-pass filtered noise burst at the start of each note to simulate the hammer hitting the string.
 - **Master Dynamics Compression**: Polyphonic chord playback can quickly exceed 0 dBFS when multiple oscillators and noise bursts are active at once; routing through a compressor ensures clean sound without digital clipping.
 - **Strict Chord Deduplication**: Checking both `pressedKeyboardKeys` and `activeNotes` prevents double note triggers when chord keys are pressed in rapid succession or held.
-- **Controlled Mapping Validation**: Rather than throwing uncaught exceptions on malformed input (such as `null`, numbers, non-strings, out-of-range MIDI codes, or unknown note names), validation methods return structured result descriptors (`{ isValid, errors, warnings, sanitizedMapping }`). Mutative operations (`applyKeyboardMapping`, `applyMidiMapping`) strictly guard state updates so invalid configurations never corrupt active mappings.
+- **Controlled Mapping Validation**: Rather than throwing uncaught exceptions on malformed input, validation methods return structured result descriptors (`{ isValid, errors, warnings, sanitizedMapping }`).
+- **Sample Error Diagnostics**: Errors when loading audio sample assets are never swallowed; informative diagnostics are emitted via `onSampleError` and displayed in the status banner.
 - **Exponential Decay**: Implemented exponential gain ramps for a natural-sounding fade-out.
 - **Decoupled Engine**: Wrapped the audio logic in a UMD-style `PianoEngine` to make it reusable in other projects.
 
@@ -179,8 +143,8 @@ None (uses native browser APIs).
 
 ## Known Limitations
 
-- The synthesis is a simplified model and does not fully capture the complex harmonics of a real piano.
-- No support for velocity (volume depends on the synthesis settings, not how hard the key is pressed).
+- Procedural synthesis is a simplified model and does not fully capture the complex harmonics of an acoustic piano.
+- No support for velocity (volume depends on synthesis settings).
 
 ---
 
