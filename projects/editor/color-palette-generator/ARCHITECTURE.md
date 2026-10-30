@@ -79,7 +79,8 @@ UI updated with AA/AAA pass/fail badges
 
 - Base color picker with hex input and random color button
 - Six harmony modes: Complementary, Analogous, Triadic, Split-Complementary, Tetradic, Monochromatic
-- Five generated swatches per palette with lock/unlock per swatch
+- Five generated swatches per palette with lock/unlock and direct "Copy HEX" button per swatch
+- Individual "Copy HEX" button on each swatch that copies the currently displayed hex code with toast confirmation
 - Click a swatch to apply its color to the WCAG contrast checker
 - WCAG contrast ratio display with AA, AA-Large, and AAA pass/fail badges
 - Live preview block showing selected background + foreground combination
@@ -126,6 +127,7 @@ UI updated with AA/AAA pass/fail badges
 
 ## Design Decisions
 
+- **Stale-closure immune event delegation** — swatch interactions and "Copy HEX" actions utilize event delegation on the palette grid to dynamically resolve hex values from the live DOM attributes and active palette, preventing stale closures across multiple palette regenerations.
 - **No external libraries** — color math is implemented from scratch using HSL conversions to keep the project self-contained and zero-dependency.
 - **Lock-per-swatch model** — locking individual swatches lets users iterate on part of a palette without losing work, a common workflow in design tools.
 - **Alternating contrast checker** — clicking a palette swatch alternates between setting foreground and background so users can quickly compare two palette colors.

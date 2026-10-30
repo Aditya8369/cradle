@@ -305,6 +305,37 @@ input[type="color"]::-webkit-color-swatch {
   color: var(--text-muted);
 }
 
+.btn-copy-hex {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.btn-copy-hex:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+  border-color: var(--accent);
+}
+
+.btn-copy-hex.copied {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
 /* Contrast Checker */
 .contrast-controls {
   display: flex;
