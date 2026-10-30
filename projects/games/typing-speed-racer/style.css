@@ -1,3 +1,9 @@
+
+/* Respect the HTML hidden attribute for game controls and overlays. */
+[hidden] {
+  display: none !important;
+}
+
 /* ═══ Layout ═══ */
 .game-shell {
   max-width: 820px;
