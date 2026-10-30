@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#082f49" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Aurora Glow Filter -->
+    <filter id="auroraGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="80" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Card Shadow -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Base background -->
+  <rect width="1200" height="675" rx="0" fill="url(#bgGrad)" />
+
+  <!-- Aurora Glows -->
+  <circle cx="280" cy="220" r="300" fill="#0284c7" opacity="0.35" filter="url(#auroraGlow)" />
+  <circle cx="950" cy="450" r="320" fill="#38bdf8" opacity="0.2" filter="url(#auroraGlow)" />
+
+  <!-- Decorative Grid Pattern -->
+  <g opacity="0.1" stroke="#38bdf8" stroke-width="1.5" fill="none">
+    <path d="M 0,100 L 1200,100 M 0,200 L 1200,200 M 0,300 L 1200,300 M 0,400 L 1200,400 M 0,500 L 1200,500 M 0,600 L 1200,600" />
+    <path d="M 150,0 L 150,675 M 300,0 L 300,675 M 450,0 L 450,675 M 600,0 L 600,675 M 750,0 L 750,675 M 900,0 L 900,675 M 1050,0 L 1050,675" />
+  </g>
+
+  <!-- Border Frame -->
+  <rect x="25" y="25" width="1150" height="625" rx="20" fill="none" stroke="#38bdf8" stroke-opacity="0.25" stroke-width="2" />
+
+  <!-- Glassmorphic Card Container -->
+  <rect x="75" y="75" width="1050" height="525" rx="16" fill="#ffffff" fill-opacity="0.03" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1" filter="url(#cardShadow)" />
+
+  <!-- Category Badge -->
+  <g transform="translate(100, 130)">
+    <rect width="160" height="40" rx="20" fill="#0284c7" fill-opacity="0.2" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.5" />
+    <text x="80" y="24" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#ffffff" fill-opacity="0.9" letter-spacing="2" text-anchor="middle">PRODUCTIVITY</text>
+  </g>
+
+  <!-- Project Title -->
+  <text x="100" y="320" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="72" font-weight="800" fill="#ffffff" letter-spacing="-1.5">Weather</text>
+  <text x="100" y="385" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="28" font-weight="500" fill="#94a3b8">Real-Time Forecast &amp; Geolocation</text>
+
+  <!-- Weather Graphic Artwork -->
+  <g transform="translate(780, 200)">
+    <!-- Sun -->
+    <circle cx="160" cy="80" r="60" fill="#f59e0b" opacity="0.9" />
+    <!-- Sun Rays -->
+    <g stroke="#f59e0b" stroke-width="6" stroke-linecap="round" opacity="0.7">
+      <line x1="160" y1="0" x2="160" y2="10" />
+      <line x1="220" y1="20" x2="212" y2="28" />
+      <line x1="240" y1="80" x2="230" y2="80" />
+      <line x1="160" y1="160" x2="160" y2="150" />
+    </g>
+    <!-- Cloud -->
+    <path d="M 60 140 A 50 50 0 0 1 150 100 A 40 40 0 0 1 210 130 A 35 35 0 0 1 200 190 L 70 190 A 30 30 0 0 1 60 140 Z" fill="#e2e8f0" opacity="0.95" />
+  </g>
+
+  <!-- Watermark logo -->
+  <g transform="translate(1100, 560)" text-anchor="end">
+    <text font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="20" font-weight="800" fill="#ffffff" fill-opacity="0.45" letter-spacing="4">CRADLE</text>
+    <text y="22" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#ffffff" fill-opacity="0.25" letter-spacing="1">EXPERIMENT SHOWCASE</text>
+  </g>
+</svg>

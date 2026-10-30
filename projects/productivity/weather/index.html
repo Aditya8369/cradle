@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather | Cradle</title>
+    <meta
+      name="description"
+      content="Check real-time weather forecasts with geolocation, manual city search fallback, and offline support."
+    />
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/productivity/weather/"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Weather | Cradle" />
+    <meta
+      property="og:description"
+      content="Check real-time weather forecasts with geolocation, manual city search fallback, and offline support."
+    />
+    <meta
+      property="og:url"
+      content="https://facelessism.github.io/cradle/projects/productivity/weather/"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+    <script
+      src="../../../src/components/ui/BackToHome/BackToHome.js"
+      defer
+    ></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1>Weather Forecast</h1>
+        <p class="subtitle">
+          Real-time weather conditions, 5-day forecast, and instant city search.
+        </p>
+      </header>
+
+      <section class="search-section" aria-label="Search and location controls">
+        <form id="search-form" class="search-bar">
+          <input
+            type="text"
+            id="city-search-input"
+            placeholder="Search city or postcode (e.g. London, Tokyo)..."
+            aria-label="City or postcode search"
+            autocomplete="off"
+          />
+          <button type="submit" id="btn-search" class="btn btn-primary">
+            Search
+          </button>
+          <button
+            type="button"
+            id="btn-location"
+            class="btn btn-secondary"
+            title="Use current location"
+            aria-label="Use current geolocation"
+          >
+            📍 My Location
+          </button>
+          <button
+            type="button"
+            id="btn-unit-toggle"
+            class="btn btn-outline"
+            aria-label="Toggle Celsius and Fahrenheit temperature units"
+          >
+            °C / °F
+          </button>
+        </form>
+
+        <div class="preset-chips" aria-label="Popular cities">
+          <span class="preset-label">Quick cities:</span>
+          <button type="button" class="chip" data-city="London">London</button>
+          <button type="button" class="chip" data-city="New York">
+            New York
+          </button>
+          <button type="button" class="chip" data-city="Tokyo">Tokyo</button>
+          <button type="button" class="chip" data-city="Paris">Paris</button>
+          <button type="button" class="chip" data-city="Sydney">Sydney</button>
+        </div>
+      </section>
+
+      <!-- Status notice for geolocation messages, warnings, and error fallbacks -->
+      <section
+        id="status-banner"
+        class="status-banner"
+        role="alert"
+        aria-live="polite"
+      ></section>
+
+      <!-- Main Weather Dashboard Display -->
+      <section id="weather-display" class="weather-display">
+        <!-- Current Conditions -->
+        <article class="card current-weather" id="current-weather-card">
+          <div class="current-header">
+            <div>
+              <h2 id="location-name" class="location-name">London</h2>
+              <p id="weather-condition" class="weather-condition">
+                Partly cloudy
+              </p>
+            </div>
+            <div id="weather-icon" class="weather-icon" aria-hidden="true">
+              ⛅
+            </div>
+          </div>
+
+          <div class="current-temp-wrapper">
+            <span id="temperature" class="current-temp">15°C</span>
+          </div>
+
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Humidity</span>
+              <strong id="humidity" class="detail-val">68%</strong>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Wind Speed</span>
+              <strong id="wind-speed" class="detail-val">14 km/h</strong>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Pressure</span>
+              <strong id="pressure" class="detail-val">1013 hPa</strong>
+            </div>
+          </div>
+        </article>
+
+        <!-- 5-Day Forecast -->
+        <article class="card forecast-card" id="forecast-card">
+          <h3 class="forecast-heading">5-Day Forecast</h3>
+          <div id="forecast-grid" class="forecast-grid">
+            <!-- Populated dynamically by script.js -->
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="weatherEngine.js"></script>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
