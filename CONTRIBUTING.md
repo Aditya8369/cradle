@@ -96,7 +96,7 @@ project-name/
 
 Use this as a guideline rather than a strict requirement:
 
-- `index.html` — the entry point for browser-based projects (should include the shared `<link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />` favicon tag and `<script src="../../../src/components/ui/BackToHome/BackToHome.js" defer></script>` component for standardized navigation).
+- `index.html` — the entry point for browser-based projects (should include a meaningful descriptive `<title>`, the shared `<link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />` favicon tag, and `<script src="../../../src/components/ui/BackToHome/BackToHome.js" defer></script>` component for standardized navigation).
 - `style.css` — project-specific styling where applicable.
 - `script.js` — project behavior and logic where applicable.
 - `ARCHITECTURE.md` — project architecture documentation covering what the project does, its structure, and how to use or run it.

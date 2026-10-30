@@ -161,10 +161,30 @@ function checkMetadata(project, html) {
       )
     );
   }
-  if (html !== null && !/<title>\s*[^<\s][^<]*<\/title>/i.test(html)) {
-    issues.push(
-      issue("warning", "missing-title", "index.html has no non-empty <title>.")
-    );
+  if (html !== null) {
+    const strippedHtml = html.replace(/<!--[\s\S]*?-->/g, "");
+    const titleMatch = strippedHtml.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+    if (!titleMatch) {
+      issues.push(
+        issue("warning", "missing-title", "index.html has no <title> tag.")
+      );
+    } else if (!titleMatch[1].trim()) {
+      issues.push(
+        issue("warning", "missing-title", "index.html has no non-empty <title>.")
+      );
+    } else if (
+      /^(document|untitled|index|mini|project|app|default|test|placeholder)$/i.test(
+        titleMatch[1].trim()
+      )
+    ) {
+      issues.push(
+        issue(
+          "warning",
+          "generic-title",
+          `index.html has a generic placeholder <title> "${titleMatch[1].trim()}".`
+        )
+      );
+    }
   }
   return issues;
 }

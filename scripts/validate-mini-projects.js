@@ -190,6 +190,53 @@ function validateProjectFavicons(diskProjects) {
   return issues;
 }
 
+
+function validateProjectTitles(diskProjects) {
+  const issues = [];
+
+  for (const project of diskProjects) {
+    const htmlPath = path.join(project.absPath, "index.html");
+    if (!fs.existsSync(htmlPath)) continue;
+
+    const htmlContent = fs.readFileSync(htmlPath, "utf-8");
+    const contentNoComments = htmlContent.replace(/<!--[\s\S]*?-->/g, "");
+    const titleMatch = contentNoComments.match(
+      /<title\b[^>]*>([\s\S]*?)<\/title>/i
+    );
+
+    if (!titleMatch) {
+      issues.push({
+        type: "MISSING_TITLE",
+        project: project.name,
+        message: `Project "${project.relPath}" is missing a <title> tag in index.html.`,
+      });
+      continue;
+    }
+
+    const titleText = titleMatch[1].trim();
+    if (!titleText) {
+      issues.push({
+        type: "EMPTY_TITLE",
+        project: project.name,
+        message: `Project "${project.relPath}" has an empty <title> tag in index.html.`,
+      });
+      continue;
+    }
+
+    const genericPlaceholders =
+      /^(document|untitled|index|mini|project|app|default|test|placeholder)$/i;
+    if (genericPlaceholders.test(titleText) || titleText.length < 2) {
+      issues.push({
+        type: "GENERIC_TITLE",
+        project: project.name,
+        message: `Project "${project.relPath}" has a generic or non-descriptive <title> "${titleText}" in index.html. Expected a meaningful descriptive title.`,
+      });
+    }
+  }
+
+  return issues;
+}
+
 /**
  * Validates that every mini project opens successfully without missing pages or load failures.
  */
@@ -219,6 +266,7 @@ function validateMiniProjects() {
   issues.push(...validateProjectIndexEntries(diskProjects, projectsJsonData));
   issues.push(...validateProjectNavigation(diskProjects));
   issues.push(...validateProjectFavicons(diskProjects));
+  issues.push(...validateProjectTitles(diskProjects));
 
   // 3. Validate each registered project entry in projects.json
   for (const project of projectsJsonData) {
@@ -337,5 +385,6 @@ module.exports = {
   validateProjectIndexEntries,
   validateProjectNavigation,
   validateProjectFavicons,
+  validateProjectTitles,
   validateMiniProjects,
 };
