@@ -323,10 +323,13 @@ function buildPiano() {
       key.dataset.note = note;
       key.dataset.freq = freq;
 
-      key.innerHTML = `
-      <span class="note-label">${note}</span>
-      <span class="freq-label">${freq} Hz</span>
-    `;
+      const noteSpan = document.createElement("span");
+      noteSpan.className = "note-label";
+      noteSpan.textContent = note;
+      const freqSpan = document.createElement("span");
+      freqSpan.className = "freq-label";
+      freqSpan.textContent = `${freq} Hz`;
+      key.append(noteSpan, freqSpan);
 
       key.addEventListener("mousedown", e => {
         e.preventDefault();

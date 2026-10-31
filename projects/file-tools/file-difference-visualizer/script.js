@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         diffStatus.textContent = `⚠️ Error: Original file "${file.name}" (${fileFormatted}) exceeds maximum limit of ${maxFormatted}. File rejected.`;
         textInputA.value = "";
         e.target.value = "";
-        originalContent.innerHTML = `<div class="diff-line line-delete"><span class="line-text">File rejected: ${file.name} (${fileFormatted}) exceeds maximum limit of ${maxFormatted}.</span></div>`;
+        originalContent.innerHTML = `<div class="diff-line line-delete"><span class="line-text">File rejected: ${escapeHtml(file.name)} (${fileFormatted}) exceeds maximum limit of ${maxFormatted}.</span></div>`;
         modifiedContent.innerHTML = "";
         unifiedContent.innerHTML = "";
         return;
@@ -170,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
         diffStatus.textContent = `⚠️ Error: Modified file "${file.name}" (${fileFormatted}) exceeds maximum limit of ${maxFormatted}. File rejected.`;
         textInputB.value = "";
         e.target.value = "";
-        modifiedContent.innerHTML = `<div class="diff-line line-delete"><span class="line-text">File rejected: ${file.name} (${fileFormatted}) exceeds maximum limit of ${maxFormatted}.</span></div>`;
+        modifiedContent.innerHTML = `<div class="diff-line line-delete"><span class="line-text">File rejected: ${escapeHtml(file.name)} (${fileFormatted}) exceeds maximum limit of ${maxFormatted}.</span></div>`;
         originalContent.innerHTML = "";
         unifiedContent.innerHTML = "";
         return;

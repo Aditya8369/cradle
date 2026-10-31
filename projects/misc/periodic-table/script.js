@@ -274,12 +274,15 @@ document.addEventListener("DOMContentLoaded", () => {
     modalHeroCard.style.borderColor = `var(--cat-${elem.category})`;
     modalSymbol.style.color = `var(--cat-${elem.category})`;
 
-    modalHeader.innerHTML = `
-      <h2>${elem.name} (${elem.symbol})</h2>
-      <span class="modal-category-badge" style="background: var(--cat-${elem.category}); color: #fff;">
-        ${catName}
-      </span>
-    `;
+    modalHeader.textContent = "";
+    const h2 = document.createElement("h2");
+    h2.textContent = `${elem.name} (${elem.symbol})`;
+    const catBadge = document.createElement("span");
+    catBadge.className = "modal-category-badge";
+    catBadge.style.background = `var(--cat-${elem.category})`;
+    catBadge.style.color = "#fff";
+    catBadge.textContent = catName;
+    modalHeader.append(h2, catBadge);
 
     modalCategory.textContent = catName;
     modalGroupPeriod.textContent = `Group ${elem.group || "N/A"}, Period ${elem.period}`;

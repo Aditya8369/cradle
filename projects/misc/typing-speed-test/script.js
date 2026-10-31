@@ -218,7 +218,11 @@ function finishTest() {
   document.getElementById("resultRawWpm").textContent = rawWpm;
 
   const $grade = document.getElementById("resultsGrade");
-  $grade.innerHTML = `<span class="grade-badge grade-${grade.level}">${grade.emoji} ${grade.label}</span>`;
+  $grade.textContent = "";
+  const gradeSpan = document.createElement("span");
+  gradeSpan.className = `grade-badge grade-${grade.level}`;
+  gradeSpan.textContent = `${grade.emoji} ${grade.label}`;
+  $grade.appendChild(gradeSpan);
   $grade.className = "results-grade";
 
   $resultsSection.classList.remove("hidden");
