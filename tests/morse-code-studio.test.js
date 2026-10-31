@@ -24,6 +24,7 @@ function createStudioSandbox() {
   let gainValuesCancelled = false;
   let gainDisconnected = false;
   let contextSuspended = false;
+  let contextClosed = false;
 
   const mockOscillator = {
     type: "sine",
@@ -36,7 +37,11 @@ function createStudioSandbox() {
     stop: () => {
       oscillatorStopped = true;
     },
-    addEventListener: () => {},
+    addEventListener: (evt, fn) => {
+      if (evt === "ended") {
+        setTimeout(fn, 0);
+      }
+    },
   };
 
   const mockGain = {
@@ -64,6 +69,10 @@ function createStudioSandbox() {
     },
     resume: async () => {
       mockAudioContext.state = "running";
+    },
+    close: async () => {
+      contextClosed = true;
+      mockAudioContext.state = "closed";
     },
     destination: {},
   };
@@ -138,6 +147,9 @@ function createStudioSandbox() {
       },
       get contextSuspended() {
         return contextSuspended;
+      },
+      get contextClosed() {
+        return contextClosed;
       },
     }),
   };
@@ -234,7 +246,7 @@ test("stopAudio stops active oscillator, gain node, suspends context, and resets
   );
 });
 
-test("pagehide event listener halts audio playback", () => {
+test("pagehide event listener halts audio playback and closes AudioContext", () => {
   const env = createStudioSandbox();
   const { sandbox, listeners, mockAudioContext, mockElements, getAudioFlags } =
     env;
@@ -259,9 +271,9 @@ test("pagehide event listener halts audio playback", () => {
     "Playback should stop on pagehide"
   );
   assert.equal(
-    getAudioFlags().contextSuspended,
+    getAudioFlags().contextClosed,
     true,
-    "AudioContext should suspend on pagehide"
+    "AudioContext should close on pagehide"
   );
   assert.equal(mockElements.playBtn.disabled, false);
 });
@@ -307,9 +319,10 @@ test("visibilitychange event listener halts audio playback when document is hidd
   );
 });
 
-test("clicking Back to Home button stops playback", () => {
+test("clicking Back to Home button stops playback and closes AudioContext", () => {
   const env = createStudioSandbox();
-  const { sandbox, listeners, mockAudioContext, mockElements } = env;
+  const { sandbox, listeners, mockAudioContext, mockElements, getAudioFlags } =
+    env;
   const { module } = sandbox;
   const { setAudioContext, setIsPlaying } = module.exports;
 
@@ -338,5 +351,128 @@ test("clicking Back to Home button stops playback", () => {
     false,
     "Playback should stop on BackToHome click"
   );
+  assert.equal(
+    getAudioFlags().contextClosed,
+    true,
+    "AudioContext should close on BackToHome click"
+  );
   assert.equal(mockElements.playBtn.disabled, false);
+});
+
+test("pointerdown on Back to Home button halts playback immediately in capture phase", () => {
+  const env = createStudioSandbox();
+  const { sandbox, listeners, mockAudioContext, mockElements, getAudioFlags } =
+    env;
+  const { module } = sandbox;
+  const { setAudioContext, setIsPlaying } = module.exports;
+
+  setAudioContext(mockAudioContext);
+  setIsPlaying(true);
+  mockElements.playBtn.disabled = true;
+
+  assert.ok(
+    listeners.document.pointerdown && listeners.document.pointerdown.length > 0,
+    "pointerdown listener should be registered on document"
+  );
+
+  const mockBackBtn = {
+    matches: sel => sel.includes(".cradle-back-home"),
+  };
+  const mockPointerEvent = {
+    target: {
+      closest: sel => (sel.includes(".cradle-back-home") ? mockBackBtn : null),
+    },
+  };
+
+  listeners.document.pointerdown.forEach(fn => fn(mockPointerEvent));
+
+  assert.equal(
+    module.exports.getAudioState().isPlaying,
+    false,
+    "Playback should stop on pointerdown"
+  );
+  assert.equal(
+    getAudioFlags().contextClosed,
+    true,
+    "AudioContext should close on pointerdown"
+  );
+});
+
+test("beforeunload, unload, and popstate listeners close AudioContext and stop playback", () => {
+  const env = createStudioSandbox();
+  const { sandbox, listeners, mockAudioContext, mockElements, getAudioFlags } =
+    env;
+  const { module } = sandbox;
+  const { setAudioContext, setIsPlaying } = module.exports;
+
+  assert.ok(
+    listeners.window.beforeunload && listeners.window.beforeunload.length > 0,
+    "beforeunload listener registered"
+  );
+  assert.ok(
+    listeners.window.unload && listeners.window.unload.length > 0,
+    "unload listener registered"
+  );
+  assert.ok(
+    listeners.window.popstate && listeners.window.popstate.length > 0,
+    "popstate listener registered"
+  );
+
+  // Trigger beforeunload
+  setAudioContext(mockAudioContext);
+  setIsPlaying(true);
+  mockElements.playBtn.disabled = true;
+  listeners.window.beforeunload.forEach(fn => fn());
+  assert.equal(module.exports.getAudioState().isPlaying, false);
+  assert.equal(getAudioFlags().contextClosed, true);
+
+  // Trigger popstate
+  let popstateClosed = false;
+  const freshCtx = {
+    currentTime: 0,
+    state: "running",
+    close: async () => {
+      popstateClosed = true;
+      freshCtx.state = "closed";
+    },
+    suspend: async () => {},
+  };
+  setAudioContext(freshCtx);
+  setIsPlaying(true);
+  listeners.window.popstate.forEach(fn => fn());
+  assert.equal(module.exports.getAudioState().isPlaying, false);
+  assert.equal(popstateClosed, true);
+});
+
+test("stopAudio with closeContext=true closes and nulls AudioContext", () => {
+  const env = createStudioSandbox();
+  const { sandbox, mockAudioContext, getAudioFlags } = env;
+  const { module } = sandbox;
+  const { stopAudio, setAudioContext, setIsPlaying } = module.exports;
+
+  setAudioContext(mockAudioContext);
+  setIsPlaying(true);
+
+  stopAudio({ closeContext: true });
+
+  assert.equal(module.exports.getAudioState().isPlaying, false);
+  assert.equal(getAudioFlags().contextClosed, true);
+  assert.equal(module.exports.getAudioState().audioContext, null);
+});
+
+test("playMorse creates new AudioContext if previous context is closed or null", async () => {
+  const env = createStudioSandbox();
+  const { sandbox, mockElements } = env;
+  const { module } = sandbox;
+  const { playMorse, setAudioContext, getAudioState } = module.exports;
+
+  // Closed context initially
+  setAudioContext({ state: "closed" });
+  mockElements.outputText.value = ".";
+
+  await playMorse();
+
+  const currentCtx = getAudioState().audioContext;
+  assert.ok(currentCtx, "A new AudioContext should be created");
+  assert.notEqual(currentCtx.state, "closed", "State should not be closed");
 });
