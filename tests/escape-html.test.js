@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { escapeHtml } = require("../src/components/ui/escapeHtml.js");
+const { escapeHtml, html, raw } = require("../src/components/ui/escapeHtml.js");
 
 test("escapeHtml escapes all five special characters", () => {
   assert.equal(
@@ -29,4 +29,41 @@ test("escapeHtml coerces non-string values via String()", () => {
 test("escapeHtml escapes already-escaped HTML entities", () => {
   assert.equal(escapeHtml("&amp;"), "&amp;amp;");
   assert.equal(escapeHtml("&lt;script&gt;"), "&amp;lt;script&amp;gt;");
+});
+
+test("html tagged template encodes dynamic expressions", () => {
+  const userInput = '<img src=x onerror="alert(1)">';
+  const markup = html`<div class="card"><p>${userInput}</p></div>`;
+
+  assert.equal(
+    markup,
+    '<div class="card"><p>&lt;img src=x onerror=&quot;alert(1)&quot;&gt;</p></div>'
+  );
+});
+
+test("html tagged template handles numbers and booleans safely", () => {
+  const count = 5;
+  const markup = html`<span>${count} items</span>`;
+  assert.equal(markup, "<span>5 items</span>");
+});
+
+test("html tagged template preserves raw safe content", () => {
+  const safeIcon = raw('<i class="icon"></i>');
+  const userText = "<Danger>";
+  const markup = html`<div>${safeIcon} <span>${userText}</span></div>`;
+
+  assert.equal(
+    markup,
+    '<div><i class="icon"></i> <span>&lt;Danger&gt;</span></div>'
+  );
+});
+
+test("html tagged template handles arrays of items", () => {
+  const items = ["Apple & Pear", "<script>bad()</script>"];
+  const markup = html`<ul>${items.map(item => html`<li>${item}</li>`)}</ul>`;
+
+  assert.equal(
+    markup,
+    "<ul><li>Apple &amp; Pear</li><li>&lt;script&gt;bad()&lt;/script&gt;</li></ul>"
+  );
 });

@@ -1075,7 +1075,11 @@ function copyToClipboard(text, msg) {
 function showToast(message) {
   const toast = document.createElement("div");
   toast.className = "toast";
-  toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color: var(--theme-accent);"></i> ${message}`;
+  const icon = document.createElement("i");
+  icon.className = "fa-solid fa-circle-check";
+  icon.style.color = "var(--theme-accent)";
+  toast.appendChild(icon);
+  toast.appendChild(document.createTextNode(` ${message}`));
 
   toastContainer.appendChild(toast);
 

@@ -271,10 +271,12 @@
 
       setStatus("Camera Unavailable", "Using fallback mode", message);
 
-      els.emptyPreview.innerHTML = `
-        <strong>Camera unavailable</strong>
-        <span>${message}</span>
-      `;
+      els.emptyPreview.textContent = "";
+      const strong = document.createElement("strong");
+      strong.textContent = "Camera unavailable";
+      const span = document.createElement("span");
+      span.textContent = message;
+      els.emptyPreview.append(strong, span);
     }
   }
 

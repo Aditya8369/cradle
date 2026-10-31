@@ -115,7 +115,11 @@ function showToast(message, type = "info") {
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   toast.setAttribute("role", "status");
-  toast.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${message}</span>`;
+  const icon = document.createElement("i");
+  icon.className = `fa-solid ${icons[type] || "fa-circle-info"}`;
+  const span = document.createElement("span");
+  span.textContent = message;
+  toast.append(icon, span);
 
   el.toastContainer.appendChild(toast);
 
