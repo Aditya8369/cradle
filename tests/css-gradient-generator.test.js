@@ -6,6 +6,7 @@ const {
   buildGradientCSS,
   renderGradientToCanvas,
   exportPNG,
+  downloadGradientPNG,
 } = require("../projects/editor/css-gradient-generator/script.js");
 
 test("parseColorToRgba formats hex and rgba with alpha channel", () => {
@@ -140,5 +141,155 @@ test("exportPNG strictly requests image/png to preserve alpha channel transparen
     assert.ok(dataUrl.startsWith("data:image/png"));
   } finally {
     delete global.HTMLCanvasElement;
+  }
+});
+
+test("parseColorToRgba handles 8-digit hex values, opacity bounds clamping, and fallbacks", () => {
+  // 8-digit hex with alpha
+  assert.equal(parseColorToRgba("#ff000080", 100), "rgba(255, 0, 0, 0.502)");
+  assert.equal(parseColorToRgba("#ff0000ff", 100), "#ff0000");
+  assert.equal(parseColorToRgba("#ff000080", 50), "rgba(255, 0, 0, 0.251)");
+
+  // Clamping opacity: < 0 clamped to 0, > 100 clamped to 100
+  assert.equal(parseColorToRgba("#00ff00", -10), "rgba(0, 255, 0, 0)");
+  assert.equal(parseColorToRgba("#00ff00", 150), "#00ff00");
+  assert.equal(parseColorToRgba("#00ff00", NaN), "#00ff00");
+
+  // Fallback on empty color string
+  assert.equal(parseColorToRgba("", 100), "rgba(0, 0, 0, 1)");
+});
+
+test("renderGradientToCanvas supports radial and conic gradients with alpha stops", () => {
+  const stops = [
+    { color: "#ff0000", opacity: 0, pos: 0 },
+    { color: "#00ff00", opacity: 50, pos: 50 },
+    { color: "#0000ff", opacity: 100, pos: 100 },
+  ];
+
+  // Radial gradient canvas rendering
+  let radialCreated = false;
+  const radialStops = [];
+  const mockRadialCtx = {
+    clearRect() {},
+    createRadialGradient(x0, y0, r0, x1, y1, r1) {
+      radialCreated = true;
+      return {
+        addColorStop(offset, color) {
+          radialStops.push({ offset, color });
+        },
+      };
+    },
+    fillRect() {},
+    set fillStyle(val) {},
+  };
+  const mockRadialCanvas = {
+    width: 0,
+    height: 0,
+    getContext: () => mockRadialCtx,
+  };
+
+  renderGradientToCanvas(mockRadialCanvas, {
+    width: 600,
+    height: 600,
+    gradientType: "radial",
+    stops,
+  });
+
+  assert.equal(radialCreated, true);
+  assert.equal(radialStops.length, 3);
+  assert.equal(radialStops[0].color, "rgba(255, 0, 0, 0)");
+  assert.equal(radialStops[1].color, "rgba(0, 255, 0, 0.5)");
+
+  // Conic gradient canvas rendering with createConicGradient
+  let conicCreated = false;
+  const conicStops = [];
+  const mockConicCtx = {
+    clearRect() {},
+    createConicGradient(angle, cx, cy) {
+      conicCreated = true;
+      return {
+        addColorStop(offset, color) {
+          conicStops.push({ offset, color });
+        },
+      };
+    },
+    fillRect() {},
+    set fillStyle(val) {},
+  };
+  const mockConicCanvas = {
+    width: 0,
+    height: 0,
+    getContext: () => mockConicCtx,
+  };
+
+  renderGradientToCanvas(mockConicCanvas, {
+    width: 400,
+    height: 400,
+    gradientType: "conic",
+    angle: 45,
+    stops,
+  });
+
+  assert.equal(conicCreated, true);
+  assert.equal(conicStops.length, 3);
+  assert.equal(conicStops[0].color, "rgba(255, 0, 0, 0)");
+});
+
+test("downloadGradientPNG appends link with download attribute and triggers click", () => {
+  let clicked = false;
+  let appendedChild = null;
+
+  const mockLink = {
+    download: "",
+    href: "",
+    parentNode: null,
+    click() {
+      clicked = true;
+    },
+  };
+
+  const mockDocument = {
+    createElement(tag) {
+      if (tag === "canvas") {
+        return {
+          width: 0,
+          height: 0,
+          getContext() {
+            return {
+              clearRect: () => {},
+              createLinearGradient: () => ({ addColorStop: () => {} }),
+              fillRect: () => {},
+              set fillStyle(val) {},
+            };
+          },
+          toDataURL: type => `data:${type};base64,transparentData`,
+        };
+      }
+      if (tag === "a") {
+        return mockLink;
+      }
+      return {};
+    },
+    body: {
+      appendChild(node) {
+        appendedChild = node;
+        node.parentNode = this;
+      },
+      removeChild(node) {
+        node.parentNode = null;
+      },
+    },
+  };
+
+  global.document = mockDocument;
+
+  try {
+    const dataUrl = downloadGradientPNG("transparent-gradient.png");
+    assert.equal(clicked, true);
+    assert.equal(mockLink.download, "transparent-gradient.png");
+    assert.ok(dataUrl.startsWith("data:image/png"));
+    assert.equal(mockLink.href, dataUrl);
+  } finally {
+    delete global.document;
   }
 });
