@@ -5,6 +5,11 @@ import {
 import { filterProjects } from "./src/utils/projectSearch.js";
 import { getThumbnailUrl } from "./src/utils/assetUrl.js";
 import {
+  openDB,
+  getCachedProjects,
+  fetchAndCacheProjects as fetchAndCacheProjectsDB,
+} from "./src/utils/cradleDb.js";
+import {
   createFilterWorker,
   DEFAULT_WORKER_RETRY_CONFIG,
   calculateBackoffDelay,
@@ -218,26 +223,6 @@ function initializeFilterWorker() {
 
 initializeFilterWorker();
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("CradleDB", 1);
-
-    request.onerror = () => reject(request.error);
-
-    request.onsuccess = () => resolve(request.result);
-
-    request.onupgradeneeded = event => {
-      const db = event.target.result;
-
-      if (!db.objectStoreNames.contains("projectsStore")) {
-        db.createObjectStore("projectsStore", {
-          keyPath: "id",
-        });
-      }
-    };
-  });
-}
-
 function sortProjectList(projects) {
   const sorted = [...projects];
 
@@ -288,39 +273,10 @@ function sortProjectList(projects) {
       return sorted.sort((a, b) => a.title.localeCompare(b.title));
   }
 }
-function getCachedProjects(db) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["projectsStore"], "readonly");
-    const store = transaction.objectStore("projectsStore");
-    const request = store.get("projects");
-
-    request.onerror = () => reject(request.error);
-
-    request.onsuccess = () =>
-      resolve(request.result ? request.result.data : null);
-  });
-}
 
 async function fetchAndCacheProjects(db) {
-  const response = await fetch("./data/projects.json");
-
-  if (!response.ok) {
-    throw new Error("Failed to load projects");
-  }
-
-  const data = await response.json();
+  const data = await fetchAndCacheProjectsDB(db);
   allProjects = data;
-
-  if (db) {
-    const transaction = db.transaction(["projectsStore"], "readwrite");
-    const store = transaction.objectStore("projectsStore");
-
-    store.put({
-      id: "projects",
-      data: data,
-    });
-  }
-
   return data;
 }
 
