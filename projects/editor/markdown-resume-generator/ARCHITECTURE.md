@@ -80,6 +80,11 @@ Word count and ATS completeness score updated
 - Template layouts (Classic, Modern, Minimal).
 - Built-in ATS section checklist scoring (Summary, Skills, Experience, Education, Projects).
 - One-click print / PDF export and standalone HTML document download.
+- **Circular Reference Detection & Safe Serialization**:
+  - `detectCircularReferences(data, options)`: Deeply traverses object graphs and tracks active ancestor sets to differentiate true cycles from shared DAG references.
+  - `validateResumeData(data, options)`: Validates incoming resume payloads, emitting controlled error descriptors for invalid or circular payloads.
+  - `serializeResume(data, options)`: Guards against circular references before serialization, preventing uncaught `TypeError` runtime crashes and providing controlled validation errors.
+  - `ResumeValidationError`: Dedicated error class preserving error codes, paths, and details.
 
 ---
 
@@ -105,6 +110,10 @@ Word count and ATS completeness score updated
 - `parseInlineMarkdown(text)` — Handles links, strong tags, and emphasis inline replacements.
 - `calculateATSScore(markdown)` — Computes percentage score based on key resume section headers.
 - `generateStandaloneHTML(markdown, template, theme)` — Generates printable HTML string wrapper.
+- `detectCircularReferences(data)` — Detects cyclical object graphs before serialization.
+- `validateResumeData(data, options)` — Validates resume objects and prevents malformed structures.
+- `serializeResume(data, options)` — Safely serializes resume models to JSON with cycle protection.
+- `ResumeValidationError` — Controlled error class for validation and serialization failures.
 
 ### `script.js`
 
