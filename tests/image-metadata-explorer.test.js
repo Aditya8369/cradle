@@ -8,6 +8,10 @@ const {
   formatFNumber,
   formatFocalLength,
   parse,
+  readFileBuffer,
+  classifyReadError,
+  FileReadError,
+  detectFormat,
 } = require("../projects/file-tools/image-metadata-explorer/metadataEngine");
 
 /* -----------------------------
@@ -462,4 +466,194 @@ test("parse handles empty files gracefully", async () => {
 
 test("parse handles null/undefined input gracefully", async () => {
   await assert.rejects(parse(null), /No image file provided/);
+});
+
+/* -----------------------------
+   File-Read Error Handling (Issue: Improve file-read error handling)
+----------------------------- */
+
+test("FileReadError instantiates with code, name, and cause", () => {
+  const cause = new Error("Underlying reason");
+  const err = new FileReadError("Permission denied", "PERMISSION_DENIED", cause);
+
+  assert.strictEqual(err.name, "FileReadError");
+  assert.strictEqual(err.message, "Permission denied");
+  assert.strictEqual(err.code, "PERMISSION_DENIED");
+  assert.strictEqual(err.cause, cause);
+});
+
+test("classifyReadError maps NotReadableError to PERMISSION_DENIED", () => {
+  const err = new Error("File is locked by OS");
+  err.name = "NotReadableError";
+  const classified = classifyReadError(err);
+
+  assert.strictEqual(classified instanceof FileReadError, true);
+  assert.strictEqual(classified.code, "PERMISSION_DENIED");
+  assert.match(classified.message, /Permission denied/);
+});
+
+test("classifyReadError maps SecurityError to SECURITY_ERROR", () => {
+  const err = new Error("Cross-origin or security restriction");
+  err.name = "SecurityError";
+  const classified = classifyReadError(err);
+
+  assert.strictEqual(classified.code, "SECURITY_ERROR");
+  assert.match(classified.message, /Security error/);
+});
+
+test("classifyReadError maps AbortError to READ_ABORTED", () => {
+  const err = new Error("Read aborted by caller");
+  err.name = "AbortError";
+  const classified = classifyReadError(err);
+
+  assert.strictEqual(classified.code, "READ_ABORTED");
+  assert.match(classified.message, /aborted/);
+});
+
+test("classifyReadError maps NotFoundError to FILE_NOT_FOUND", () => {
+  const err = new Error("File moved");
+  err.name = "NotFoundError";
+  const classified = classifyReadError(err);
+
+  assert.strictEqual(classified.code, "FILE_NOT_FOUND");
+  assert.match(classified.message, /File not found/);
+});
+
+test("readFileBuffer resolves ArrayBuffer directly", async () => {
+  const buf = new Uint8Array([1, 2, 3]).buffer;
+  const result = await readFileBuffer(buf);
+  assert.strictEqual(result, buf);
+});
+
+test("readFileBuffer resolves typed arrays as sliced ArrayBuffer", async () => {
+  const arr = new Uint8Array([1, 2, 3, 4]);
+  const result = await readFileBuffer(arr);
+  assert.strictEqual(result.byteLength, 4);
+});
+
+test("readFileBuffer rejects empty buffer with EMPTY_FILE", async () => {
+  const buf = new ArrayBuffer(0);
+  await assert.rejects(
+    readFileBuffer(buf),
+    err => err instanceof FileReadError && err.code === "EMPTY_FILE"
+  );
+});
+
+test("readFileBuffer rejects null input with INVALID_INPUT", async () => {
+  await assert.rejects(
+    readFileBuffer(null),
+    err => err instanceof FileReadError && err.code === "INVALID_INPUT"
+  );
+});
+
+test("readFileBuffer catches permission failure (NotReadableError) from file", async () => {
+  const failingFile = {
+    arrayBuffer: async () => {
+      const err = new Error("The requested file could not be read.");
+      err.name = "NotReadableError";
+      throw err;
+    },
+  };
+
+  await assert.rejects(
+    readFileBuffer(failingFile),
+    err => err instanceof FileReadError && err.code === "PERMISSION_DENIED"
+  );
+});
+
+test("readFileBuffer catches security restrictions (SecurityError)", async () => {
+  const securityFile = {
+    arrayBuffer: async () => {
+      const err = new Error("Access was denied.");
+      err.name = "SecurityError";
+      throw err;
+    },
+  };
+
+  await assert.rejects(
+    readFileBuffer(securityFile),
+    err => err instanceof FileReadError && err.code === "SECURITY_ERROR"
+  );
+});
+
+test("readFileBuffer catches unreadable / corrupted file stream errors", async () => {
+  const corruptedStreamFile = {
+    arrayBuffer: async () => {
+      throw new Error("I/O failure while streaming bytes");
+    },
+  };
+
+  await assert.rejects(
+    readFileBuffer(corruptedStreamFile),
+    err => err instanceof FileReadError && err.code === "UNREADABLE_FILE"
+  );
+});
+
+test("parse propagates permission error as FileReadError with PERMISSION_DENIED", async () => {
+  const lockedFile = {
+    arrayBuffer: async () => {
+      const err = new Error("File locked by another process");
+      err.name = "NotReadableError";
+      throw err;
+    },
+  };
+
+  await assert.rejects(
+    parse(lockedFile),
+    err => err instanceof FileReadError && err.code === "PERMISSION_DENIED"
+  );
+});
+
+test("detectFormat detects various formats correctly", () => {
+  const jpegHeader = new DataView(new Uint8Array([0xff, 0xd8, 0xff]).buffer);
+  assert.strictEqual(detectFormat(jpegHeader), "jpeg");
+
+  const pngHeader = new DataView(
+    new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).buffer
+  );
+  assert.strictEqual(detectFormat(pngHeader), "png");
+
+  const gifHeader = new DataView(
+    new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]).buffer
+  );
+  assert.strictEqual(detectFormat(gifHeader), "gif");
+
+  const bmpHeader = new DataView(new Uint8Array([0x42, 0x4d, 0x00, 0x00]).buffer);
+  assert.strictEqual(detectFormat(bmpHeader), "bmp");
+
+  const tiffHeader = new DataView(
+    new Uint8Array([0x49, 0x49, 0x2a, 0x00]).buffer
+  );
+  assert.strictEqual(detectFormat(tiffHeader), "tiff");
+
+  const unknownHeader = new DataView(
+    new Uint8Array([0x00, 0x01, 0x02, 0x03]).buffer
+  );
+  assert.strictEqual(detectFormat(unknownHeader), "unknown");
+});
+
+test("parse rejects BMP format with descriptive UNSUPPORTED_FORMAT error", async () => {
+  const bmpBuffer = Buffer.from([0x42, 0x4d, 0x00, 0x00, 0x00, 0x00]);
+  const mockFile = createMockFile(bmpBuffer, "test.bmp", "image/bmp");
+
+  await assert.rejects(
+    parse(mockFile),
+    err =>
+      err instanceof FileReadError &&
+      err.code === "UNSUPPORTED_FORMAT" &&
+      err.message.includes("BMP")
+  );
+});
+
+test("parse rejects TIFF format with descriptive UNSUPPORTED_FORMAT error", async () => {
+  const tiffBuffer = Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00]);
+  const mockFile = createMockFile(tiffBuffer, "test.tiff", "image/tiff");
+
+  await assert.rejects(
+    parse(mockFile),
+    err =>
+      err instanceof FileReadError &&
+      err.code === "UNSUPPORTED_FORMAT" &&
+      err.message.includes("TIFF")
+  );
 });
