@@ -228,12 +228,18 @@
     document.head.appendChild(style);
   }
 
+  function _cleanText(value) {
+    if (typeof value !== "string") return "";
+    return value.replace(/<[^>]*>/g, "").trim();
+  }
+
   function createFallbackImage(title) {
     const fallback = document.createElement("div");
     fallback.className = "cradle-card__image cradle-card__image--fallback";
     fallback.setAttribute("role", "img");
-    fallback.setAttribute("aria-label", title || "Thumbnail fallback");
-    const firstChar = (title || "?").trim().charAt(0) || "?";
+    const cleanTitle = typeof title === "string" ? _cleanText(title) || title : title;
+    fallback.setAttribute("aria-label", cleanTitle || "Thumbnail fallback");
+    const firstChar = (cleanTitle || "?").trim().charAt(0) || "?";
     fallback.textContent = firstChar.toUpperCase();
     return fallback;
   }
@@ -361,13 +367,13 @@
 
       const h = document.createElement("h3");
       h.className = "cradle-card__title";
-      h.textContent = title;
+      h.textContent = typeof title === "string" ? _cleanText(title) || title : title;
       titleRow.appendChild(h);
 
       if (badge) {
         const b = document.createElement("span");
         b.className = "cradle-card__badge";
-        b.textContent = badge;
+        b.textContent = typeof badge === "string" ? _cleanText(badge) || badge : badge;
         titleRow.appendChild(b);
       }
 
@@ -377,7 +383,7 @@
     if (subtitle) {
       const sub = document.createElement("p");
       sub.className = "cradle-card__subtitle";
-      sub.textContent = subtitle;
+      sub.textContent = typeof subtitle === "string" ? _cleanText(subtitle) || subtitle : subtitle;
       textWrapper.appendChild(sub);
     }
 
