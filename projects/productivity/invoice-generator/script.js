@@ -283,9 +283,33 @@ function renderLogo(invoice) {
   return `<div class="logo-placeholder">${escapeHtml(initials)}</div>`;
 }
 
-function handleLogoUpload(event) {
+async function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
+
+  const declaredType = (file.type || "").toLowerCase();
+  if (declaredType && !declaredType.startsWith("image/")) {
+    setStatus("Invalid logo format. Please upload an image file.");
+    event.target.value = "";
+    return;
+  }
+
+  if (typeof file.slice === "function") {
+    try {
+      const header = await file.slice(0, 16).arrayBuffer();
+      const b = new Uint8Array(header);
+      const isJpeg = b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff;
+      const isPng = b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47;
+      const isWebp = b.length >= 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50;
+      const isGif = b.length >= 6 && b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38;
+      const isSvg = b.length >= 4 && b[0] === 0x3c && (b[1] === 0x73 || b[1] === 0x3f);
+      if (!isJpeg && !isPng && !isWebp && !isGif && !isSvg) {
+        setStatus("Invalid image signature. Please upload a valid image file.");
+        event.target.value = "";
+        return;
+      }
+    } catch (_) {}
+  }
 
   const reader = new FileReader();
   reader.onload = () => {

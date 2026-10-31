@@ -73,7 +73,125 @@ export class AudioProcessor {
     }
   }
 
+  async validateAudioFile(file) {
+    if (!file) {
+      return { valid: false, error: "No audio file provided." };
+    }
+
+    if (
+      typeof globalThis !== "undefined" &&
+      globalThis.CradleMediaValidator &&
+      typeof globalThis.CradleMediaValidator.validateAudioBlob === "function"
+    ) {
+      return await globalThis.CradleMediaValidator.validateAudioBlob(file);
+    }
+
+    const type = (file.type || "").trim().toLowerCase();
+    if (
+      type &&
+      !type.startsWith("audio/") &&
+      type !== "video/webm" &&
+      type !== "video/mp4"
+    ) {
+      return {
+        valid: false,
+        error: `Unsupported MIME type: "${type}". Please select a valid audio file.`,
+      };
+    }
+
+    if (typeof file.slice === "function") {
+      try {
+        const slice = file.slice(0, 32);
+        const buffer = await slice.arrayBuffer();
+        const b = new Uint8Array(buffer);
+        if (b.length < 2) {
+          return { valid: false, error: "Audio file is empty or corrupted." };
+        }
+
+        const isWav =
+          b.length >= 12 &&
+          b[0] === 0x52 &&
+          b[1] === 0x49 &&
+          b[2] === 0x46 &&
+          b[3] === 0x46 &&
+          b[8] === 0x57 &&
+          b[9] === 0x41 &&
+          b[10] === 0x56 &&
+          b[11] === 0x45;
+
+        const isMp3Id3 =
+          b.length >= 3 && b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33;
+
+        const isMp3Sync =
+          b.length >= 2 && b[0] === 0xff && (b[1] & 0xe0) === 0xe0;
+
+        const isOgg =
+          b.length >= 4 &&
+          b[0] === 0x4f &&
+          b[1] === 0x67 &&
+          b[2] === 0x67 &&
+          b[3] === 0x53;
+
+        const isFlac =
+          b.length >= 4 &&
+          b[0] === 0x66 &&
+          b[1] === 0x4c &&
+          b[2] === 0x61 &&
+          b[3] === 0x43;
+
+        const isWebM =
+          b.length >= 4 &&
+          b[0] === 0x1a &&
+          b[1] === 0x45 &&
+          b[2] === 0xdf &&
+          b[3] === 0xa3;
+
+        const isMp4 =
+          b.length >= 8 &&
+          b[4] === 0x66 &&
+          b[5] === 0x74 &&
+          b[6] === 0x79 &&
+          b[7] === 0x70;
+
+        if (
+          !isWav &&
+          !isMp3Id3 &&
+          !isMp3Sync &&
+          !isOgg &&
+          !isFlac &&
+          !isWebM &&
+          !isMp4
+        ) {
+          return {
+            valid: false,
+            error:
+              "File signature does not match any supported audio format (WAV, MP3, OGG, FLAC, WebM).",
+          };
+        }
+      } catch (err) {
+        return { valid: false, error: "Failed to read audio file header." };
+      }
+    }
+
+    return { valid: true };
+  }
+
   async loadAudioFile(file) {
+    if (!file) return false;
+
+    const validation = await this.validateAudioFile(file);
+    if (!validation.valid) {
+      console.error("Audio validation failed:", validation.error);
+      const banner = document.getElementById("error-banner");
+      if (banner) {
+        banner.textContent =
+          validation.error ||
+          "Invalid audio file. Please select a valid audio file (WAV, MP3, OGG, FLAC).";
+        banner.hidden = false;
+      }
+      return false;
+    }
+
     if (!this.audioContext) await this.init();
     await this.resumeContext();
 

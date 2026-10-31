@@ -183,6 +183,29 @@ if (fileUpload) {
       return;
     }
 
+    // Inspect file signature before processing blob
+    if (typeof file.slice === "function") {
+      try {
+        const header = await file.slice(0, 16).arrayBuffer();
+        const sigCheck =
+          typeof MemeEngine !== "undefined" &&
+          typeof MemeEngine.validateImageSignature === "function"
+            ? MemeEngine.validateImageSignature(new Uint8Array(header))
+            : { valid: true };
+        if (!sigCheck.valid) {
+          showError(
+            "Invalid image file: signature does not match any supported image format."
+          );
+          e.target.value = "";
+          return;
+        }
+      } catch (err) {
+        showError("Unable to read image header. Please try another file.");
+        e.target.value = "";
+        return;
+      }
+    }
+
     // Check image dimensions before actually loading it into the meme.
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();

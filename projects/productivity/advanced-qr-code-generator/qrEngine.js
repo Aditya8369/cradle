@@ -278,8 +278,104 @@
     return true;
   }
 
+
+  function isValidLogoType(type) {
+    return ["image/png", "image/jpeg", "image/svg+xml"].includes(type);
+  }
+
+  async function validateLogoSignature(blobOrBytes) {
+    if (!blobOrBytes) {
+      return { valid: false, error: "No logo file provided." };
+    }
+
+    let bytes = null;
+    if (blobOrBytes instanceof Uint8Array) {
+      bytes = blobOrBytes;
+    } else if (ArrayBuffer.isView(blobOrBytes)) {
+      bytes = new Uint8Array(
+        blobOrBytes.buffer,
+        blobOrBytes.byteOffset,
+        blobOrBytes.byteLength
+      );
+    } else if (blobOrBytes instanceof ArrayBuffer) {
+      bytes = new Uint8Array(blobOrBytes);
+    } else if (typeof blobOrBytes.slice === "function") {
+      try {
+        const slice = blobOrBytes.slice(0, 64);
+        const buffer = await slice.arrayBuffer();
+        bytes = new Uint8Array(buffer);
+      } catch (err) {
+        return { valid: false, error: "Failed to read logo header." };
+      }
+    }
+
+    if (!bytes || bytes.length < 3) {
+      return { valid: false, error: "Logo file is empty or corrupted." };
+    }
+
+    // JPEG: FF D8 FF
+    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+      return { valid: true, mimeType: "image/jpeg" };
+    }
+
+    // PNG: 89 50 4E 47 0D 0A 1A 0A
+    if (
+      bytes.length >= 8 &&
+      bytes[0] === 0x89 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x4e &&
+      bytes[3] === 0x47 &&
+      bytes[4] === 0x0d &&
+      bytes[5] === 0x0a &&
+      bytes[6] === 0x1a &&
+      bytes[7] === 0x0a
+    ) {
+      return { valid: true, mimeType: "image/png" };
+    }
+
+    // SVG: UTF-8 XML/SVG markup
+    let isSvg = false;
+    let hasNull = false;
+    for (let i = 0; i < Math.min(bytes.length, 32); i++) {
+      if (bytes[i] === 0) {
+        hasNull = true;
+        break;
+      }
+    }
+    if (!hasNull) {
+      let str = "";
+      try {
+        if (typeof TextDecoder !== "undefined") {
+          str = new TextDecoder("utf-8").decode(bytes);
+        } else {
+          str = String.fromCharCode.apply(null, Array.from(bytes));
+        }
+        const trimmed = str.trim().toLowerCase();
+        if (
+          trimmed.startsWith("<svg") ||
+          (trimmed.startsWith("<?xml") && trimmed.includes("<svg")) ||
+          trimmed.includes("<svg")
+        ) {
+          isSvg = true;
+        }
+      } catch (_) {}
+    }
+
+    if (isSvg) {
+      return { valid: true, mimeType: "image/svg+xml" };
+    }
+
+    return {
+      valid: false,
+      error:
+        "File signature does not match any supported logo format (PNG, JPEG, SVG).",
+    };
+  }
+
   return {
     DEFAULT_OPTIONS,
+    isValidLogoType,
+    validateLogoSignature,
     isValidHex,
     sanitizeOptions,
     buildConfigPayload,

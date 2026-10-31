@@ -263,6 +263,22 @@ async function processImage(file) {
       fileType.textContent = file.type || "Unknown";
     }
 
+    if (typeof file.slice === "function") {
+      const slice = file.slice(0, 32);
+      const buffer = await slice.arrayBuffer();
+      const view = new DataView(buffer);
+      const detected =
+        globalThis.ImageMetadataEngine &&
+        typeof globalThis.ImageMetadataEngine.detectFormat === "function"
+          ? globalThis.ImageMetadataEngine.detectFormat(view)
+          : null;
+      if (!detected) {
+        throw new Error(
+          "Unsupported image format or invalid signature. Only JPEG, PNG, and WebP are supported."
+        );
+      }
+    }
+
     const imageInfo = await loadImagePreview(file);
 
     if (
