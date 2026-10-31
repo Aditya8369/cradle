@@ -54,8 +54,8 @@ User interaction (Start / Pause / Reset / Mode Change)
 ↓
 update state (mode, running, timeLeft)
 ↓
-tick() interval (every 1 second)
-    ↳ Decrement timeLeft
+tick() interval / document.visibilitychange
+    ↳ Recalculate timeLeft from Date.now() and endTime (drift-free)
     ↳ updateDisplay() → update numeric timer + page title
     ↳ updateInfinity() → calculate progress % and update SVG stroke-dashoffset
     ↳ Update infinityDot position using path.getPointAtLength()
@@ -73,6 +73,7 @@ saveState() → Persist current config and stats to localStorage
 
 ## Key Features
 
+- **Drift-Free Timing with Page Visibility API**: Anchoring remaining time to wall-clock target timestamps (`endTime = Date.now() + duration`) and synchronizing via `document.visibilitychange` prevents timer drift caused by browser background tab throttling.
 - **Infinity Loop Visual**: A custom cubic bezier SVG path that fills linearly as the timer counts down, with a glowing dot following the path.
 - **Flexible Session Logic**: Supports configurable focus and break durations, and a "sessions before long break" threshold.
 - **Procedural Ambient Audio**: Uses the Web Audio API to generate noise-based soundscapes (e.g., rain, fire) without requiring external audio files.
@@ -116,6 +117,7 @@ saveState() → Persist current config and stats to localStorage
 
 ## Design Decisions
 
+- **Timestamp-Based Countdown with Page Visibility API**: Anchoring remaining time to `Date.now()` prevents timing drift when background tabs are throttled by browsers, instantly re-syncing visual and countdown progress on tab reactivation.
 - **SVG `stroke-dashoffset`**: Used for the filling animation because it provides a mathematically precise way to represent progress along a complex path.
 - **Procedural Audio**: Chosen over audio files to keep the project lightweight and eliminate the need for asset management.
 - **State Persistence**: Implemented a `savedAt` timestamp in `localStorage` to ensure that daily stats are automatically reset when a new day begins.

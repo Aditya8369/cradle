@@ -55,8 +55,8 @@ User interaction (Start / Pause / Reset / Mode Change)
 ↓
 update state (currentMode, timeRemaining, isRunning)
 ↓
-setInterval tick (every 1 second)
-    ↳ Decrement timeRemaining
+setInterval tick / document.visibilitychange
+    ↳ Recalculate timeRemaining from Date.now() and endTime (drift-free)
     ↳ updateDisplay() → Update numeric timer and Page Title
     ↳ updateRing() → Calculate progress and update SVG stroke-dashoffset
 ↓
@@ -73,6 +73,7 @@ saveState() → Sync settings and stats to localStorage
 
 ## Key Features
 
+- **Drift-Free Timing with Page Visibility API**: Anchoring remaining time to wall-clock target timestamps (`endTime = Date.now() + duration`) and synchronizing via `document.visibilitychange` prevents timer drift caused by browser background tab throttling.
 - **Mode-Driven UI**: The entire interface changes its accent color based on the mode (Red for Focus, Green for Short Break, Indigo for Long Break).
 - **Animated Progress Ring**: An SVG ring that depletes as time passes, providing a clear visual cue of remaining time.
 - **Persistence Layer**: All settings and daily session logs are saved to `localStorage`, resetting only at midnight.
@@ -102,7 +103,7 @@ saveState() → Sync settings and stats to localStorage
 
 ### `script.js`
 
-- `startTimer()` / `pauseTimer()`: Controls the `setInterval` loop.
+- `startTimer()` / `pauseTimer()`: Controls the countdown loop using wall-clock timestamp synchronization and Page Visibility API to eliminate background tab throttling drift.
 - `updateRing()`: Maps the ratio of `timeRemaining / totalTime` to the ring's offset.
 - `onTimerComplete()`: Manages the logic for transitioning between Pomodoro phases.
 - `saveState()` / `loadState()`: Handles serialization of data to `localStorage`.
@@ -116,6 +117,7 @@ saveState() → Sync settings and stats to localStorage
 
 ## Design Decisions
 
+- **Timestamp-Based Countdown with Page Visibility API**: Rather than naive decrementing inside `setInterval`, the timer anchors countdowns to `Date.now()`. When browser tabs are throttled in the background or restored to focus, elapsed time is calculated accurately against wall-clock time.
 - **Accent Colors for Modes**: Chosen to provide immediate subconscious feedback to the user about their current state (Focus vs. Break).
 - **localStorage-Based Logging**: Used to provide a "daily log" feel without requiring a backend database.
 - **Web Audio API**: Used instead of `<audio>` tags to ensure the notification sounds are generated instantly and without network latency.
@@ -146,7 +148,6 @@ None (uses native browser APIs).
 
 ## Known Limitations
 
-- Timer precision can drift slightly over long periods due to `setInterval` behavior in background tabs.
 - No multi-device synchronization.
 
 ---
