@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game</title>
+    <meta
+      name="description"
+      content="Classic arcade Snake game featuring responsive controls, speed customization, real-time score tracking, and precise collision detection."
+    />
+    <link
+      rel="canonical"
+      href="https://facelessism.github.io/cradle/projects/games/snake-game/"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Snake Game" />
+    <meta
+      property="og:description"
+      content="Classic arcade Snake game featuring responsive controls, speed customization, real-time score tracking, and precise collision detection."
+    />
+    <meta
+      property="og:url"
+      content="https://facelessism.github.io/cradle/projects/games/snake-game/"
+    />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="panel__header">
+        <p class="eyebrow">Retro Arcade</p>
+        <h1>Snake Game</h1>
+      </header>
+
+      <div class="scores-container" aria-label="Game stats">
+        <div class="score-card">
+          <span class="score-card__label">Score</span>
+          <strong id="scoreValue">0</strong>
+        </div>
+        <div class="score-card">
+          <span class="score-card__label">High Score</span>
+          <strong id="highScoreValue">0</strong>
+        </div>
+        <div class="score-card">
+          <span class="score-card__label">Length</span>
+          <strong id="lengthValue">3</strong>
+        </div>
+      </div>
+
+      <div class="controls-bar" aria-label="Game controls">
+        <div class="speed-wrapper">
+          <label for="speedSelect">Speed:</label>
+          <select id="speedSelect" class="speed-select">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button id="startBtn" type="button" class="btn btn-primary">
+            ▶ Start
+          </button>
+          <button id="pauseBtn" type="button" class="btn btn-secondary" hidden>
+            ⏸ Pause
+          </button>
+          <button id="resetBtn" type="button" class="btn btn-secondary">
+            ↻ Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+        <div id="gameOverModal" class="modal-overlay" hidden>
+          <div class="modal-content">
+            <h2>Game Over</h2>
+            <p id="deathReason" class="death-reason">You crashed!</p>
+            <div class="final-stats">
+              <div class="stat-item">
+                <span class="stat-label">Score</span>
+                <span id="finalScore" class="stat-value">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">High Score</span>
+                <span id="finalHighScore" class="stat-value">0</span>
+              </div>
+            </div>
+            <button
+              id="restartBtn"
+              type="button"
+              class="btn btn-primary"
+              style="width: 100%"
+            >
+              ↻ Play Again
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dpad-container" aria-label="Mobile D-Pad Controls">
+        <button id="dpadUp" type="button" class="dpad-btn" aria-label="Move Up">
+          ▲
+        </button>
+        <button
+          id="dpadLeft"
+          type="button"
+          class="dpad-btn"
+          aria-label="Move Left"
+        >
+          ◀
+        </button>
+        <button
+          id="dpadRight"
+          type="button"
+          class="dpad-btn"
+          aria-label="Move Right"
+        >
+          ▶
+        </button>
+        <button
+          id="dpadDown"
+          type="button"
+          class="dpad-btn"
+          aria-label="Move Down"
+        >
+          ▼
+        </button>
+      </div>
+
+      <p class="controls-legend">
+        Controls: <kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd
+        ><kbd class="kbd">←</kbd><kbd class="kbd">→</kbd> or
+        <kbd class="kbd">W</kbd><kbd class="kbd">A</kbd><kbd class="kbd">S</kbd
+        ><kbd class="kbd">D</kbd> to move | <kbd class="kbd">Space</kbd> to
+        pause | <kbd class="kbd">R</kbd> to reset
+      </p>
+    </main>
+
+    <script
+      src="../../../src/components/ui/BackToHome/BackToHome.js"
+      defer
+    ></script>
+    <script src="../../../src/components/ui/storage.js"></script>
+    <script src="./snakeEngine.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

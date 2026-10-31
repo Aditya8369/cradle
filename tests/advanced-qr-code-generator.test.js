@@ -115,3 +115,29 @@ test("triggerDownload returns false when document is unavailable", () => {
   const success = QREngine.triggerDownload("data:test", "qr-code.png", {});
   assert.equal(success, false);
 });
+
+test("isValidLogoType validates PNG, JPEG, SVG mime types", () => {
+  assert.equal(QREngine.isValidLogoType("image/png"), true);
+  assert.equal(QREngine.isValidLogoType("image/jpeg"), true);
+  assert.equal(QREngine.isValidLogoType("image/svg+xml"), true);
+  assert.equal(QREngine.isValidLogoType("application/x-msdownload"), false);
+  assert.equal(QREngine.isValidLogoType("text/html"), false);
+});
+
+test("validateLogoSignature validates logo magic bytes", async () => {
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const pngCheck = await QREngine.validateLogoSignature(png);
+  assert.equal(pngCheck.valid, true);
+
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+  const jpegCheck = await QREngine.validateLogoSignature(jpeg);
+  assert.equal(jpegCheck.valid, true);
+
+  const svg = new TextEncoder().encode("<svg viewBox='0 0 10 10'></svg>");
+  const svgCheck = await QREngine.validateLogoSignature(svg);
+  assert.equal(svgCheck.valid, true);
+
+  const invalid = new Uint8Array([0x00, 0x11, 0x22, 0x33]);
+  const invalidCheck = await QREngine.validateLogoSignature(invalid);
+  assert.equal(invalidCheck.valid, false);
+});

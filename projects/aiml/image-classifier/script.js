@@ -141,9 +141,18 @@ customModeBtn?.addEventListener("click", () => {
 });
 
 // Standard Image Upload
-imageUpload?.addEventListener("change", event => {
+imageUpload?.addEventListener("change", async event => {
   const file = event.target.files[0];
   if (file) {
+    const validator = window.ClassifierEngine?.validateImageFile;
+    if (typeof validator === "function") {
+      const check = await validator(file);
+      if (!check.valid) {
+        showToast(check.error || "Invalid image file.");
+        event.target.value = "";
+        return;
+      }
+    }
     if (previewObjectURL) {
       URL.revokeObjectURL(previewObjectURL);
     }
@@ -157,9 +166,18 @@ imageUpload?.addEventListener("change", event => {
 });
 
 // Custom Test Image Upload
-customImageUpload?.addEventListener("change", event => {
+customImageUpload?.addEventListener("change", async event => {
   const file = event.target.files[0];
   if (file) {
+    const validator = window.ClassifierEngine?.validateImageFile;
+    if (typeof validator === "function") {
+      const check = await validator(file);
+      if (!check.valid) {
+        showToast(check.error || "Invalid image file.");
+        event.target.value = "";
+        return;
+      }
+    }
     if (customTestImageURL) {
       URL.revokeObjectURL(customTestImageURL);
     }
@@ -304,6 +322,14 @@ async function addImageToClass(event, id) {
     : null;
 
   for (let file of files) {
+    const validator = window.ClassifierEngine?.validateImageFile;
+    if (typeof validator === "function") {
+      const check = await validator(file);
+      if (!check.valid) {
+        showToast(check.error || `Invalid image file: ${file.name}`);
+        continue;
+      }
+    }
     const img = new Image();
     const objectUrl = URL.createObjectURL(file);
     img.src = objectUrl;

@@ -271,10 +271,12 @@
 
       setStatus("Camera Unavailable", "Using fallback mode", message);
 
-      els.emptyPreview.innerHTML = `
-        <strong>Camera unavailable</strong>
-        <span>${message}</span>
-      `;
+      els.emptyPreview.textContent = "";
+      const strong = document.createElement("strong");
+      strong.textContent = "Camera unavailable";
+      const span = document.createElement("span");
+      span.textContent = message;
+      els.emptyPreview.append(strong, span);
     }
   }
 
@@ -448,6 +450,33 @@
       );
 
       return;
+    }
+
+    // Inspect file signature before processing blob
+    if (typeof file.slice === "function") {
+      try {
+        const header = await file.slice(0, 16).arrayBuffer();
+        const sigCheck =
+          typeof ASCIIEngine !== "undefined" &&
+          typeof ASCIIEngine.validateImageSignature === "function"
+            ? ASCIIEngine.validateImageSignature(new Uint8Array(header))
+            : { valid: true };
+        if (!sigCheck.valid) {
+          rejectUpload(
+            "Image Rejected",
+            "Invalid file content",
+            "The file signature does not match any supported image format.\n\nPlease upload a valid JPEG, PNG, WebP, or GIF image."
+          );
+          return;
+        }
+      } catch (err) {
+        rejectUpload(
+          "Image Rejected",
+          "Unreadable file",
+          "Could not inspect the file header. Please try another image."
+        );
+        return;
+      }
     }
 
     stopCamera();

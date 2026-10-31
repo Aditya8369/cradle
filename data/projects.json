@@ -392,6 +392,13 @@
     "thumbnailHash": "ccee007b"
   },
   {
+    "title": "Snake Game",
+    "category": "games",
+    "path": "projects/games/snake-game/",
+    "dateAdded": "2026-10-30T18:43:29.246Z",
+    "thumbnailHash": "cf368c27"
+  },
+  {
     "title": "Sound Wave Visualizer",
     "category": "misc",
     "path": "projects/misc/sound-wave-visualizer/",
@@ -479,7 +486,7 @@
     "title": "Weather",
     "category": "productivity",
     "path": "projects/productivity/weather/",
-    "dateAdded": "2026-10-30T16:37:38.613Z",
+    "dateAdded": "2026-10-30T22:22:08+05:30",
     "thumbnailHash": "564597ef"
   },
   {

@@ -129,15 +129,26 @@ function renderWeather(data) {
     data.forecast.forEach(item => {
       const card = document.createElement("div");
       card.className = "forecast-day";
-      card.innerHTML = `
-        <span class="forecast-day-name">${item.day}</span>
-        <span class="forecast-icon" aria-hidden="true">${item.icon}</span>
-        <div class="forecast-temps">
-          <span class="forecast-max">${formatTemperature(item.maxC, state.currentUnit)}</span>
-          <span class="forecast-min">${formatTemperature(item.minC, state.currentUnit)}</span>
-        </div>
-        <span class="forecast-cond">${item.condition}</span>
-      `;
+      const daySpan = document.createElement("span");
+      daySpan.className = "forecast-day-name";
+      daySpan.textContent = item.day;
+      const iconSpan = document.createElement("span");
+      iconSpan.className = "forecast-icon";
+      iconSpan.setAttribute("aria-hidden", "true");
+      iconSpan.textContent = item.icon;
+      const tempsDiv = document.createElement("div");
+      tempsDiv.className = "forecast-temps";
+      const maxSpan = document.createElement("span");
+      maxSpan.className = "forecast-max";
+      maxSpan.textContent = formatTemperature(item.maxC, state.currentUnit);
+      const minSpan = document.createElement("span");
+      minSpan.className = "forecast-min";
+      minSpan.textContent = formatTemperature(item.minC, state.currentUnit);
+      tempsDiv.append(maxSpan, minSpan);
+      const condSpan = document.createElement("span");
+      condSpan.className = "forecast-cond";
+      condSpan.textContent = item.condition;
+      card.append(daySpan, iconSpan, tempsDiv, condSpan);
       forecastGridEl.appendChild(card);
     });
   }

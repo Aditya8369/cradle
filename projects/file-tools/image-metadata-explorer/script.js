@@ -26,11 +26,9 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const ACCEPTED_FILE_TYPES = new Set([
   "image/jpeg",
+  "image/jpg",
   "image/png",
-  "image/gif",
   "image/webp",
-  "image/bmp",
-  "image/tiff",
 ]);
 
 /* --------------------------------
@@ -62,10 +60,15 @@ function formatValue(value) {
 }
 
 function showError(message) {
+  console.error("Image metadata error:", message);
+
   if (!errorMessage) return;
 
   errorMessage.textContent = message;
   errorMessage.classList.remove("hidden");
+  errorMessage.style.display = "block";
+  errorMessage.style.visibility = "visible";
+  errorMessage.style.opacity = "1";
 }
 
 function hideError() {
@@ -73,6 +76,7 @@ function hideError() {
 
   errorMessage.textContent = "";
   errorMessage.classList.add("hidden");
+  errorMessage.style.display = "none";
 }
 
 function validateImageFile(file) {
@@ -92,6 +96,13 @@ function validateImageFile(file) {
     formatFileSize(file.size)
   );
 
+  if (file.size === 0) {
+    return {
+      valid: false,
+      message: "The image file is empty (0 bytes).",
+    };
+  }
+
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
@@ -99,10 +110,10 @@ function validateImageFile(file) {
     };
   }
 
-  if (!ACCEPTED_FILE_TYPES.has(file.type)) {
+  if (file.type && !ACCEPTED_FILE_TYPES.has(file.type)) {
     return {
       valid: false,
-      message: "Invalid file type. Please select a supported image file.",
+      message: "Unsupported image format. Only JPEG, PNG, and WebP are supported.",
     };
   }
 
@@ -188,9 +199,15 @@ function loadImagePreview(file) {
 
     if (currentObjectUrl) {
       URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
     }
 
-    currentObjectUrl = URL.createObjectURL(file);
+    try {
+      currentObjectUrl = URL.createObjectURL(file);
+    } catch (err) {
+      reject(new Error("Unable to create preview URL for the image file."));
+      return;
+    }
 
     const image = new Image();
 
@@ -213,7 +230,15 @@ function loadImagePreview(file) {
     };
 
     image.onerror = () => {
-      reject(new Error("The selected image could not be loaded."));
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+        currentObjectUrl = null;
+      }
+      reject(
+        new Error(
+          "The selected image could not be loaded. The format may be unsupported or the file is corrupted."
+        )
+      );
     };
 
     image.src = currentObjectUrl;
@@ -263,6 +288,22 @@ async function processImage(file) {
       fileType.textContent = file.type || "Unknown";
     }
 
+    if (typeof file.slice === "function") {
+      const slice = file.slice(0, 32);
+      const buffer = await slice.arrayBuffer();
+      const view = new DataView(buffer);
+      const detected =
+        globalThis.ImageMetadataEngine &&
+        typeof globalThis.ImageMetadataEngine.detectFormat === "function"
+          ? globalThis.ImageMetadataEngine.detectFormat(view)
+          : null;
+      if (!detected) {
+        throw new Error(
+          "Unsupported image format or invalid signature. Only JPEG, PNG, and WebP are supported."
+        );
+      }
+    }
+
     const imageInfo = await loadImagePreview(file);
 
     if (
@@ -292,6 +333,23 @@ async function processImage(file) {
 
     currentFile = null;
     currentMetadata = null;
+
+    if (currentObjectUrl) {
+      URL.revokeObjectURL(currentObjectUrl);
+      currentObjectUrl = null;
+    }
+
+    if (imagePreview) {
+      imagePreview.removeAttribute("src");
+    }
+
+    if (resultsSection) {
+      resultsSection.classList.add("hidden");
+    }
+
+    if (uploadCard) {
+      uploadCard.classList.remove("hidden");
+    }
 
     showError(
       error instanceof Error ? error.message : "Unable to read image metadata."
@@ -507,16 +565,3 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-function showError(message) {
-  console.error("SHOW ERROR:", message);
-
-  if (errorMessage) {
-    errorMessage.textContent = message;
-    errorMessage.classList.remove("hidden");
-    errorMessage.style.display = "block";
-    errorMessage.style.visibility = "visible";
-    errorMessage.style.opacity = "1";
-  }
-
-  alert(message);
-}

@@ -23,6 +23,7 @@ let state = {
   paused: false,
   timeLeft: 25 * 60,
   totalTime: 25 * 60,
+  endTime: null,
   currentSession: 1,
   streak: 0,
   todayMinutes: 0,
@@ -168,15 +169,25 @@ function startTimer() {
   state.running = true;
   state.paused = false;
 
+  state.endTime = Date.now() + state.timeLeft * 1000;
+
   startBtn.hidden = true;
   pauseBtn.hidden = false;
   timerDisplay.classList.remove("paused");
 
+  clearInterval(timerId);
   timerId = setInterval(tick, 1000);
   startAmbient();
 }
 
 function pauseTimer() {
+  if (state.running && state.endTime) {
+    state.timeLeft = Math.max(
+      0,
+      Math.ceil((state.endTime - Date.now()) / 1000)
+    );
+  }
+  state.endTime = null;
   state.paused = true;
   clearInterval(timerId);
   timerDisplay.classList.add("paused");
@@ -184,10 +195,12 @@ function pauseTimer() {
   startBtn.textContent = "▶ Resume";
   pauseBtn.hidden = true;
   stopAmbient();
+  updateDisplay();
 }
 
 function resetTimer() {
   clearInterval(timerId);
+  state.endTime = null;
   state.running = false;
   state.paused = false;
   state.timeLeft = getModeTime(state.mode) * 60;
@@ -206,6 +219,7 @@ function resetTimer() {
 
 function skipSession() {
   clearInterval(timerId);
+  state.endTime = null;
   state.running = false;
   state.paused = false;
   stopAmbient();
@@ -213,7 +227,15 @@ function skipSession() {
 }
 
 function tick() {
+  if (!state.endTime) {
+    state.endTime = Date.now() + state.timeLeft * 1000;
+  }
+
+  state.timeLeft = Math.max(0, Math.ceil((state.endTime - Date.now()) / 1000));
+
   if (state.timeLeft <= 0) {
+    state.timeLeft = 0;
+    state.endTime = null;
     clearInterval(timerId);
     state.running = false;
     stopAmbient();
@@ -221,11 +243,11 @@ function tick() {
     return;
   }
 
-  state.timeLeft--;
   updateDisplay();
 }
 
 function completeSession() {
+  state.endTime = null;
   const mode = state.mode;
   const duration = getModeTime(mode);
 
@@ -281,6 +303,7 @@ function completeSession() {
 
 // ─── Mode ──────────────────────────────────────────────────────────
 function setMode(mode) {
+  state.endTime = null;
   state.mode = mode;
   state.timeLeft = getModeTime(mode) * 60;
   state.totalTime = state.timeLeft;
@@ -543,6 +566,15 @@ document.addEventListener("keydown", e => {
   if (e.key === "r") resetTimer();
   if (e.key === "s") skipSession();
 });
+
+// ─── Page Visibility API ──────────────────────────────────────────
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && state.running && !state.paused && state.endTime) {
+      tick();
+    }
+  });
+}
 
 // ─── Start ─────────────────────────────────────────────────────────
 init();

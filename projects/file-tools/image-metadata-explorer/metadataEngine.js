@@ -538,6 +538,41 @@ function detectFormat(view) {
     return "webp";
   }
 
+  if (
+    view.byteLength >= 6 &&
+    view.getUint8(0) === 0x47 &&
+    view.getUint8(1) === 0x49 &&
+    view.getUint8(2) === 0x46 &&
+    view.getUint8(3) === 0x38 &&
+    (view.getUint8(4) === 0x37 || view.getUint8(4) === 0x39) &&
+    view.getUint8(5) === 0x61
+  ) {
+    return "gif";
+  }
+
+  if (
+    view.byteLength >= 2 &&
+    view.getUint8(0) === 0x42 &&
+    view.getUint8(1) === 0x4d
+  ) {
+    return "bmp";
+  }
+
+  if (
+    (view.byteLength >= 4 &&
+      view.getUint8(0) === 0x49 &&
+      view.getUint8(1) === 0x49 &&
+      view.getUint8(2) === 0x2a &&
+      view.getUint8(3) === 0x00) ||
+    (view.byteLength >= 4 &&
+      view.getUint8(0) === 0x4d &&
+      view.getUint8(1) === 0x4d &&
+      view.getUint8(2) === 0x00 &&
+      view.getUint8(3) === 0x2a)
+  ) {
+    return "tiff";
+  }
+
   return "unknown";
 }
 
@@ -934,22 +969,179 @@ function normalizeMetadata(raw) {
 }
 
 /* --------------------------------
+   Custom Errors & File Reading
+-------------------------------- */
+
+class FileReadError extends Error {
+  constructor(message, code = "UNREADABLE_FILE", cause = null) {
+    super(message);
+    this.name = "FileReadError";
+    this.code = code;
+    if (cause) {
+      this.cause = cause;
+    }
+  }
+}
+
+function classifyReadError(err) {
+  if (err instanceof FileReadError) {
+    return err;
+  }
+
+  const name =
+    (err && (err.name || (err.constructor && err.constructor.name))) || "";
+  const msg = err && err.message ? String(err.message) : "";
+
+  if (
+    name === "NotReadableError" ||
+    /permission/i.test(msg) ||
+    /not readable/i.test(msg) ||
+    /locked/i.test(msg)
+  ) {
+    return new FileReadError(
+      "Permission denied: Unable to read file due to permission restrictions or file lock.",
+      "PERMISSION_DENIED",
+      err
+    );
+  }
+
+  if (name === "SecurityError" || /security/i.test(msg)) {
+    return new FileReadError(
+      "Security error: Access to the file was blocked by browser security restrictions.",
+      "SECURITY_ERROR",
+      err
+    );
+  }
+
+  if (name === "NotFoundError" || /not found/i.test(msg)) {
+    return new FileReadError(
+      "File not found: The selected file could not be accessed.",
+      "FILE_NOT_FOUND",
+      err
+    );
+  }
+
+  if (name === "AbortError" || /aborted/i.test(msg)) {
+    return new FileReadError(
+      "File read operation was aborted.",
+      "READ_ABORTED",
+      err
+    );
+  }
+
+  return new FileReadError(
+    msg ? `Failed to read file: ${msg}` : "Unreadable file: Unable to read file data.",
+    "UNREADABLE_FILE",
+    err
+  );
+}
+
+function readFileBuffer(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new FileReadError("No image file provided.", "INVALID_INPUT"));
+      return;
+    }
+
+    if (file instanceof ArrayBuffer) {
+      if (file.byteLength === 0) {
+        reject(new FileReadError("The image file is empty.", "EMPTY_FILE"));
+        return;
+      }
+      resolve(file);
+      return;
+    }
+
+    if (ArrayBuffer.isView(file)) {
+      if (file.byteLength === 0) {
+        reject(new FileReadError("The image file is empty.", "EMPTY_FILE"));
+        return;
+      }
+      resolve(
+        file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength)
+      );
+      return;
+    }
+
+    // Support standard FileReader API for Blobs/Files in browser environments
+    if (
+      typeof FileReader !== "undefined" &&
+      (typeof Blob === "undefined" ||
+        file instanceof Blob ||
+        typeof file.slice === "function")
+    ) {
+      try {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const result = reader.result;
+          if (!result || result.byteLength === 0) {
+            reject(
+              new FileReadError("The image file is empty.", "EMPTY_FILE")
+            );
+            return;
+          }
+          resolve(result);
+        };
+
+        reader.onerror = () => {
+          reject(classifyReadError(reader.error));
+        };
+
+        reader.onabort = () => {
+          reject(
+            new FileReadError(
+              "File read operation was aborted.",
+              "READ_ABORTED"
+            )
+          );
+        };
+
+        reader.readAsArrayBuffer(file);
+        return;
+      } catch (err) {
+        if (typeof file.arrayBuffer !== "function") {
+          reject(classifyReadError(err));
+          return;
+        }
+      }
+    }
+
+    if (typeof file.arrayBuffer === "function") {
+      file
+        .arrayBuffer()
+        .then(buffer => {
+          if (!buffer || buffer.byteLength === 0) {
+            reject(
+              new FileReadError("The image file is empty.", "EMPTY_FILE")
+            );
+            return;
+          }
+          resolve(buffer);
+        })
+        .catch(err => {
+          reject(classifyReadError(err));
+        });
+      return;
+    }
+
+    reject(new FileReadError("Invalid image file.", "INVALID_INPUT"));
+  });
+}
+
+/* --------------------------------
    Main Parser
 -------------------------------- */
 
 async function parse(file) {
   if (!file) {
-    throw new Error("No image file provided.");
+    throw new FileReadError("No image file provided.", "INVALID_INPUT");
   }
 
-  if (typeof file.arrayBuffer !== "function") {
-    throw new Error("Invalid image file.");
-  }
-
-  const buffer = await file.arrayBuffer();
+  const buffer = await readFileBuffer(file);
 
   if (!buffer || buffer.byteLength === 0) {
-    throw new Error("The image file is empty.");
+    throw new FileReadError("The image file is empty.", "EMPTY_FILE");
   }
 
   const view = new DataView(buffer);
@@ -959,21 +1151,48 @@ async function parse(file) {
   let dimensions = null;
 
   if (format === "jpeg") {
-    const tiffStart = findExifSegment(view);
-    if (tiffStart !== -1) {
-      rawMetadata = parseTIFF(view, tiffStart);
+    try {
+      const tiffStart = findExifSegment(view);
+      if (tiffStart !== -1) {
+        rawMetadata = parseTIFF(view, tiffStart);
+      }
+    } catch (err) {
+      throw new FileReadError(
+        `Corrupted image data: Failed to parse JPEG EXIF metadata (${err.message}).`,
+        "UNREADABLE_FILE",
+        err
+      );
     }
   } else if (format === "png") {
-    const result = parsePNG(view);
-    rawMetadata = result.metadata;
-    dimensions = result.dimensions;
+    try {
+      const result = parsePNG(view);
+      rawMetadata = result.metadata;
+      dimensions = result.dimensions;
+    } catch (err) {
+      throw new FileReadError(
+        `Corrupted image data: Failed to parse PNG metadata (${err.message}).`,
+        "UNREADABLE_FILE",
+        err
+      );
+    }
   } else if (format === "webp") {
-    const result = parseWebP(view);
-    rawMetadata = result.metadata;
-    dimensions = result.dimensions;
+    try {
+      const result = parseWebP(view);
+      rawMetadata = result.metadata;
+      dimensions = result.dimensions;
+    } catch (err) {
+      throw new FileReadError(
+        `Corrupted image data: Failed to parse WebP metadata (${err.message}).`,
+        "UNREADABLE_FILE",
+        err
+      );
+    }
   } else {
-    throw new Error(
-      "Unsupported image format. Only JPEG, PNG, and WebP are supported."
+    const detectedName =
+      format && format !== "unknown" ? ` (${format.toUpperCase()})` : "";
+    throw new FileReadError(
+      `Unsupported image format${detectedName}. Only JPEG, PNG, and WebP are supported.`,
+      "UNSUPPORTED_FORMAT"
     );
   }
 
@@ -992,10 +1211,15 @@ async function parse(file) {
 
 const ImageMetadataEngine = {
   parse,
+  readFileBuffer,
+  classifyReadError,
+  FileReadError,
+  detectFormat,
   formatFileSize,
   gpsToDecimal,
   getMetadataGroups,
   metadataToJSON,
+  detectFormat,
 };
 
 if (typeof globalThis !== "undefined") {
@@ -1018,5 +1242,9 @@ if (typeof module !== "undefined" && module.exports) {
     getMetadataGroups,
     metadataToJSON,
     parse,
+    readFileBuffer,
+    classifyReadError,
+    FileReadError,
+    detectFormat,
   };
 }

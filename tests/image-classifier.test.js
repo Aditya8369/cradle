@@ -10,6 +10,7 @@ const {
   formatConfidence,
   formatCustomPredictions,
   validateClassName,
+  validateImageFile,
 } = require("../projects/aiml/image-classifier/classifierEngine.js");
 
 // calculateClampedDimensions
@@ -232,4 +233,30 @@ test("custom class rendering does not interpolate user input into innerHTML", ()
   assert.doesNotMatch(source, /innerHTML\s*=.*\$\{c\.name\}/);
   assert.doesNotMatch(source, /innerHTML\s*=.*\$\{prediction\.className\}/);
   assert.match(source, /textContent = text/);
+});
+
+// validateImageFile
+test("validateImageFile accepts valid JPEG image buffer", async () => {
+  const jpegBuffer = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+  const result = await validateImageFile(jpegBuffer);
+  assert.equal(result.valid, true);
+  assert.equal(result.detectedType, "image/jpeg");
+});
+
+test("validateImageFile accepts valid PNG image buffer", async () => {
+  const pngBuffer = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const result = await validateImageFile(pngBuffer);
+  assert.equal(result.valid, true);
+  assert.equal(result.detectedType, "image/png");
+});
+
+test("validateImageFile rejects spoofed MIME or invalid signature", async () => {
+  const fakeFile = {
+    type: "image/jpeg",
+    size: 50,
+    arrayBuffer: async () => new Uint8Array([0x4d, 0x5a, 0x90, 0x00]).buffer,
+  };
+  const result = await validateImageFile(fakeFile);
+  assert.equal(result.valid, false);
+  assert.ok(result.error);
 });

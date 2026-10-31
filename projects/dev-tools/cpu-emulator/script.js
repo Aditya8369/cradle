@@ -116,12 +116,18 @@ function renderInitialHardwareGrid() {
   ramGrid.innerHTML = "";
   for (let i = 0; i < 16; i++) {
     const hexAddress = "0x" + i.toString(16).toUpperCase();
-    ramGrid.innerHTML += `
-            <div class="ram-cell" id="ram-cell-${i}">
-                <span class="ram-addr">${hexAddress}</span>
-                <span class="ram-data" id="ram-data-${i}">00</span>
-            </div>
-        `;
+    const cell = document.createElement("div");
+    cell.className = "ram-cell";
+    cell.id = `ram-cell-${i}`;
+    const addrSpan = document.createElement("span");
+    addrSpan.className = "ram-addr";
+    addrSpan.textContent = hexAddress;
+    const dataSpan = document.createElement("span");
+    dataSpan.className = "ram-data";
+    dataSpan.id = `ram-data-${i}`;
+    dataSpan.textContent = "00";
+    cell.append(addrSpan, dataSpan);
+    ramGrid.appendChild(cell);
   }
 }
 

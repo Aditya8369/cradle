@@ -115,7 +115,11 @@ function showToast(message, type = "info") {
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   toast.setAttribute("role", "status");
-  toast.innerHTML = `<i class="fa-solid ${icons[type]}"></i><span>${message}</span>`;
+  const icon = document.createElement("i");
+  icon.className = `fa-solid ${icons[type] || "fa-circle-info"}`;
+  const span = document.createElement("span");
+  span.textContent = message;
+  toast.append(icon, span);
 
   el.toastContainer.appendChild(toast);
 
@@ -306,7 +310,7 @@ addListener(el.errorLevel, "change", e => {
 });
 
 /** Logo upload */
-addListener(el.logoUpload, "change", e => {
+addListener(el.logoUpload, "change", async e => {
   const file = e.target.files[0];
   if (!file) return;
 
@@ -314,6 +318,19 @@ addListener(el.logoUpload, "change", e => {
     showToast("Please upload a PNG, JPG, JPEG, or SVG file.", "error");
     el.logoUpload.value = "";
     return;
+  }
+
+  const validator = typeof QREngine !== "undefined" && typeof QREngine.validateLogoSignature === "function"
+    ? QREngine.validateLogoSignature
+    : validateLogoSignature;
+
+  if (typeof validator === "function") {
+    const sigCheck = await validator(file);
+    if (!sigCheck.valid) {
+      showToast(sigCheck.error || "File signature does not match a supported image format.", "error");
+      el.logoUpload.value = "";
+      return;
+    }
   }
 
   const reader = new FileReader();
@@ -638,6 +655,14 @@ function shouldGenerateQRCode(text) {
   return typeof text === "string" && text.trim().length > 0;
 }
 
+
+async function validateLogoSignature(file) {
+  if (typeof QREngine !== "undefined" && typeof QREngine.validateLogoSignature === "function") {
+    return await QREngine.validateLogoSignature(file);
+  }
+  return { valid: true };
+}
+
 function isValidLogoType(type) {
   return ["image/png", "image/jpeg", "image/svg+xml"].includes(type);
 }
@@ -648,6 +673,7 @@ if (typeof module !== "undefined" && module.exports) {
     buildQrOptions,
     isValidHex,
     isValidLogoType,
+    validateLogoSignature,
     shouldGenerateQRCode,
     downloadQR,
     triggerDownloadFile,

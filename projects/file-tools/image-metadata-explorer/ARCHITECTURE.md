@@ -119,6 +119,10 @@ User clicks Export JSON → a .json file downloads
 ### `metadataEngine.js`
 
 - `parse(file)` — main entry: reads the buffer, finds the EXIF segment, returns normalised metadata
+- `readFileBuffer(file)` — reads file input asynchronously using standard FileReader (with `file.arrayBuffer()` fallback), safely handling permission failures, aborts, and unreadable/corrupted files
+- `classifyReadError(err)` — maps DOMExceptions and stream errors (`NotReadableError`, `SecurityError`, `NotFoundError`, `AbortError`) to structured `FileReadError` instances
+- `FileReadError` — custom error class exposing structured error codes (`PERMISSION_DENIED`, `SECURITY_ERROR`, `FILE_NOT_FOUND`, `READ_ABORTED`, `UNREADABLE_FILE`, `UNSUPPORTED_FORMAT`, `EMPTY_FILE`, `INVALID_INPUT`)
+- `detectFormat(view)` — identifies image formats by magic bytes (JPEG, PNG, WebP) and recognizes unsupported formats (GIF, BMP, TIFF) to provide actionable format errors
 - `findExifSegment(view)` — scans JPEG markers for the APP1 "Exif\0\0" segment
 - `parseTIFF(view, tiffStart)` — reads byte order, magic number, and follows the IFD chain (including EXIF and GPS sub-IFDs)
 - `readIFD(view, offset, littleEndian, tagMap)` — walks IFD entries and decodes known tags
@@ -149,6 +153,7 @@ User clicks Export JSON → a .json file downloads
 ## Design Decisions
 
 - **Engine Modules vs. Inline Logic Rationale**: EXIF parsing, binary ArrayBuffer TIFF parsing, GPS conversion, and data normalization are isolated in `metadataEngine.js` with UMD exports. This separates core binary parsing from DOM manipulation, allowing `metadataEngine.js` to be unit-tested headlessly via `node --test` while `script.js` manages drag-and-drop file uploads, image previews, and UI rendering.
+- **File-Reading & Error Classification Rationale**: Reading local files via the browser File API can fail due to permission revocation (`NotReadableError`), browser security policies (`SecurityError`), unreadable or corrupted storage streams, aborted operations, or unsupported image formats. Rather than allowing uncaught exceptions or generic failures, the application standardizes all reading errors through `FileReadError` with actionable messages and surfaces them into the UI with `role="alert"` so the user can easily recover.
 
 ---
 

@@ -448,7 +448,12 @@ function updatePlayerIndicators() {
 }
 
 function renderHistory() {
-  moveList.innerHTML = history.map(m => `<li>${m}</li>`).join("");
+  moveList.textContent = "";
+  for (const m of history) {
+    const li = document.createElement("li");
+    li.textContent = m;
+    moveList.appendChild(li);
+  }
 }
 
 function capitalize(text) {

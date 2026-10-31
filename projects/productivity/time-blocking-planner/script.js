@@ -324,7 +324,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const chip = document.createElement("div");
       chip.className = "stat-chip";
       chip.style.borderLeftColor = CATEGORY_COLORS[cat] || "#64748b";
-      chip.innerHTML = `${CATEGORY_NAMES[cat] || cat}: <strong>${formatDuration(mins)}</strong>`;
+      chip.textContent = `${CATEGORY_NAMES[cat] || cat}: `;
+      const strong = document.createElement("strong");
+      strong.textContent = formatDuration(mins);
+      chip.appendChild(strong);
       statsBar.appendChild(chip);
     });
   }

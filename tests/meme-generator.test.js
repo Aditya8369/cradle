@@ -6,6 +6,7 @@ const {
   getDefaultMemeOptions,
   isCanvasTainted,
   exportMemeCanvas,
+  validateImageSignature,
 } = require("../projects/misc/meme-generator/memeEngine");
 
 const {
@@ -155,4 +156,16 @@ test("meme preset storage preserves special characters and HTML payloads safely"
   );
 
   deleteMemePreset(saved[0].id);
+});
+
+test("validateImageSignature validates image headers correctly", () => {
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe1]);
+  assert.equal(validateImageSignature(jpeg).valid, true);
+  assert.equal(validateImageSignature(jpeg).mimeType, "image/jpeg");
+
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  assert.equal(validateImageSignature(png).valid, true);
+
+  const invalid = new Uint8Array([0x00, 0x00, 0x00, 0x00]);
+  assert.equal(validateImageSignature(invalid).valid, false);
 });

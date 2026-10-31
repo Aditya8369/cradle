@@ -421,21 +421,45 @@ function initBoard() {
             : space.i === 20
               ? "PARKING"
               : "GO TO JAIL";
-      div.innerHTML = `<div>${label}</div>`;
+      const labelDiv = document.createElement("div");
+      labelDiv.textContent = label;
+      div.appendChild(labelDiv);
     } else if (space.type === "property") {
       div.classList.add("ownable");
       if (isBottom) div.classList.add("side-bottom");
-      div.innerHTML = `<div class="colorbar" style="background:${GROUP_COLORS[space.group]}"></div>
-        <div class="name">${space.name}</div>
-        <div class="price">$${space.price}</div>
-        <div class="owner-strip"></div>`;
+      const colorbar = document.createElement("div");
+      colorbar.className = "colorbar";
+      colorbar.style.background = GROUP_COLORS[space.group] || "";
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "name";
+      nameDiv.textContent = space.name;
+      const priceDiv = document.createElement("div");
+      priceDiv.className = "price";
+      priceDiv.textContent = `${space.price}`;
+      const ownerStrip = document.createElement("div");
+      ownerStrip.className = "owner-strip";
+      div.append(colorbar, nameDiv, priceDiv, ownerStrip);
     } else if (space.type === "railroad" || space.type === "utility") {
       div.classList.add("ownable", "special");
-      div.innerHTML = `<div class="name">${space.name}</div><div class="price">$${space.price}</div>
-        <div class="owner-strip"></div>`;
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "name";
+      nameDiv.textContent = space.name;
+      const priceDiv = document.createElement("div");
+      priceDiv.className = "price";
+      priceDiv.textContent = `${space.price}`;
+      const ownerStrip = document.createElement("div");
+      ownerStrip.className = "owner-strip";
+      div.append(nameDiv, priceDiv, ownerStrip);
     } else {
       div.classList.add("special");
-      div.innerHTML = `<div class="name">${space.name}${space.amount ? "<br>$" + space.amount : ""}</div>`;
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "name";
+      nameDiv.textContent = space.name;
+      if (space.amount) {
+        nameDiv.appendChild(document.createElement("br"));
+        nameDiv.appendChild(document.createTextNode(`${space.amount}`));
+      }
+      div.appendChild(nameDiv);
     }
     boardEl.appendChild(div);
   });
@@ -847,8 +871,18 @@ function showCardModal(type, card, onClose) {
   const box = document.getElementById("modalBox");
   const title = type === "chance" ? "Chance" : "Community Chest";
   if (box) {
-    box.innerHTML = `<h2>${title}</h2><p>${card.text}</p>
-      <div class="btn-row"><button id="modalOkBtn">OK</button></div>`;
+    box.textContent = "";
+    const h2 = document.createElement("h2");
+    h2.textContent = title;
+    const p = document.createElement("p");
+    p.textContent = card.text;
+    const btnRow = document.createElement("div");
+    btnRow.className = "btn-row";
+    const okBtn = document.createElement("button");
+    okBtn.id = "modalOkBtn";
+    okBtn.textContent = "OK";
+    btnRow.appendChild(okBtn);
+    box.append(h2, p, btnRow);
   }
   if (overlay) overlay.style.display = "flex";
   document.getElementById("modalOkBtn")?.addEventListener(
