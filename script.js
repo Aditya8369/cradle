@@ -14,6 +14,10 @@ import {
   DEFAULT_WORKER_RETRY_CONFIG,
   calculateBackoffDelay,
 } from "./src/utils/filterWorker.js";
+import {
+  sanitizeProject,
+  sanitizeProjectList,
+} from "./src/utils/projectSanitizer.js";
 
 const projectsGrid = document.getElementById("projects-grid");
 const searchInput = document.getElementById("search");
@@ -213,7 +217,7 @@ function initializeFilterWorker() {
     // No workerFactory: the default builds `new Worker("./scripts/worker.js")`.
     onResult: projects => {
       workerRetryCount = 0;
-      renderProjects(sortProjectList(projects));
+      renderProjects(sortProjectList(sanitizeProjectList(projects)));
     },
     onFailure: error => {
       handleFilterWorkerFailure(error, "Worker execution failed");
@@ -291,7 +295,7 @@ async function loadProjects() {
       const cachedProjects = await getCachedProjects(db);
 
       if (cachedProjects && cachedProjects.length > 0) {
-        allProjects = cachedProjects;
+        allProjects = sanitizeProjectList(cachedProjects);
 
         validateSelectedCategory();
         renderCategories();
@@ -330,7 +334,7 @@ async function loadProjects() {
 function renderCategories() {
   const categories = [
     "all",
-    ...new Set(allProjects.map(project => project.category)),
+    ...new Set(allProjects.map(project => project.category).filter(Boolean)),
   ];
 
   categoriesContainer.innerHTML = "";
@@ -371,15 +375,7 @@ function getRecentProjects() {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
 
-    return parsed
-      .filter(
-        project =>
-          project &&
-          typeof project.title === "string" &&
-          typeof project.category === "string" &&
-          typeof project.path === "string"
-      )
-      .slice(0, RECENT_PROJECTS_LIMIT);
+    return sanitizeProjectList(parsed).slice(0, RECENT_PROJECTS_LIMIT);
   } catch (error) {
     console.warn("Failed to load recently opened projects:", error);
     return [];
@@ -388,9 +384,10 @@ function getRecentProjects() {
 
 function saveRecentProjects(projects) {
   try {
+    const safe = sanitizeProjectList(projects);
     localStorage.setItem(
       RECENT_PROJECTS_KEY,
-      JSON.stringify(projects.slice(0, RECENT_PROJECTS_LIMIT))
+      JSON.stringify(safe.slice(0, RECENT_PROJECTS_LIMIT))
     );
   } catch (error) {
     console.warn("Failed to save recently opened projects:", error);
@@ -434,13 +431,14 @@ function setRecentProjectsCollapsed(isCollapsed) {
 }
 
 function recordRecentlyOpenedProject(project) {
-  if (!project) return;
+  const clean = sanitizeProject(project);
+  if (!clean) return;
 
   const recentProject = {
-    title: project.title,
-    category: project.category,
-    path: project.path,
-    dateAdded: project.dateAdded || null,
+    title: clean.title,
+    category: clean.category,
+    path: clean.path,
+    dateAdded: clean.dateAdded || null,
   };
 
   const existingProjects = getRecentProjects().filter(
@@ -461,7 +459,13 @@ function clearRecentProjects() {
   renderRecentProjects();
 }
 
-function createProjectCard(project, options = {}) {
+function createProjectCard(rawProject, options = {}) {
+  const project = sanitizeProject(rawProject);
+  if (!project) {
+    console.warn("Skipping invalid project metadata:", rawProject);
+    return document.createComment("invalid project");
+  }
+
   const { onOpen = null, recent = false } = options;
 
   const openButton = CradleButton.create({
@@ -733,7 +737,10 @@ function resetCopyButton(button) {
   }, 1800);
 }
 
-async function copyProjectUrl(project, button) {
+async function copyProjectUrl(rawProject, button) {
+  const project = sanitizeProject(rawProject);
+  if (!project) return;
+
   const projectUrl = getProjectUrl(project.path);
 
   button.disabled = true;

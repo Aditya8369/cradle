@@ -49,6 +49,17 @@
       return String(html ?? "");
     };
 
+  /* ── URL validator for safe anchor rendering ─────────────── */
+  function _isSafeHref(url) {
+    if (typeof url !== "string") return false;
+    const cleaned = url.replace(/[\x00-\x1f\x7f]/g, "").trim();
+    if (!cleaned) return false;
+    if (/^\s*(javascript|data|vbscript|file):/i.test(cleaned)) {
+      return false;
+    }
+    return true;
+  }
+
   /* ── Inject styles once ───────────────────────────────── */
   const STYLE_ID = "cradle-btn-styles";
 
@@ -291,12 +302,23 @@
         el.type = type;
         if (disabled || loading) el.disabled = true;
       } else {
-        el.href = href;
+        if (_isSafeHref(href)) {
+          el.href = href;
+        } else {
+          el.removeAttribute("href");
+          el.setAttribute("role", "link");
+          el.setAttribute("aria-disabled", "true");
+        }
         if (target) el.target = target;
         if (rel) el.rel = rel;
         if (disabled) el.setAttribute("aria-disabled", "true");
       }
-      if (ariaLabel) el.setAttribute("aria-label", ariaLabel);
+      if (ariaLabel) {
+        el.setAttribute(
+          "aria-label",
+          String(ariaLabel).replace(/<[^>]*>/g, "").trim()
+        );
+      }
       if (loading) el.setAttribute("aria-busy", "true");
 
       /* Content */
