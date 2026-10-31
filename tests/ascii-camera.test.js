@@ -228,3 +228,19 @@ test("Camera lifecycle: pauses stream and cancels render loop on visibilitychang
     "Camera restart initiated on return"
   );
 });
+
+test("ASCIIEngine validates image magic bytes correctly", () => {
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+  assert.strictEqual(engine.validateImageSignature(jpeg).valid, true);
+  assert.strictEqual(engine.validateImageSignature(jpeg).mimeType, "image/jpeg");
+
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  assert.strictEqual(engine.validateImageSignature(png).valid, true);
+  assert.strictEqual(engine.validateImageSignature(png).mimeType, "image/png");
+
+  const gif = new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
+  assert.strictEqual(engine.validateImageSignature(gif).valid, true);
+
+  const fake = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
+  assert.strictEqual(engine.validateImageSignature(fake).valid, false);
+});

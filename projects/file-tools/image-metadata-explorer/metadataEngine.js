@@ -1219,6 +1219,7 @@ const ImageMetadataEngine = {
   gpsToDecimal,
   getMetadataGroups,
   metadataToJSON,
+  detectFormat,
 };
 
 if (typeof globalThis !== "undefined") {

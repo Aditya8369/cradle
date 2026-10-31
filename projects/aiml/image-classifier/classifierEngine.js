@@ -239,6 +239,122 @@ function validateAndClampImage(imageInput, maxDimension = MAX_IMAGE_DIMENSION) {
  * @param {number} [maxDimension=MAX_IMAGE_DIMENSION]
  * @returns {{element: Object, resized: boolean, warning: string|null, valid: boolean, error: string|null}}
  */
+
+/**
+ * Inspects MIME type and file signature (magic bytes) of an image blob or file.
+ * @param {Blob|File|Uint8Array} blob
+ * @returns {Promise<{valid: boolean, error: string|null, detectedType: string|null}>}
+ */
+async function validateImageFile(blob) {
+  if (!blob) {
+    return { valid: false, error: "No image file provided.", detectedType: null };
+  }
+
+  if (
+    typeof globalThis !== "undefined" &&
+    globalThis.CradleMediaValidator &&
+    typeof globalThis.CradleMediaValidator.validateImageBlob === "function"
+  ) {
+    const res = await globalThis.CradleMediaValidator.validateImageBlob(blob);
+    return {
+      valid: res.valid,
+      error: res.error || null,
+      detectedType: res.detectedMime || null,
+    };
+  }
+
+  const declaredType = (blob.type || "").trim().toLowerCase();
+  const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (declaredType && !allowed.includes(declaredType) && declaredType !== "image/jpg") {
+    return {
+      valid: false,
+      error: `Unsupported image MIME type: "${declaredType}". Please upload a JPEG, PNG, WebP, or GIF image.`,
+      detectedType: null,
+    };
+  }
+
+  if (typeof blob.slice === "function" || blob instanceof Uint8Array || ArrayBuffer.isView(blob)) {
+    try {
+      let b;
+      if (blob instanceof Uint8Array) {
+        b = blob;
+      } else if (ArrayBuffer.isView(blob)) {
+        b = new Uint8Array(blob.buffer, blob.byteOffset, blob.byteLength);
+      } else {
+        const slice = blob.slice(0, 16);
+        const ab = await slice.arrayBuffer();
+        b = new Uint8Array(ab);
+      }
+
+      if (b.length < 3) {
+        return { valid: false, error: "Image file is empty or corrupted.", detectedType: null };
+      }
+
+      const isJpeg = b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff;
+      const isPng =
+        b.length >= 8 &&
+        b[0] === 0x89 &&
+        b[1] === 0x50 &&
+        b[2] === 0x4e &&
+        b[3] === 0x47 &&
+        b[4] === 0x0d &&
+        b[5] === 0x0a &&
+        b[6] === 0x1a &&
+        b[7] === 0x0a;
+      const isGif =
+        b.length >= 6 &&
+        b[0] === 0x47 &&
+        b[1] === 0x49 &&
+        b[2] === 0x46 &&
+        b[3] === 0x38 &&
+        (b[4] === 0x37 || b[4] === 0x39) &&
+        b[5] === 0x61;
+      const isWebp =
+        b.length >= 12 &&
+        b[0] === 0x52 &&
+        b[1] === 0x49 &&
+        b[2] === 0x46 &&
+        b[3] === 0x46 &&
+        b[8] === 0x57 &&
+        b[9] === 0x45 &&
+        b[10] === 0x42 &&
+        b[11] === 0x50;
+
+      let detected = null;
+      if (isJpeg) detected = "image/jpeg";
+      else if (isPng) detected = "image/png";
+      else if (isGif) detected = "image/gif";
+      else if (isWebp) detected = "image/webp";
+
+      if (!detected) {
+        return {
+          valid: false,
+          error: "File signature does not match any supported image format (JPEG, PNG, WebP, GIF).",
+          detectedType: null,
+        };
+      }
+
+      if (
+        declaredType &&
+        declaredType !== detected &&
+        !(declaredType === "image/jpg" && detected === "image/jpeg")
+      ) {
+        return {
+          valid: false,
+          error: `File signature (${detected}) does not match declared type (${declaredType}).`,
+          detectedType: detected,
+        };
+      }
+
+      return { valid: true, error: null, detectedType: detected };
+    } catch (err) {
+      return { valid: false, error: "Failed to read image file signature.", detectedType: null };
+    }
+  }
+
+  return { valid: true, error: null, detectedType: null };
+}
+
 function resizeImage(imageElement, maxDimension = MAX_IMAGE_DIMENSION) {
   const check = validateAndClampImage(imageElement, maxDimension);
   if (!check.valid) {
@@ -300,6 +416,7 @@ function resizeImage(imageElement, maxDimension = MAX_IMAGE_DIMENSION) {
     countTrainedClasses,
     getTrainedClasses,
     formatConfidence,
+    validateImageFile,
   };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
